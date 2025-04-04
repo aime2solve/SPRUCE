@@ -1,392 +1,374 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2566">
-  <style type="text/css">
-    body {background-color: #e7e7e7}
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.3px Menlo; color: #000000; -webkit-text-stroke: #000000; background-color: #ffffff}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.3px Menlo; color: #000000; -webkit-text-stroke: #000000; background-color: #ffffff; min-height: 15.0px}
-    span.s1 {font-kerning: none}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPRUCE Soil Temperature Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            background-color: #000000;
+            font-family: 'Lato', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            color: #00FFFF;
+            text-align: center;
+            text-shadow: 0 0 10px #00CC66;
+            padding: 3vh;
+            font-family: 'Orbitron', sans-serif;
+            font-size: calc(18px + 2vw);
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 300px;
+            background: rgba(26, 26, 26, 0.8);
+            border-right: 2px solid #00FFFF;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: fixed;
+            top: 15vh;
+            height: 85%;
+        }
+        .sidebar-title {
+            font-family: 'Merriweather', serif;
+            font-size: 24px;
+            color: #DAA520;
+            text-align: center;
+            text-shadow: 0 0 10px #DAA520;
+        }
+        .button-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .button-label {
+            color: #FFFF00;
+            font-size: 12px;
+            margin-right: 10px;
+            width: 100px;
+            text-align: right;
+        }
+        .dropdown-toggle {
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid #00FFFF;
+            color: #00FFFF;
+            font-size: 10px;
+            padding: 4px 8px;
+            width: calc(100% - 120px);
+            text-align: left;
+            cursor: pointer;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 110px;
+            width: calc(100% - 120px);
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(26, 26, 26, 0.95);
+            border: 2px solid #00FFFF;
+            color: #00FFFF;
+            font-size: 10px;
+            padding: 8px;
+        }
+        .dropdown-menu.open {
+            display: block;
+        }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+        .dropdown-item input[type="radio"],
+        .dropdown-item input[type="checkbox"] {
+            margin-right: 10px;
+            accent-color: #00FFFF;
+        }
+        .stats-panel {
+            display: none;
+            width: calc(100% - 120px);
+            max-height: 200px;
+            background: rgba(26, 26, 26, 0.95);
+            border: 2px solid #00FFFF;
+            color: #00FF00;
+            font-size: 10px;
+            padding: 8px;
+            margin-left: auto;
+            margin-top: 5px;
+        }
+        .stats-panel.open {
+            display: block;
+        }
+        .graph-container {
+            flex-grow: 1;
+            margin-left: 300px;
+            background-color: #1A1A1A;
+            height: 98%;
+        }
+        #graph {
+            width: 90%;
+            height: 99%;
+            margin: 0.5% auto;
+        }
+    </style>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;SPRUCE Soil Temperature Dashboard&lt;/title&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&amp;family=Lato:wght@400;700&amp;family=Merriweather:wght@700&amp;display=swap" rel="stylesheet"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;style&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>body, html {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #000000;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-family: 'Lato', sans-serif;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>overflow: hidden;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>flex-direction: column;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>h1 {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #00FFFF;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-align: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-shadow: 0 0 10px #00CC66;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 3vh;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-family: 'Orbitron', sans-serif;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: calc(18px + 2vw);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.container {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>flex-grow: 1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>overflow: hidden;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.sidebar {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 300px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: rgba(26, 26, 26, 0.8);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-right: 2px solid #00FFFF;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 15px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>flex-direction: column;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>gap: 20px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>position: fixed;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>top: 15vh;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 85%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.sidebar-title {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-family: 'Merriweather', serif;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 24px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #DAA520;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-align: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-shadow: 0 0 10px #DAA520;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.button-container {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.button-label {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #FFFF00;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 12px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-right: 10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 100px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-align: right;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.dropdown-toggle {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: rgba(26, 26, 26, 0.8);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 2px solid #00FFFF;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #00FFFF;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 4px 8px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: calc(100% - 120px);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-align: left;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>cursor: pointer;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.dropdown-menu {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: none;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>position: absolute;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>top: calc(100% + 5px);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>left: 110px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: calc(100% - 120px);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>max-height: 400px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>overflow-y: auto;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: rgba(26, 26, 26, 0.95);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 2px solid #00FFFF;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #00FFFF;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 8px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.dropdown-menu.open {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: block;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.dropdown-item {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-bottom: 3px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.dropdown-item input[type="radio"],</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.dropdown-item input[type="checkbox"] {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-right: 10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>accent-color: #00FFFF;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.stats-panel {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: none;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: calc(100% - 120px);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>max-height: 200px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: rgba(26, 26, 26, 0.95);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 2px solid #00FFFF;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #00FF00;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 8px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-left: auto;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-top: 5px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.stats-panel.open {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: block;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.graph-container {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>flex-grow: 1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-left: 300px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #1A1A1A;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 98%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>#graph {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 90%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 99%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin: 0.5% auto;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.plot.ly/plotly-2.32.0.min.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.jsdelivr.net/npm/flatpickr"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;h1&gt;SPRUCE Soil Temperature Dashboard&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="container"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="sidebar" id="sidebar"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="sidebar-title"&gt;SPRUCE Data Explorer&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="button-container"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;span class="button-label"&gt;Plot:&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-toggle" id="plot-toggle"&gt;Select Plots&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-menu" id="plot-menu"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;!-- Dynamically populated --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="button-container"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;span class="button-label"&gt;Independent:&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-toggle" id="independent-toggle"&gt;Temp_target&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-menu" id="independent-menu"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="independent" id="Temp_target" value="Temp_target" checked&gt;&lt;label for="Temp_target"&gt;Target Temperature (°C)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="independent" id="CO2_trmt" value="CO2_trmt"&gt;&lt;label for="CO2_trmt"&gt;CO₂ Treatment (ppm)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="independent" id="WS_10" value="WS_10"&gt;&lt;label for="WS_10"&gt;Wind Speed (m/s)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="independent" id="WD_10" value="WD_10"&gt;&lt;label for="WD_10"&gt;Wind Direction (°)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="independent" id="PAR_2" value="PAR_2"&gt;&lt;label for="PAR_2"&gt;PAR (µmol/m²s)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="independent" id="PREC_6" value="PREC_6"&gt;&lt;label for="PREC_6"&gt;Precipitation (mm)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="button-container"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;span class="button-label"&gt;Dependent:&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-toggle" id="dependent-toggle"&gt;TS_0__A1&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-menu" id="dependent-menu"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="TS_0__A1" value="TS_0__A1" checked&gt;&lt;label for="TS_0__A1"&gt;Soil Temp 0 cm (A1, °C)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="TS_-5__A2" value="TS_-5__A2"&gt;&lt;label for="TS_-5__A2"&gt;Soil Temp -5 cm (A2, °C)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="TS_-10__A3" value="TS_-10__A3"&gt;&lt;label for="TS_-10__A3"&gt;Soil Temp -10 cm (A3, °C)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="TS_-20__A4" value="TS_-20__A4"&gt;&lt;label for="TS_-20__A4"&gt;Soil Temp -20 cm (A4, °C)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="TS_-100__A8" value="TS_-100__A8"&gt;&lt;label for="TS_-100__A8"&gt;Soil Temp -100 cm (A8, °C)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="TS_Hummock_A1" value="TS_Hummock_A1"&gt;&lt;label for="TS_Hummock_A1"&gt;Hummock Temp (A1, °C)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="WS_10" value="WS_10"&gt;&lt;label for="WS_10"&gt;Wind Speed (m/s)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="WD_10" value="WD_10"&gt;&lt;label for="WD_10"&gt;Wind Direction (°)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="PAR_2" value="PAR_2"&gt;&lt;label for="PAR_2"&gt;PAR (µmol/m²s)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="PREC_6" value="PREC_6"&gt;&lt;label for="PREC_6"&gt;Precipitation (mm)&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="button-container"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;span class="button-label"&gt;Conditions:&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-toggle" id="condition-toggle"&gt;Select Conditions&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-menu" id="condition-menu"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="checkbox" id="WS_10_cond" value="WS_10"&gt;&lt;label for="WS_10_cond"&gt;Wind Speed&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="checkbox" id="WD_10_cond" value="WD_10"&gt;&lt;label for="WD_10_cond"&gt;Wind Direction&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="checkbox" id="PAR_2_cond" value="PAR_2"&gt;&lt;label for="PAR_2_cond"&gt;PAR&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="checkbox" id="PREC_6_cond" value="PREC_6"&gt;&lt;label for="PREC_6_cond"&gt;Precipitation&lt;/label&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="button-container"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;span class="button-label"&gt;Stats:&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-toggle" id="stats-toggle"&gt;Show Stats&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="stats-panel" id="stats-panel"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div id="stats-content"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="graph-container" id="graph-container"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="graph"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const baseUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let allData = [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const plots = Array.from({ length: 21 }, (_, i) =&gt; i + 1); // Plots 1-21</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const knownPlots = [4, 6, 7, 8, 10, 11, 13, 16, 17, 19, 20, 21]; // Known data plots</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Initial plot</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>Plotly.newPlot('graph', [], {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>title: 'Loading SPRUCE Data...',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>plot_bgcolor: '#1A1A1A',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>paper_bgcolor: '#1A1A1A',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font: { color: '#FFFFFF' },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>xaxis: { gridcolor: '#333333' },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>yaxis: { gridcolor: '#333333' }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}, { responsive: true });</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Populate plot dropdown</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function populatePlotDropdown() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const plotMenu = document.getElementById('plot-menu');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>plotMenu.innerHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>plots.forEach(plot =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const div = document.createElement('div');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>div.className = 'dropdown-item';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const input = document.createElement('input');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>input.type = 'checkbox';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>input.id = `plot-${plot}`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>input.value = plot;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>input.checked = true;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>input.addEventListener('change', updateGraph);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const label = document.createElement('label');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>label.htmlFor = `plot-${plot}`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>label.textContent = `Plot ${plot}`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>div.appendChild(input);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>div.appendChild(label);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>plotMenu.appendChild(div);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Fetch CSV data for a plot (example date used; adjust as needed)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>async function fetchPlotData(plot) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const paddedPlot = plot.toString().padStart(2, '0');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Use a sample date; in practice, you'd need to fetch all dates or latest</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const sampleDate = plot === 4 ? '20160826' : '20190402'; // Example dates from your filenames</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const url = `${baseUrl}WEW PLOT_${paddedPlot}_Complete_Environ_${sampleDate}.csv`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>try {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const response = await fetch(url);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!response.ok) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (response.status === 404) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>console.log(`No data for Plot ${plot}`);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>return { plot, data: [], message: `No data for Plot ${plot}` };</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>throw new Error(`HTTP error: ${response.status}`);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const csvText = await response.text();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const result = Papa.parse(csvText, { header: true, dynamicTyping: true });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return { plot, data: result.data.map(row =&gt; ({ ...row, Plot: plot })) };</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} catch (error) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>console.error(`Error fetching Plot ${plot}:`, error);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return { plot, data: [], message: `No data for Plot ${plot}` };</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Load all data</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>async function loadData() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const promises = plots.map(plot =&gt; fetchPlotData(plot));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const results = await Promise.all(promises);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>allData = results.flatMap(result =&gt; result.data);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const noDataPlots = results.filter(result =&gt; result.message).map(result =&gt; result.message);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (allData.length === 0) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>Plotly.newPlot('graph', [], {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>title: 'No Data Loaded' + (noDataPlots.length ? '&lt;br&gt;' + noDataPlots.join('&lt;br&gt;') : ''),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>plot_bgcolor: '#1A1A1A',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>paper_bgcolor: '#1A1A1A',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>font: { color: '#FFFFFF' }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>updateGraph();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Toggle dropdown</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function toggleDropdown(id) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const menu = document.getElementById(id);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>menu.classList.toggle('open');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Update graph</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function updateGraph() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const selectedPlots = Array.from(document.querySelectorAll('#plot-menu input:checked')).map(input =&gt; parseInt(input.value));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const independent = document.querySelector('#independent-menu input:checked').value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const dependent = document.querySelector('#dependent-menu input:checked').value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input =&gt; input.value);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Filter data</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let filteredData = allData.filter(row =&gt; selectedPlots.includes(row.Plot));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>conditions.forEach(cond =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>filteredData = filteredData.filter(row =&gt; row[cond] !== undefined &amp;&amp; row[cond] !== null &amp;&amp; row[cond] !== 0);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Group by plot for traces</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const traces = [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const noDataPlots = [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>selectedPlots.forEach(plot =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const plotData = filteredData.filter(row =&gt; row.Plot === plot);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (plotData.length === 0) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (!knownPlots.includes(plot)) noDataPlots.push(`No data for Plot ${plot}`);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const x = plotData.map(row =&gt; row[independent]).filter(v =&gt; v !== undefined &amp;&amp; v !== null);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const y = plotData.map(row =&gt; row[dependent]).filter(v =&gt; v !== undefined &amp;&amp; v !== null);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (x.length &gt; 0 &amp;&amp; y.length &gt; 0) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>traces.push({</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>x: x,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>y: y,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>mode: 'markers',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>name: `Plot ${plot}`,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>marker: { size: 12, color: `#${Math.floor(Math.random()*16777215).toString(16)}` } // Random color per plot</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Calculate statistics</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const allY = filteredData.map(row =&gt; row[dependent]).filter(v =&gt; v !== undefined &amp;&amp; v !== null);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const statsText = allY.length &gt; 0 ?<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>`Mean: ${ (allY.reduce((sum, val) =&gt; sum + val, 0) / allY.length).toFixed(2) }, ` +</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>`Min: ${ Math.min(...allY).toFixed(2) }, Max: ${ Math.max(...allY).toFixed(2) }, Points: ${allY.length}` :</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>'No data points';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('stats-content').innerHTML = statsText;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Update plot</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const layout = {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>title: `${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}` +<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                       </span>(noDataPlots.length ? '&lt;br&gt;' + noDataPlots.join('&lt;br&gt;') : ''),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>plot_bgcolor: '#1A1A1A',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>paper_bgcolor: '#1A1A1A',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>font: { color: '#FFFFFF' },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>xaxis: { title: document.querySelector(`label[for="${independent}"]`).textContent, gridcolor: '#333333' },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>yaxis: { title: document.querySelector(`label[for="${dependent}"]`).textContent, gridcolor: '#333333' },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>showlegend: true</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (traces.length === 0) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>layout.title = 'No Data to Plot' + (noDataPlots.length ? '&lt;br&gt;' + noDataPlots.join('&lt;br&gt;') : '');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>Plotly.newPlot('graph', traces, layout, { responsive: true });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Event listeners</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('plot-toggle').addEventListener('click', () =&gt; toggleDropdown('plot-menu'));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('independent-toggle').addEventListener('click', () =&gt; toggleDropdown('independent-menu'));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('dependent-toggle').addEventListener('click', () =&gt; toggleDropdown('dependent-menu'));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('condition-toggle').addEventListener('click', () =&gt; toggleDropdown('condition-menu'));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('stats-toggle').addEventListener('click', () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const statsPanel = document.getElementById('stats-panel');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>statsPanel.classList.toggle('open');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('stats-toggle').textContent = statsPanel.classList.contains('open') ? 'Hide Stats' : 'Show Stats';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.querySelectorAll('#independent-menu input, #dependent-menu input').forEach(input =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>input.addEventListener('change', () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (input.name === 'independent') {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>document.getElementById('independent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} else if (input.name === 'dependent') {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>document.getElementById('dependent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>updateGraph();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.querySelectorAll('#condition-menu input').forEach(input =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>input.addEventListener('change', updateGraph);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Initialize</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>populatePlotDropdown();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>loadData();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+    <h1>SPRUCE Soil Temperature Dashboard</h1>
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-title">SPRUCE Data Explorer</div>
+            <div class="button-container">
+                <span class="button-label">Plot:</span>
+                <div class="dropdown-toggle" id="plot-toggle">Select Plots</div>
+                <div class="dropdown-menu" id="plot-menu">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+            <div class="button-container">
+                <span class="button-label">Independent:</span>
+                <div class="dropdown-toggle" id="independent-toggle">Temp_target</div>
+                <div class="dropdown-menu" id="independent-menu">
+                    <div class="dropdown-item"><input type="radio" name="independent" id="Temp_target" value="Temp_target" checked><label for="Temp_target">Target Temperature (°C)</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="CO2_trmt" value="CO2_trmt"><label for="CO2_trmt">CO₂ Treatment (ppm)</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="WS_10" value="WS_10"><label for="WS_10">Wind Speed (m/s)</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction (°)</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
+                    <div class="dropdown-item"><input type="radio" name="independent" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
+                </div>
+            </div>
+            <div class="button-container">
+                <span class="button-label">Dependent:</span>
+                <div class="dropdown-toggle" id="dependent-toggle">TS_0__A1</div>
+                <div class="dropdown-menu" id="dependent-menu">
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="TS_0__A1" value="TS_0__A1" checked><label for="TS_0__A1">Soil Temp 0 cm (A1, °C)</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="TS_-5__A2" value="TS_-5__A2"><label for="TS_-5__A2">Soil Temp -5 cm (A2, °C)</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="TS_-10__A3" value="TS_-10__A3"><label for="TS_-10__A3">Soil Temp -10 cm (A3, °C)</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="TS_-20__A4" value="TS_-20__A4"><label for="TS_-20__A4">Soil Temp -20 cm (A4, °C)</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="TS_-100__A8" value="TS_-100__A8"><label for="TS_-100__A8">Soil Temp -100 cm (A8, °C)</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="TS_Hummock_A1" value="TS_Hummock_A1"><label for="TS_Hummock_A1">Hummock Temp (A1, °C)</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="WS_10" value="WS_10"><label for="WS_10">Wind Speed (m/s)</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction (°)</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
+                    <div class="dropdown-item"><input type="radio" name="dependent" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
+                </div>
+            </div>
+            <div class="button-container">
+                <span class="button-label">Conditions:</span>
+                <div class="dropdown-toggle" id="condition-toggle">Select Conditions</div>
+                <div class="dropdown-menu" id="condition-menu">
+                    <div class="dropdown-item"><input type="checkbox" id="WS_10_cond" value="WS_10"><label for="WS_10_cond">Wind Speed</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10_cond" value="WD_10"><label for="WD_10_cond">Wind Direction</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PAR_2_cond" value="PAR_2"><label for="PAR_2_cond">PAR</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6_cond" value="PREC_6"><label for="PREC_6_cond">Precipitation</label></div>
+                </div>
+            </div>
+            <div class="button-container">
+                <span class="button-label">Stats:</span>
+                <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
+                <div class="stats-panel" id="stats-panel">
+                    <div id="stats-content"></div>
+                </div>
+            </div>
+        </div>
+        <div class="graph-container" id="graph-container">
+            <div id="graph"></div>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/';
+        let allData = [];
+        const plots = Array.from({ length: 21 }, (_, i) => i + 1); // Plots 1-21
+        const knownPlots = [4, 6, 7, 8, 10, 11, 13, 16, 17, 19, 20, 21]; // Known data plots
+
+        // Initial plot
+        Plotly.newPlot('graph', [], {
+            title: 'Loading SPRUCE Data...',
+            plot_bgcolor: '#1A1A1A',
+            paper_bgcolor: '#1A1A1A',
+            font: { color: '#FFFFFF' },
+            xaxis: { gridcolor: '#333333' },
+            yaxis: { gridcolor: '#333333' }
+        }, { responsive: true });
+
+        // Populate plot dropdown
+        function populatePlotDropdown() {
+            const plotMenu = document.getElementById('plot-menu');
+            plotMenu.innerHTML = '';
+            plots.forEach(plot => {
+                const div = document.createElement('div');
+                div.className = 'dropdown-item';
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.id = `plot-${plot}`;
+                input.value = plot;
+                input.checked = true;
+                input.addEventListener('change', updateGraph);
+                const label = document.createElement('label');
+                label.htmlFor = `plot-${plot}`;
+                label.textContent = `Plot ${plot}`;
+                div.appendChild(input);
+                div.appendChild(label);
+                plotMenu.appendChild(div);
+            });
+        }
+
+        // Fetch CSV data for a plot (example date used; adjust as needed)
+        async function fetchPlotData(plot) {
+            const paddedPlot = plot.toString().padStart(2, '0');
+            // Use a sample date; in practice, you'd need to fetch all dates or latest
+            const sampleDate = plot === 4 ? '20160826' : '20190402'; // Example dates from your filenames
+            const url = `${baseUrl}WEW PLOT_${paddedPlot}_Complete_Environ_${sampleDate}.csv`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        console.log(`No data for Plot ${plot}`);
+                        return { plot, data: [], message: `No data for Plot ${plot}` };
+                    }
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+                const csvText = await response.text();
+                const result = Papa.parse(csvText, { header: true, dynamicTyping: true });
+                return { plot, data: result.data.map(row => ({ ...row, Plot: plot })) };
+            } catch (error) {
+                console.error(`Error fetching Plot ${plot}:`, error);
+                return { plot, data: [], message: `No data for Plot ${plot}` };
+            }
+        }
+
+        // Load all data
+        async function loadData() {
+            const promises = plots.map(plot => fetchPlotData(plot));
+            const results = await Promise.all(promises);
+            allData = results.flatMap(result => result.data);
+            const noDataPlots = results.filter(result => result.message).map(result => result.message);
+            if (allData.length === 0) {
+                Plotly.newPlot('graph', [], {
+                    title: 'No Data Loaded' + (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : ''),
+                    plot_bgcolor: '#1A1A1A',
+                    paper_bgcolor: '#1A1A1A',
+                    font: { color: '#FFFFFF' }
+                });
+            } else {
+                updateGraph();
+            }
+        }
+
+        // Toggle dropdown
+        function toggleDropdown(id) {
+            const menu = document.getElementById(id);
+            menu.classList.toggle('open');
+        }
+
+        // Update graph
+        function updateGraph() {
+            const selectedPlots = Array.from(document.querySelectorAll('#plot-menu input:checked')).map(input => parseInt(input.value));
+            const independent = document.querySelector('#independent-menu input:checked').value;
+            const dependent = document.querySelector('#dependent-menu input:checked').value;
+            const conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
+
+            // Filter data
+            let filteredData = allData.filter(row => selectedPlots.includes(row.Plot));
+            conditions.forEach(cond => {
+                filteredData = filteredData.filter(row => row[cond] !== undefined && row[cond] !== null && row[cond] !== 0);
+            });
+
+            // Group by plot for traces
+            const traces = [];
+            const noDataPlots = [];
+            selectedPlots.forEach(plot => {
+                const plotData = filteredData.filter(row => row.Plot === plot);
+                if (plotData.length === 0) {
+                    if (!knownPlots.includes(plot)) noDataPlots.push(`No data for Plot ${plot}`);
+                    return;
+                }
+                const x = plotData.map(row => row[independent]).filter(v => v !== undefined && v !== null);
+                const y = plotData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
+                if (x.length > 0 && y.length > 0) {
+                    traces.push({
+                        x: x,
+                        y: y,
+                        mode: 'markers',
+                        name: `Plot ${plot}`,
+                        marker: { size: 12, color: `#${Math.floor(Math.random()*16777215).toString(16)}` } // Random color per plot
+                    });
+                }
+            });
+
+            // Calculate statistics
+            const allY = filteredData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
+            const statsText = allY.length > 0 ? 
+                `Mean: ${ (allY.reduce((sum, val) => sum + val, 0) / allY.length).toFixed(2) }, ` +
+                `Min: ${ Math.min(...allY).toFixed(2) }, Max: ${ Math.max(...allY).toFixed(2) }, Points: ${allY.length}` :
+                'No data points';
+            document.getElementById('stats-content').innerHTML = statsText;
+
+            // Update plot
+            const layout = {
+                title: `${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}` + 
+                       (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : ''),
+                plot_bgcolor: '#1A1A1A',
+                paper_bgcolor: '#1A1A1A',
+                font: { color: '#FFFFFF' },
+                xaxis: { title: document.querySelector(`label[for="${independent}"]`).textContent, gridcolor: '#333333' },
+                yaxis: { title: document.querySelector(`label[for="${dependent}"]`).textContent, gridcolor: '#333333' },
+                showlegend: true
+            };
+
+            if (traces.length === 0) {
+                layout.title = 'No Data to Plot' + (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : '');
+            }
+            Plotly.newPlot('graph', traces, layout, { responsive: true });
+        }
+
+        // Event listeners
+        document.getElementById('plot-toggle').addEventListener('click', () => toggleDropdown('plot-menu'));
+        document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
+        document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
+        document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
+        document.getElementById('stats-toggle').addEventListener('click', () => {
+            const statsPanel = document.getElementById('stats-panel');
+            statsPanel.classList.toggle('open');
+            document.getElementById('stats-toggle').textContent = statsPanel.classList.contains('open') ? 'Hide Stats' : 'Show Stats';
+        });
+
+        document.querySelectorAll('#independent-menu input, #dependent-menu input').forEach(input => {
+            input.addEventListener('change', () => {
+                if (input.name === 'independent') {
+                    document.getElementById('independent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+                } else if (input.name === 'dependent') {
+                    document.getElementById('dependent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+                }
+                updateGraph();
+            });
+        });
+        document.querySelectorAll('#condition-menu input').forEach(input => {
+            input.addEventListener('change', updateGraph);
+        });
+
+        // Initialize
+        populatePlotDropdown();
+        loadData();
+    </script>
 </body>
 </html>
