@@ -76,6 +76,7 @@
             display: flex;
             align-items: center;
             width: 100%;
+            position: relative;
         }
         .button-label {
             color: #FFFF00;
@@ -84,7 +85,7 @@
             width: 100px;
             text-align: right;
         }
-        .dropdown-toggle {
+        .dropdown-toggle, #analyze-button {
             background: rgba(26, 26, 26, 0.8);
             border: 2px solid #00FFFF;
             border-radius: 10px;
@@ -96,10 +97,12 @@
             cursor: pointer;
             box-shadow: 0 0 8px #00FFFF;
         }
+        #analyze-button {
+            text-align: center;
+        }
         .dropdown-menu {
-            display: none;
             position: absolute;
-            top: calc(100% + 5px);
+            top: 100%;
             left: 110px;
             width: calc(100% - 120px);
             max-height: 0;
@@ -111,10 +114,11 @@
             font-size: 10px;
             padding: 8px;
             transition: max-height 0.5s ease;
+            visibility: hidden;
         }
         .dropdown-menu.open {
-            display: block;
             max-height: 400px;
+            visibility: visible;
         }
         .dropdown-item {
             display: flex;
@@ -143,20 +147,22 @@
             font-size: 10px;
         }
         .stats-panel {
-            display: none;
+            position: absolute;
+            top: 100%;
+            left: 110px;
             width: calc(100% - 120px);
-            max-height: 200px;
+            max-height: 0;
             background: rgba(26, 26, 26, 0.95);
             border: 2px solid #00FFFF;
             border-radius: 10px;
             color: #00FF00;
             font-size: 10px;
             padding: 8px;
-            margin-left: auto;
-            margin-top: 5px;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
         }
         .stats-panel.open {
-            display: block;
+            max-height: 200px;
         }
         .graph-container {
             flex-grow: 1;
@@ -182,7 +188,7 @@
     <h1>SPRUCE Soil Temperature Dashboard</h1>
     <div class="container">
         <div class="sidebar" id="sidebar">
-            <div class="sidebar-tab" id="sidebar-tab">&gt;</div>
+            <div class="sidebar-tab" id="sidebar-tab">></div>
             <div class="sidebar-title">SPRUCE Data Explorer</div>
             <div class="button-container">
                 <span class="button-label">Plot:</span>
@@ -211,8 +217,8 @@
                     <div class="dropdown-item"><input type="checkbox" id="TS_-20__A4" value="TS_-20__A4"><label for="TS_-20__A4">Soil Temp -20 cm (A4, °C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_-100__A8" value="TS_-100__A8"><label for="TS_-100__A8">Soil Temp -100 cm (A8, °C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_Hummock_A1" value="TS_Hummock_A1"><label for="TS_Hummock_A1">Hummock Temp (A1, °C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="WS_ Bind 10" value="WS_10"><label for="WS_10">Wind Speed (m/s)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction (°)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WS_10_dep" value="WS_10"><label for="WS_10_dep">Wind Speed (m/s)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10_dep" value="WD_10"><label for="WD_10_dep">Wind Direction (°)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2_dep" value="PAR_2"><label for="PAR_2_dep">PAR (µmol/m²s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PREC_6"><label for="PREC_6_dep">Precipitation (mm)</label></div>
                 </div>
@@ -248,277 +254,280 @@
                     <div id="stats-content"></div>
                 </div>
             </div>
+            <div class="button-container">
+                <span class="button-label">Analyze:</span>
+                <div id="analyze-button">Analyze</div>
+            </div>
         </div>
         <div class="graph-container" id="graph-container">
             <div id="graph"></div>
         </div>
     </div>
 
-   <script>
-    const baseUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/';
-    let allData = [];
-    const plots = Array.from({ length: 21 }, (_, i) => i + 1);
-    const knownFiles = [
-        'WEW PLOT_04_Complete_Environ_20160826.csv',
-        'WEW PLOT_06_Complete_Environ_20160826.csv',
-        'WEW PLOT_08_Complete_Environ_20160826.csv',
-        'WEW PLOT_10_Complete_Environ_20160826.csv',
-        'WEW PLOT_21_Complete_Environ_20160826.csv'
-    ];
-    let startDate = null;
-    let endDate = null;
+    <script>
+        const baseUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/';
+        let allData = [];
+        const plots = Array.from({ length: 21 }, (_, i) => i + 1);
+        const knownFiles = [
+            'WEW PLOT_04_Complete_Environ_20160826.csv',
+            'WEW PLOT_06_Complete_Environ_20160826.csv',
+            'WEW PLOT_08_Complete_Environ_20160826.csv',
+            'WEW PLOT_10_Complete_Environ_20160826.csv',
+            'WEW PLOT_21_Complete_Environ_20160826.csv'
+        ];
+        let startDate = null;
+        let endDate = null;
+        let dataLoaded = false;
 
-    Plotly.newPlot('graph', [], {
-        title: 'Loading SPRUCE Data...',
-        plot_bgcolor: '#1A1A1A',
-        paper_bgcolor: '#1A1A1A',
-        font: { color: '#FFFFFF' },
-        xaxis: { gridcolor: '#333333' },
-        yaxis: { gridcolor: '#333333' }
-    }, { responsive: true });
-
-    function populatePlotDropdown() {
-        const plotMenu = document.getElementById('plot-menu');
-        plotMenu.innerHTML = '';
-        plots.forEach(plot => {
-            const div = document.createElement('div');
-            div.className = 'dropdown-item';
-            const input = document.createElement('input');
-            input.type = 'checkbox';
-            input.id = `plot-${plot}`;
-            input.value = plot;
-            input.checked = true;
-            input.addEventListener('change', debounceUpdateGraph);
-            const label = document.createElement('label');
-            label.htmlFor = `plot-${plot}`;
-            label.textContent = `Plot ${plot}`;
-            div.appendChild(input);
-            div.appendChild(label);
-            plotMenu.appendChild(div);
-        });
-    }
-
-    async function fetchFileData(filename) {
-        const url = `${baseUrl}${filename}`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-            const csvText = await response.text();
-            const result = Papa.parse(csvText, { header: true, dynamicTyping: true });
-            const plot = parseInt(filename.match(/PLOT_(\d+)/)[1]);
-            console.log(`Loaded ${filename}: ${result.data.length} rows`);
-            return result.data.map(row => ({ ...row, Plot: plot, TIMESTAMP: row.TIMESTAMP }));
-        } catch (error) {
-            console.error(`Error fetching ${filename}:`, error);
-            return [];
-        }
-    }
-
-    async function loadData() {
-        const promises = knownFiles.map(file => fetchFileData(file));
-        const results = await Promise.all(promises);
-        allData = results.flat();
-        console.log(`Total rows loaded: ${allData.length}`);
-        allData = allData.reduce((acc, row) => {
-            const plot = row.Plot;
-            if (!acc[plot]) acc[plot] = [];
-            if (acc[plot].length < 1000) acc[plot].push(row);
-            return acc;
-        }, {});
-        allData = Object.values(allData).flat();
-        console.log(`Sampled rows: ${allData.length}`);
-        updateGraph();
-    }
-
-    function toggleDropdown(id) {
-        console.log(`Toggling dropdown: ${id}`);
-        const menu = document.getElementById(id);
-        if (menu) {
-            menu.classList.toggle('open');
-        } else {
-            console.error(`Dropdown menu not found: ${id}`);
-        }
-    }
-
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const graphContainer = document.getElementById('graph-container');
-        const tab = document.getElementById('sidebar-tab');
-        sidebar.classList.toggle('collapsed');
-        graphContainer.classList.toggle('full-width');
-        tab.textContent = sidebar.classList.contains('collapsed') ? '<' : '>';
-        Plotly.Plots.resize('graph');
-    }
-
-    function debounce(func, wait) {
-        let timeout;
-        return function(...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-    }
-
-    const debounceUpdateGraph = debounce(updateGraph, 300);
-
-    function enforceSingleSelection(groupId, changedId) {
-        const checkboxes = document.querySelectorAll(`#${groupId} input[type="checkbox"]`);
-        checkboxes.forEach(checkbox => {
-            if (checkbox.id !== changedId && checkbox.checked) {
-                checkbox.checked = false;
-            }
-        });
-    }
-
-    function updateGraph() {
-        const selectedPlots = Array.from(document.querySelectorAll('#plot-menu input:checked')).map(input => parseInt(input.value));
-        const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || 'Temp_target';
-        const dependent = Array.from(document.querySelectorAll('#dependent-menu input:checked'))[0]?.value || 'TS_0__A1';
-        const conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
-
-        let workingData = allData.filter(row => selectedPlots.includes(row.Plot));
-        if (startDate || endDate) {
-            workingData = workingData.filter(row => {
-                const rowDate = new Date(row.TIMESTAMP);
-                return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= endDate);
-            });
-        }
-        conditions.forEach(cond => {
-            workingData = workingData.filter(row => row[cond] !== undefined && row[cond] !== null && row[cond] !== 0);
-        });
-
-        const traces = [];
-        const noDataPlots = [];
-        selectedPlots.forEach(plot => {
-            const plotData = workingData.filter(row => row.Plot === plot);
-            if (plotData.length === 0) {
-                noDataPlots.push(`No data for Plot ${plot}`);
-                return;
-            }
-            const x = plotData.map(row => row[independent]).filter(v => v !== undefined && v !== null);
-            const y = plotData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
-            if (x.length > 0 && y.length > 0) {
-                traces.push({
-                    x: x,
-                    y: y,
-                    mode: 'markers',
-                    name: `Plot ${plot}`,
-                    marker: { size: 12, color: `#${Math.floor(Math.random()*16777215).toString(16)}` }
-                });
-            }
-        });
-
-        const allY = workingData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
-        const statsText = allY.length > 0 ? 
-            `Mean: ${(allY.reduce((sum, val) => sum + val, 0) / allY.length).toFixed(2)}, ` +
-            `Min: ${Math.min(...allY).toFixed(2)}, Max: ${Math.max(...allY).toFixed(2)}, Points: ${allY.length}` :
-            'No data points';
-        document.getElementById('stats-content').innerHTML = statsText;
-
-        const layout = {
-            title: `${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}` + 
-                   (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : ''),
+        // Initial welcome message
+        Plotly.newPlot('graph', [], {
+            title: 'Welcome to SPRUCE!\nChoose variables and conditions to analyze',
             plot_bgcolor: '#1A1A1A',
             paper_bgcolor: '#1A1A1A',
-            font: { color: '#FFFFFF' },
-            xaxis: { title: document.querySelector(`label[for="${independent}"]`)?.textContent || independent, gridcolor: '#333333' },
-            yaxis: { title: document.querySelector(`label[for="${dependent}"]`)?.textContent || dependent, gridcolor: '#333333' },
-            showlegend: true
-        };
+            font: { color: '#FFFFFF', family: 'Orbitron, sans-serif', size: 16 },
+            xaxis: { gridcolor: '#333333', visible: false },
+            yaxis: { gridcolor: '#333333', visible: false }
+        }, { responsive: true });
 
-        if (traces.length === 0) {
-            layout.title = 'No Data to Plot' + (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : '');
+        function populatePlotDropdown() {
+            const plotMenu = document.getElementById('plot-menu');
+            plotMenu.innerHTML = '';
+            plots.forEach(plot => {
+                const div = document.createElement('div');
+                div.className = 'dropdown-item';
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.id = `plot-${plot}`;
+                input.value = plot;
+                input.checked = true;
+                input.addEventListener('change', () => console.log(`Plot ${plot} toggled`));
+                const label = document.createElement('label');
+                label.htmlFor = `plot-${plot}`;
+                label.textContent = `Plot ${plot}`;
+                div.appendChild(input);
+                div.appendChild(label);
+                plotMenu.appendChild(div);
+            });
         }
-        Plotly.newPlot('graph', traces, layout, { responsive: true }).catch(err => console.error('Plotly error:', err));
-    }
 
-    document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
-    document.getElementById('plot-toggle').addEventListener('click', () => {
-        console.log('Plot toggle clicked');
-        toggleDropdown('plot-menu');
-    });
-    document.getElementById('independent-toggle').addEventListener('click', () => {
-        console.log('Independent toggle clicked');
-        toggleDropdown('independent-menu');
-    });
-    document.getElementById('dependent-toggle').addEventListener('click', () => {
-        console.log('Dependent toggle clicked');
-        toggleDropdown('dependent-menu');
-    });
-    document.getElementById('condition-toggle').addEventListener('click', () => {
-        console.log('Condition toggle clicked');
-        toggleDropdown('condition-menu');
-    });
-    document.getElementById('time-range-toggle').addEventListener('click', () => {
-        console.log('Time range toggle clicked');
-        toggleDropdown('time-range-menu');
-    });
-    document.getElementById('stats-toggle').addEventListener('click', () => {
-        console.log('Stats toggle clicked');
-        const statsPanel = document.getElementById('stats-panel');
-        statsPanel.classList.toggle('open');
-        document.getElementById('stats-toggle').textContent = statsPanel.classList.contains('open') ? 'Hide Stats' : 'Show Stats';
-    });
+        async function fetchFileData(filename) {
+            const url = `${baseUrl}${filename}`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                const csvText = await response.text();
+                const result = Papa.parse(csvText, { header: true, dynamicTyping: true });
+                const plot = parseInt(filename.match(/PLOT_(\d+)/)[1]);
+                console.log(`Loaded ${filename}: ${result.data.length} rows`);
+                return result.data.map(row => ({ ...row, Plot: plot, TIMESTAMP: row.TIMESTAMP }));
+            } catch (error) {
+                console.error(`Error fetching ${filename}:`, error);
+                return [];
+            }
+        }
 
-    document.querySelectorAll('#independent-menu input').forEach(input => {
-        input.addEventListener('change', () => {
-            enforceSingleSelection('independent-menu', input.id);
-            document.getElementById('independent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
-            debounceUpdateGraph();
+        async function loadData() {
+            if (dataLoaded) return;
+            const promises = knownFiles.map(file => fetchFileData(file));
+            const results = await Promise.all(promises);
+            allData = results.flat();
+            console.log(`Total rows loaded: ${allData.length}`);
+            allData = allData.reduce((acc, row) => {
+                const plot = row.Plot;
+                if (!acc[plot]) acc[plot] = [];
+                if (acc[plot].length < 1000) acc[plot].push(row);
+                return acc;
+            }, {});
+            allData = Object.values(allData).flat();
+            console.log(`Sampled rows: ${allData.length}`);
+            dataLoaded = true;
+            updateGraph();
+        }
+
+        function toggleDropdown(id) {
+            console.log(`Toggling dropdown: ${id}`);
+            const menu = document.getElementById(id);
+            if (menu) {
+                menu.classList.toggle('open');
+            } else {
+                console.error(`Dropdown menu not found: ${id}`);
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const graphContainer = document.getElementById('graph-container');
+            const tab = document.getElementById('sidebar-tab');
+            sidebar.classList.toggle('collapsed');
+            graphContainer.classList.toggle('full-width');
+            tab.textContent = sidebar.classList.contains('collapsed') ? '<' : '>';
+            Plotly.Plots.resize('graph');
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        const debounceUpdateGraph = debounce(updateGraph, 300);
+
+        function enforceSingleSelection(groupId, changedId) {
+            const checkboxes = document.querySelectorAll(`#${groupId} input[type="checkbox"]`);
+            checkboxes.forEach(checkbox => {
+                if (checkbox.id !== changedId && checkbox.checked) {
+                    checkbox.checked = false;
+                }
+            });
+        }
+
+        function updateGraph() {
+            if (!dataLoaded) {
+                Plotly.newPlot('graph', [], {
+                    title: 'Please click Analyze to load data',
+                    plot_bgcolor: '#1A1A1A',
+                    paper_bgcolor: '#1A1A1A',
+                    font: { color: '#FFFFFF', family: 'Orbitron, sans-serif', size: 16 },
+                    xaxis: { gridcolor: '#333333', visible: false },
+                    yaxis: { gridcolor: '#333333', visible: false }
+                }, { responsive: true });
+                return;
+            }
+
+            const selectedPlots = Array.from(document.querySelectorAll('#plot-menu input:checked')).map(input => parseInt(input.value));
+            const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || 'Temp_target';
+            const dependent = Array.from(document.querySelectorAll('#dependent-menu input:checked'))[0]?.value || 'TS_0__A1';
+            const conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
+
+            let workingData = allData.filter(row => selectedPlots.includes(row.Plot));
+            if (startDate || endDate) {
+                workingData = workingData.filter(row => {
+                    const rowDate = new Date(row.TIMESTAMP);
+                    return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= endDate);
+                });
+            }
+            conditions.forEach(cond => {
+                workingData = workingData.filter(row => row[cond] !== undefined && row[cond] !== null && row[cond] !== 0);
+            });
+
+            const traces = [];
+            const noDataPlots = [];
+            selectedPlots.forEach(plot => {
+                const plotData = workingData.filter(row => row.Plot === plot);
+                if (plotData.length === 0) {
+                    noDataPlots.push(`No data for Plot ${plot}`);
+                    return;
+                }
+                const x = plotData.map(row => row[independent]).filter(v => v !== undefined && v !== null);
+                const y = plotData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
+                if (x.length > 0 && y.length > 0) {
+                    traces.push({
+                        x: x,
+                        y: y,
+                        mode: 'markers',
+                        name: `Plot ${plot}`,
+                        marker: { size: 12, color: `#${Math.floor(Math.random()*16777215).toString(16)}` }
+                    });
+                }
+            });
+
+            const allY = workingData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
+            const statsText = allY.length > 0 ? 
+                `Mean: ${(allY.reduce((sum, val) => sum + val, 0) / allY.length).toFixed(2)}, ` +
+                `Min: ${Math.min(...allY).toFixed(2)}, Max: ${Math.max(...allY).toFixed(2)}, Points: ${allY.length}` :
+                'No data points';
+            document.getElementById('stats-content').innerHTML = statsText;
+
+            const layout = {
+                title: `${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}` + 
+                       (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : ''),
+                plot_bgcolor: '#1A1A1A',
+                paper_bgcolor: '#1A1A1A',
+                font: { color: '#FFFFFF' },
+                xaxis: { title: document.querySelector(`label[for="${independent}"]`)?.textContent || independent, gridcolor: '#333333' },
+                yaxis: { title: document.querySelector(`label[for="${dependent}"]`)?.textContent || dependent, gridcolor: '#333333' },
+                showlegend: true
+            };
+
+            if (traces.length === 0) {
+                layout.title = 'No Data to Plot' + (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : '');
+            }
+            Plotly.newPlot('graph', traces, layout, { responsive: true }).catch(err => console.error('Plotly error:', err));
+        }
+
+        document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
+        document.getElementById('plot-toggle').addEventListener('click', () => {
+            console.log('Plot toggle clicked');
+            toggleDropdown('plot-menu');
         });
-        if (input.id === 'Temp_target') input.checked = true; // Default
-    });
-
-    document.querySelectorAll('#dependent-menu input').forEach(input => {
-        input.addEventListener('change', () => {
-            enforceSingleSelection('dependent-menu', input.id);
-            document.getElementById('dependent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
-            debounceUpdateGraph();
+        document.getElementById('independent-toggle').addEventListener('click', () => {
+            console.log('Independent toggle clicked');
+            toggleDropdown('independent-menu');
         });
-        if (input.id === 'TS_0__A1') input.checked = true; // Default
-    });
+        document.getElementById('dependent-toggle').addEventListener('click', () => {
+            console.log('Dependent toggle clicked');
+            toggleDropdown('dependent-menu');
+        });
+        document.getElementById('condition-toggle').addEventListener('click', () => {
+            console.log('Condition toggle clicked');
+            toggleDropdown('condition-menu');
+        });
+        document.getElementById('time-range-toggle').addEventListener('click', () => {
+            console.log('Time range toggle clicked');
+            toggleDropdown('time-range-menu');
+        });
+        document.getElementById('stats-toggle').addEventListener('click', () => {
+            console.log('Stats toggle clicked');
+            const statsPanel = document.getElementById('stats-panel');
+            statsPanel.classList.toggle('open');
+            document.getElementById('stats-toggle').textContent = statsPanel.classList.contains('open') ? 'Hide Stats' : 'Show Stats';
+        });
+        document.getElementById('analyze-button').addEventListener('click', () => {
+            console.log('Analyze button clicked');
+            loadData();
+        });
 
-    document.querySelectorAll('#condition-menu input').forEach(input => {
-        input.addEventListener('change', debounceUpdateGraph);
-    });
+        document.querySelectorAll('#independent-menu input').forEach(input => {
+            input.addEventListener('change', () => {
+                enforceSingleSelection('independent-menu', input.id);
+                document.getElementById('independent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+            });
+            if (input.id === 'Temp_target') input.checked = true; // Default
+        });
 
-    flatpickr('#start-date', {
-        dateFormat: 'Y-m-d',
-        onChange: (selectedDates) => {
-            startDate = selectedDates[0];
-            document.getElementById('time-range-toggle').textContent = 
-                `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
-            debounceUpdateGraph();
-        }
-    });
+        document.querySelectorAll('#dependent-menu input').forEach(input => {
+            input.addEventListener('change', () => {
+                enforceSingleSelection('dependent-menu', input.id);
+                document.getElementById('dependent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+            });
+            if (input.id === 'TS_0__A1') input.checked = true; // Default
+        });
 
-    flatpickr('#end-date', {
-        dateFormat: 'Y-m-d',
-        onChange: (selectedDates) => {
-            endDate = selectedDates[0];
-            document.getElementById('time-range-toggle').textContent = 
-                `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
-            debounceUpdateGraph();
-        }
-    });
+        document.querySelectorAll('#condition-menu input').forEach(input => {
+            input.addEventListener('change', () => console.log(`Condition ${input.value} toggled`));
+        });
 
-    populatePlotDropdown();
-    loadData();
-</script>te.toISOString().split('T')[0] : 'End'}`;
-            debounceUpdateGraph();
-        }
-    });
-
-    populatePlotDropdown();
-    loadData();
-</script>           endDate = selectedDates[0];
+        flatpickr('#start-date', {
+            dateFormat: 'Y-m-d',
+            onChange: (selectedDates) => {
+                startDate = selectedDates[0];
                 document.getElementById('time-range-toggle').textContent = 
                     `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
-                debounceUpdateGraph();
+            }
+        });
+
+        flatpickr('#end-date', {
+            dateFormat: 'Y-m-d',
+            onChange: (selectedDates) => {
+                endDate = selectedDates[0];
+                document.getElementById('time-range-toggle').textContent = 
+                    `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
             }
         });
 
         populatePlotDropdown();
-        loadData();
     </script>
 </body>
 </html>
