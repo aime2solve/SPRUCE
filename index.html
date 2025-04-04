@@ -193,164 +193,180 @@
     </div>
 
     <script>
-        const baseUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/';
-        let allData = [];
-        const plots = Array.from({ length: 21 }, (_, i) => i + 1);
+    const baseUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/';
+    let allData = [];
+    const plots = Array.from({ length: 21 }, (_, i) => i + 1);
 
-        // Updated list of known files
-        const knownFiles = [
-            'WEW PLOT_04_Complete_Environ_20160826.csv',
-            'WEW PLOT_06_Complete_Environ_20160826.csv',
-            'WEW PLOT_08_Complete_Environ_20160826.csv',
-            'WEW PLOT_10_Complete_Environ_20160826.csv',
-            'WEW PLOT_21_Complete_Environ_20160826.csv'
-        ];
+    const knownFiles = [
+        'WEW PLOT_04_Complete_Environ_20160826.csv',
+        'WEW PLOT_06_Complete_Environ_20160826.csv',
+        'WEW PLOT_08_Complete_Environ_20160826.csv',
+        'WEW PLOT_10_Complete_Environ_20160826.csv',
+        'WEW PLOT_21_Complete_Environ_20160826.csv'
+    ];
 
-        // Initial plot
-        Plotly.newPlot('graph', [], {
-            title: 'Loading SPRUCE Data...',
+    Plotly.newPlot('graph', [], {
+        title: 'Loading SPRUCE Data...',
+        plot_bgcolor: '#1A1A1A',
+        paper_bgcolor: '#1A1A1A',
+        font: { color: '#FFFFFF' },
+        xaxis: { gridcolor: '#333333' },
+        yaxis: { gridcolor: '#333333' }
+    }, { responsive: true });
+
+    function populatePlotDropdown() {
+        const plotMenu = document.getElementById('plot-menu');
+        plotMenu.innerHTML = '';
+        plots.forEach(plot => {
+            const div = document.createElement('div');
+            div.className = 'dropdown-item';
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.id = `plot-${plot}`;
+            input.value = plot;
+            input.checked = true;
+            input.addEventListener('change', debounceUpdateGraph);
+            const label = document.createElement('label');
+            label.htmlFor = `plot-${plot}`;
+            label.textContent = `Plot ${plot}`;
+            div.appendChild(input);
+            div.appendChild(label);
+            plotMenu.appendChild(div);
+        });
+    }
+
+    async function fetchFileData(filename) {
+        const url = `${baseUrl}${filename}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+            const csvText = await response.text();
+            const result = Papa.parse(csvText, { header: true, dynamicTyping: true });
+            const plot = parseInt(filename.match(/PLOT_(\d+)/)[1]);
+            console.log(`Loaded ${filename}: ${result.data.length} rows`);
+            return result.data.map(row => ({ ...row, Plot: plot }));
+        } catch (error) {
+            console.error(`Error fetching ${filename}:`, error);
+            return [];
+        }
+    }
+
+    async function loadData() {
+        const promises = knownFiles.map(file => fetchFileData(file));
+        const results = await Promise.all(promises);
+        allData = results.flat();
+        console.log(`Total rows in allData: ${allData.length}`);
+        const loadedPlots = [...new Set(allData.map(row => row.Plot))];
+        const noDataPlots = plots.filter(plot => !loadedPlots.includes(plot)).map(plot => `No data for Plot ${plot}`);
+        if (allData.length === 0) {
+            Plotly.newPlot('graph', [], {
+                title: 'No Data Loaded' + (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : ''),
+                plot_bgcolor: '#1A1A1A',
+                paper_bgcolor: '#1A1A1A',
+                font: { color: '#FFFFFF' }
+            });
+        } else {
+            updateGraph();
+        }
+    }
+
+    function toggleDropdown(id) {
+        const menu = document.getElementById(id);
+        menu.classList.toggle('open');
+    }
+
+    // Debounce function to limit updateGraph calls
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
+    const debounceUpdateGraph = debounce(updateGraph, 300);
+
+    function updateGraph() {
+        const selectedPlots = Array.from(document.querySelectorAll('#plot-menu input:checked')).map(input => parseInt(input.value));
+        const independent = document.querySelector('#independent-menu input:checked').value;
+        const dependent = document.querySelector('#dependent-menu input:checked').value;
+        const conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
+
+        let filteredData = allData.filter(row => selectedPlots.includes(row.Plot));
+        conditions.forEach(cond => {
+            filteredData = filteredData.filter(row => row[cond] !== undefined && row[cond] !== null && row[cond] !== 0);
+        });
+
+        // Sample data if too large (e.g., first 1000 rows per plot)
+        const traces = [];
+        const noDataPlots = [];
+        selectedPlots.forEach(plot => {
+            const plotData = filteredData.filter(row => row.Plot === plot);
+            if (plotData.length === 0) {
+                noDataPlots.push(`No data for Plot ${plot}`);
+                return;
+            }
+            // Limit to 1000 points per plot to avoid stack overflow
+            const limitedData = plotData.slice(0, 1000);
+            const x = limitedData.map(row => row[independent]).filter(v => v !== undefined && v !== null);
+            const y = limitedData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
+            if (x.length > 0 && y.length > 0) {
+                traces.push({
+                    x: x,
+                    y: y,
+                    mode: 'markers',
+                    name: `Plot ${plot}`,
+                    marker: { size: 12, color: `#${Math.floor(Math.random()*16777215).toString(16)}` }
+                });
+            }
+        });
+
+        const allY = filteredData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
+        const statsText = allY.length > 0 ? 
+            `Mean: ${(allY.reduce((sum, val) => sum + val, 0) / allY.length).toFixed(2)}, ` +
+            `Min: ${Math.min(...allY).toFixed(2)}, Max: ${Math.max(...allY).toFixed(2)}, Points: ${allY.length}` :
+            'No data points';
+        document.getElementById('stats-content').innerHTML = statsText;
+
+        const layout = {
+            title: `${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}` + 
+                   (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : ''),
             plot_bgcolor: '#1A1A1A',
             paper_bgcolor: '#1A1A1A',
             font: { color: '#FFFFFF' },
-            xaxis: { gridcolor: '#333333' },
-            yaxis: { gridcolor: '#333333' }
-        }, { responsive: true });
+            xaxis: { title: document.querySelector(`label[for="${independent}"]`).textContent, gridcolor: '#333333' },
+            yaxis: { title: document.querySelector(`label[for="${dependent}"]`).textContent, gridcolor: '#333333' },
+            showlegend: true
+        };
 
-        // Populate plot dropdown
-        function populatePlotDropdown() {
-            const plotMenu = document.getElementById('plot-menu');
-            plotMenu.innerHTML = '';
-            plots.forEach(plot => {
-                const div = document.createElement('div');
-                div.className = 'dropdown-item';
-                const input = document.createElement('input');
-                input.type = 'checkbox';
-                input.id = `plot-${plot}`;
-                input.value = plot;
-                input.checked = true;
-                input.addEventListener('change', updateGraph);
-                const label = document.createElement('label');
-                label.htmlFor = `plot-${plot}`;
-                label.textContent = `Plot ${plot}`;
-                div.appendChild(input);
-                div.appendChild(label);
-                plotMenu.appendChild(div);
-            });
+        if (traces.length === 0) {
+            layout.title = 'No Data to Plot' + (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : '');
         }
-
-        // Fetch CSV data for a specific file
-        async function fetchFileData(filename) {
-            const url = `${baseUrl}${filename}`;
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                const csvText = await response.text();
-                const result = Papa.parse(csvText, { header: true, dynamicTyping: true });
-                const plot = parseInt(filename.match(/PLOT_(\d+)/)[1]);
-                return result.data.map(row => ({ ...row, Plot: plot }));
-            } catch (error) {
-                console.error(`Error fetching ${filename}:`, error);
-                return [];
-            }
-        }
-
-        // Load all data
-        async function loadData() {
-            const promises = knownFiles.map(file => fetchFileData(file));
-            const results = await Promise.all(promises);
-            allData = results.flat();
-            const loadedPlots = [...new Set(allData.map(row => row.Plot))];
-            const noDataPlots = plots.filter(plot => !loadedPlots.includes(plot)).map(plot => `No data for Plot ${plot}`);
-            if (allData.length === 0) {
-                Plotly.newPlot('graph', [], {
-                    title: 'No Data Loaded' + (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : ''),
-                    plot_bgcolor: '#1A1A1A',
-                    paper_bgcolor: '#1A1A1A',
-                    font: { color: '#FFFFFF' }
-                });
-            } else {
-                updateGraph();
-            }
-        }
-
-        // Toggle dropdown
-        function toggleDropdown(id) {
-            const menu = document.getElementById(id);
-            menu.classList.toggle('open');
-        }
-
-        // Update graph
-        function updateGraph() {
-            const selectedPlots = Array.from(document.querySelectorAll('#plot-menu input:checked')).map(input => parseInt(input.value));
-            const independent = document.querySelector('#independent-menu input:checked').value;
-            const dependent = document.querySelector('#dependent-menu input:checked').value;
-            const conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
-
-            let filteredData = allData.filter(row => selectedPlots.includes(row.Plot));
-            conditions.forEach(cond => {
-                filteredData = filteredData.filter(row => row[cond] !== undefined && row[cond] !== null && row[cond] !== 0);
-            });
-
-            const traces = [];
-            const noDataPlots = [];
-            selectedPlots.forEach(plot => {
-                const plotData = filteredData.filter(row => row.Plot === plot);
-                if (plotData.length === 0) {
-                    noDataPlots.push(`No data for Plot ${plot}`);
-                    return;
-                }
-                const x = plotData.map(row => row[independent]).filter(v => v !== undefined && v !== null);
-                const y = plotData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
-                if (x.length > 0 && y.length > 0) {
-                    traces.push({
-                        x: x,
-                        y: y,
-                        mode: 'markers',
-                        name: `Plot ${plot}`,
-                        marker: { size: 12, color: `#${Math.floor(Math.random()*16777215).toString(16)}` }
-                    });
-                }
-            });
-
-            const allY = filteredData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
-            const statsText = allY.length > 0 ? 
-                `Mean: ${(allY.reduce((sum, val) => sum + val, 0) / allY.length).toFixed(2)}, ` +
-                `Min: ${Math.min(...allY).toFixed(2)}, Max: ${Math.max(...allY).toFixed(2)}, Points: ${allY.length}` :
-                'No data points';
-            document.getElementById('stats-content').innerHTML = statsText;
-
-            const layout = {
-                title: `${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}` + 
-                       (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : ''),
-                plot_bgcolor: '#1A1A1A',
-                paper_bgcolor: '#1A1A1A',
-                font: { color: '#FFFFFF' },
-                xaxis: { title: document.querySelector(`label[for="${independent}"]`).textContent, gridcolor: '#333333' },
-                yaxis: { title: document.querySelector(`label[for="${dependent}"]`).textContent, gridcolor: '#333333' },
-                showlegend: true
-            };
-
-            if (traces.length === 0) {
-                layout.title = 'No Data to Plot' + (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : '');
-            }
-            Plotly.newPlot('graph', traces, layout, { responsive: true });
-        }
-
-        // Event listeners
-        document.getElementById('plot-toggle').addEventListener('click', () => toggleDropdown('plot-menu'));
-        document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
-        document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
-        document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
-        document.getElementById('stats-toggle').addEventListener('click', () => {
-            const statsPanel = document.getElementById('stats-panel');
-            statsPanel.classList.toggle('open');
-            document.getElementById('stats-toggle').textContent = statsPanel.classList.contains('open') ? 'Hide Stats' : 'Show Stats';
+        Plotly.newPlot('graph', traces, layout, { responsive: true }).catch(err => {
+            console.error('Plotly error:', err);
         });
+    }
 
-        document.querySelectorAll('#independent-menu input, #dependent-menu input').forEach(input => {
-            input.addEventListener('change', () => {
-                if (input.name === 'independent') {
-                    document.getElementById('independent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+    document.getElementById('plot-toggle').addEventListener('click', () => toggleDropdown('plot-menu'));
+    document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
+    document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
+    document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
+    document.getElementById('stats-toggle').addEventListener('click', () => {
+        const statsPanel = document.getElementById('stats-panel');
+        statsPanel.classList.toggle('open');
+        document.getElementById('stats-toggle').textContent = statsPanel.classList.contains('open') ? 'Hide Stats' : 'Show Stats';
+    });
+
+    document.querySelectorAll('#independent-menu input, #dependent-menu input').forEach(input => {
+        input.addEventListener('change', debounceUpdateGraph);
+    });
+    document.querySelectorAll('#condition-menu input').forEach(input => {
+        input.addEventListener('change', debounceUpdateGraph);
+    });
+
+    populatePlotDropdown();
+    loadData();
+</script>nt.querySelector(`label[for="${input.id}"]`).textContent;
                 } else if (input.name === 'dependent') {
                     document.getElementById('dependent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
                 }
