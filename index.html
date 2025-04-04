@@ -503,41 +503,7 @@
 
     populatePlotDropdown();
     loadData();
-</script>ocument.querySelector(`label[for="${input.id}"]`).textContent;
-            debounceUpdateGraph();
-        });
-        if (input.id === 'Temp_target') input.checked = true; // Default
-    });
-
-    document.querySelectorAll('#dependent-menu input').forEach(input => {
-        input.addEventListener('change', () => {
-            enforceSingleSelection('dependent-menu', input.id);
-            document.getElementById('dependent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
-            debounceUpdateGraph();
-        });
-        if (input.id === 'TS_0__A1') input.checked = true; // Default
-    });
-
-    document.querySelectorAll('#condition-menu input').forEach(input => {
-        input.addEventListener('change', debounceUpdateGraph);
-    });
-
-    flatpickr('#start-date', {
-        dateFormat: 'Y-m-d',
-        onChange: (selectedDates) => {
-            startDate = selectedDates[0];
-            document.getElementById('time-range-toggle').textContent = 
-                `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
-            debounceUpdateGraph();
-        }
-    });
-
-    flatpickr('#end-date', {
-        dateFormat: 'Y-m-d',
-        onChange: (selectedDates) => {
-            endDate = selectedDates[0];
-            document.getElementById('time-range-toggle').textContent = 
-                `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+</script>te.toISOString().split('T')[0] : 'End'}`;
             debounceUpdateGraph();
         }
     });
