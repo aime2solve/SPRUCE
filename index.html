@@ -139,9 +139,7 @@
             <div class="button-container">
                 <span class="button-label">Plot:</span>
                 <div class="dropdown-toggle" id="plot-toggle">Select Plots</div>
-                <div class="dropdown-menu" id="plot-menu">
-                    <!-- Dynamically populated -->
-                </div>
+                <div class="dropdown-menu" id="plot-menu"></div>
             </div>
             <div class="button-container">
                 <span class="button-label">Independent:</span>
@@ -197,8 +195,16 @@
     <script>
         const baseUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/';
         let allData = [];
-        const plots = Array.from({ length: 21 }, (_, i) => i + 1); // Plots 1-21
-        const knownPlots = [4, 6, 7, 8, 10, 11, 13, 16, 17, 19, 20, 21]; // Known data plots
+        const plots = Array.from({ length: 21 }, (_, i) => i + 1);
+
+        // Updated list of known files
+        const knownFiles = [
+            'WEW PLOT_04_Complete_Environ_20160826.csv',
+            'WEW PLOT_06_Complete_Environ_20160826.csv',
+            'WEW PLOT_08_Complete_Environ_20160826.csv',
+            'WEW PLOT_10_Complete_Environ_20160826.csv',
+            'WEW PLOT_21_Complete_Environ_20160826.csv'
+        ];
 
         // Initial plot
         Plotly.newPlot('graph', [], {
@@ -232,36 +238,29 @@
             });
         }
 
-        // Fetch CSV data for a plot (example date used; adjust as needed)
-        async function fetchPlotData(plot) {
-            const paddedPlot = plot.toString().padStart(2, '0');
-            // Use a sample date; in practice, you'd need to fetch all dates or latest
-            const sampleDate = plot === 4 ? '20160826' : '20190402'; // Example dates from your filenames
-            const url = `${baseUrl}WEW PLOT_${paddedPlot}_Complete_Environ_${sampleDate}.csv`;
+        // Fetch CSV data for a specific file
+        async function fetchFileData(filename) {
+            const url = `${baseUrl}${filename}`;
             try {
                 const response = await fetch(url);
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        console.log(`No data for Plot ${plot}`);
-                        return { plot, data: [], message: `No data for Plot ${plot}` };
-                    }
-                    throw new Error(`HTTP error: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
                 const csvText = await response.text();
                 const result = Papa.parse(csvText, { header: true, dynamicTyping: true });
-                return { plot, data: result.data.map(row => ({ ...row, Plot: plot })) };
+                const plot = parseInt(filename.match(/PLOT_(\d+)/)[1]);
+                return result.data.map(row => ({ ...row, Plot: plot }));
             } catch (error) {
-                console.error(`Error fetching Plot ${plot}:`, error);
-                return { plot, data: [], message: `No data for Plot ${plot}` };
+                console.error(`Error fetching ${filename}:`, error);
+                return [];
             }
         }
 
         // Load all data
         async function loadData() {
-            const promises = plots.map(plot => fetchPlotData(plot));
+            const promises = knownFiles.map(file => fetchFileData(file));
             const results = await Promise.all(promises);
-            allData = results.flatMap(result => result.data);
-            const noDataPlots = results.filter(result => result.message).map(result => result.message);
+            allData = results.flat();
+            const loadedPlots = [...new Set(allData.map(row => row.Plot))];
+            const noDataPlots = plots.filter(plot => !loadedPlots.includes(plot)).map(plot => `No data for Plot ${plot}`);
             if (allData.length === 0) {
                 Plotly.newPlot('graph', [], {
                     title: 'No Data Loaded' + (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : ''),
@@ -287,19 +286,17 @@
             const dependent = document.querySelector('#dependent-menu input:checked').value;
             const conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
 
-            // Filter data
             let filteredData = allData.filter(row => selectedPlots.includes(row.Plot));
             conditions.forEach(cond => {
                 filteredData = filteredData.filter(row => row[cond] !== undefined && row[cond] !== null && row[cond] !== 0);
             });
 
-            // Group by plot for traces
             const traces = [];
             const noDataPlots = [];
             selectedPlots.forEach(plot => {
                 const plotData = filteredData.filter(row => row.Plot === plot);
                 if (plotData.length === 0) {
-                    if (!knownPlots.includes(plot)) noDataPlots.push(`No data for Plot ${plot}`);
+                    noDataPlots.push(`No data for Plot ${plot}`);
                     return;
                 }
                 const x = plotData.map(row => row[independent]).filter(v => v !== undefined && v !== null);
@@ -310,20 +307,18 @@
                         y: y,
                         mode: 'markers',
                         name: `Plot ${plot}`,
-                        marker: { size: 12, color: `#${Math.floor(Math.random()*16777215).toString(16)}` } // Random color per plot
+                        marker: { size: 12, color: `#${Math.floor(Math.random()*16777215).toString(16)}` }
                     });
                 }
             });
 
-            // Calculate statistics
             const allY = filteredData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
             const statsText = allY.length > 0 ? 
-                `Mean: ${ (allY.reduce((sum, val) => sum + val, 0) / allY.length).toFixed(2) }, ` +
-                `Min: ${ Math.min(...allY).toFixed(2) }, Max: ${ Math.max(...allY).toFixed(2) }, Points: ${allY.length}` :
+                `Mean: ${(allY.reduce((sum, val) => sum + val, 0) / allY.length).toFixed(2)}, ` +
+                `Min: ${Math.min(...allY).toFixed(2)}, Max: ${Math.max(...allY).toFixed(2)}, Points: ${allY.length}` :
                 'No data points';
             document.getElementById('stats-content').innerHTML = statsText;
 
-            // Update plot
             const layout = {
                 title: `${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}` + 
                        (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : ''),
