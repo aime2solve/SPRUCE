@@ -257,7 +257,6 @@
    <script>
     const baseUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/';
     let allData = [];
-    let filteredData = [];
     const plots = Array.from({ length: 21 }, (_, i) => i + 1);
     const knownFiles = [
         'WEW PLOT_04_Complete_Environ_20160826.csv',
@@ -269,6 +268,7 @@
     let startDate = null;
     let endDate = null;
 
+    // Initial plot
     Plotly.newPlot('graph', [], {
         title: 'Loading SPRUCE Data...',
         plot_bgcolor: '#1A1A1A',
@@ -320,7 +320,15 @@
         const results = await Promise.all(promises);
         allData = results.flat();
         console.log(`Total rows loaded: ${allData.length}`);
-        filteredData = allData; // Initial filter
+        // Pre-sample data to avoid stack overflow (e.g., 1000 rows per plot)
+        allData = allData.reduce((acc, row) => {
+            const plot = row.Plot;
+            if (!acc[plot]) acc[plot] = [];
+            if (acc[plot].length < 1000) acc[plot].push(row);
+            return acc;
+        }, {});
+        allData = Object.values(allData).flat();
+        console.log(`Sampled rows: ${allData.length}`);
         updateGraph();
     }
 
@@ -364,7 +372,7 @@
         const dependent = Array.from(document.querySelectorAll('#dependent-menu input:checked'))[0]?.value || 'TS_0__A1';
         const conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
 
-        // Pre-filter data once
+        // Filter pre-sampled data
         let workingData = allData.filter(row => selectedPlots.includes(row.Plot));
         if (startDate || endDate) {
             workingData = workingData.filter(row => {
@@ -376,9 +384,6 @@
             workingData = workingData.filter(row => row[cond] !== undefined && row[cond] !== null && row[cond] !== 0);
         });
 
-        // Limit total points to 5000, distributing across plots
-        const maxPoints = 5000;
-        const pointsPerPlot = Math.floor(maxPoints / selectedPlots.length) || 1;
         const traces = [];
         const noDataPlots = [];
         selectedPlots.forEach(plot => {
@@ -387,9 +392,8 @@
                 noDataPlots.push(`No data for Plot ${plot}`);
                 return;
             }
-            const limitedData = plotData.slice(0, pointsPerPlot);
-            const x = limitedData.map(row => row[independent]).filter(v => v !== undefined && v !== null);
-            const y = limitedData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
+            const x = plotData.map(row => row[independent]).filter(v => v !== undefined && v !== null);
+            const y = plotData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
             if (x.length > 0 && y.length > 0) {
                 traces.push({
                     x: x,
@@ -481,10 +485,7 @@
 
     populatePlotDropdown();
     loadData();
-</script>   flatpickr('#end-date', {
-            dateFormat: 'Y-m-d',
-            onChange: (selectedDates) => {
-                endDate = selectedDates[0];
+</script>           endDate = selectedDates[0];
                 document.getElementById('time-range-toggle').textContent = 
                     `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
                 debounceUpdateGraph();
