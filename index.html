@@ -268,7 +268,6 @@
     let startDate = null;
     let endDate = null;
 
-    // Initial plot
     Plotly.newPlot('graph', [], {
         title: 'Loading SPRUCE Data...',
         plot_bgcolor: '#1A1A1A',
@@ -320,7 +319,6 @@
         const results = await Promise.all(promises);
         allData = results.flat();
         console.log(`Total rows loaded: ${allData.length}`);
-        // Pre-sample data to avoid stack overflow (e.g., 1000 rows per plot)
         allData = allData.reduce((acc, row) => {
             const plot = row.Plot;
             if (!acc[plot]) acc[plot] = [];
@@ -333,8 +331,13 @@
     }
 
     function toggleDropdown(id) {
+        console.log(`Toggling dropdown: ${id}`);
         const menu = document.getElementById(id);
-        menu.classList.toggle('open');
+        if (menu) {
+            menu.classList.toggle('open');
+        } else {
+            console.error(`Dropdown menu not found: ${id}`);
+        }
     }
 
     function toggleSidebar() {
@@ -372,7 +375,6 @@
         const dependent = Array.from(document.querySelectorAll('#dependent-menu input:checked'))[0]?.value || 'TS_0__A1';
         const conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
 
-        // Filter pre-sampled data
         let workingData = allData.filter(row => selectedPlots.includes(row.Plot));
         if (startDate || endDate) {
             workingData = workingData.filter(row => {
@@ -430,12 +432,28 @@
     }
 
     document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
-    document.getElementById('plot-toggle').addEventListener('click', () => toggleDropdown('plot-menu'));
-    document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
-    document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
-    document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
-    document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
+    document.getElementById('plot-toggle').addEventListener('click', () => {
+        console.log('Plot toggle clicked');
+        toggleDropdown('plot-menu');
+    });
+    document.getElementById('independent-toggle').addEventListener('click', () => {
+        console.log('Independent toggle clicked');
+        toggleDropdown('independent-menu');
+    });
+    document.getElementById('dependent-toggle').addEventListener('click', () => {
+        console.log('Dependent toggle clicked');
+        toggleDropdown('dependent-menu');
+    });
+    document.getElementById('condition-toggle').addEventListener('click', () => {
+        console.log('Condition toggle clicked');
+        toggleDropdown('condition-menu');
+    });
+    document.getElementById('time-range-toggle').addEventListener('click', () => {
+        console.log('Time range toggle clicked');
+        toggleDropdown('time-range-menu');
+    });
     document.getElementById('stats-toggle').addEventListener('click', () => {
+        console.log('Stats toggle clicked');
         const statsPanel = document.getElementById('stats-panel');
         statsPanel.classList.toggle('open');
         document.getElementById('stats-toggle').textContent = statsPanel.classList.contains('open') ? 'Hide Stats' : 'Show Stats';
@@ -445,6 +463,47 @@
         input.addEventListener('change', () => {
             enforceSingleSelection('independent-menu', input.id);
             document.getElementById('independent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+            debounceUpdateGraph();
+        });
+        if (input.id === 'Temp_target') input.checked = true; // Default
+    });
+
+    document.querySelectorAll('#dependent-menu input').forEach(input => {
+        input.addEventListener('change', () => {
+            enforceSingleSelection('dependent-menu', input.id);
+            document.getElementById('dependent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+            debounceUpdateGraph();
+        });
+        if (input.id === 'TS_0__A1') input.checked = true; // Default
+    });
+
+    document.querySelectorAll('#condition-menu input').forEach(input => {
+        input.addEventListener('change', debounceUpdateGraph);
+    });
+
+    flatpickr('#start-date', {
+        dateFormat: 'Y-m-d',
+        onChange: (selectedDates) => {
+            startDate = selectedDates[0];
+            document.getElementById('time-range-toggle').textContent = 
+                `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+            debounceUpdateGraph();
+        }
+    });
+
+    flatpickr('#end-date', {
+        dateFormat: 'Y-m-d',
+        onChange: (selectedDates) => {
+            endDate = selectedDates[0];
+            document.getElementById('time-range-toggle').textContent = 
+                `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+            debounceUpdateGraph();
+        }
+    });
+
+    populatePlotDropdown();
+    loadData();
+</script>ocument.querySelector(`label[for="${input.id}"]`).textContent;
             debounceUpdateGraph();
         });
         if (input.id === 'Temp_target') input.checked = true; // Default
