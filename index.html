@@ -1,0 +1,392 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2566">
+  <style type="text/css">
+    body {background-color: #e7e7e7}
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.3px Menlo; color: #000000; -webkit-text-stroke: #000000; background-color: #ffffff}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.3px Menlo; color: #000000; -webkit-text-stroke: #000000; background-color: #ffffff; min-height: 15.0px}
+    span.s1 {font-kerning: none}
+  </style>
+</head>
+<body>
+<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;SPRUCE Soil Temperature Dashboard&lt;/title&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&amp;family=Lato:wght@400;700&amp;family=Merriweather:wght@700&amp;display=swap" rel="stylesheet"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;style&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>body, html {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin: 0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 100%;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 100%;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #000000;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-family: 'Lato', sans-serif;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>overflow: hidden;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>flex-direction: column;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>h1 {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #00FFFF;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-align: center;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-shadow: 0 0 10px #00CC66;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 3vh;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-family: 'Orbitron', sans-serif;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: calc(18px + 2vw);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin: 0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.container {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>flex-grow: 1;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>overflow: hidden;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.sidebar {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 300px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: rgba(26, 26, 26, 0.8);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-right: 2px solid #00FFFF;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 15px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>flex-direction: column;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>gap: 20px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>position: fixed;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>top: 15vh;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 85%;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.sidebar-title {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-family: 'Merriweather', serif;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 24px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #DAA520;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-align: center;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-shadow: 0 0 10px #DAA520;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.button-container {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>align-items: center;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 100%;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.button-label {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #FFFF00;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 12px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-right: 10px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 100px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-align: right;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.dropdown-toggle {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: rgba(26, 26, 26, 0.8);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 2px solid #00FFFF;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #00FFFF;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 10px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 4px 8px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: calc(100% - 120px);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-align: left;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>cursor: pointer;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.dropdown-menu {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: none;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>position: absolute;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>top: calc(100% + 5px);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>left: 110px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: calc(100% - 120px);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>max-height: 400px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>overflow-y: auto;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: rgba(26, 26, 26, 0.95);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 2px solid #00FFFF;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #00FFFF;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 10px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 8px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.dropdown-menu.open {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: block;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.dropdown-item {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>align-items: center;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-bottom: 3px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.dropdown-item input[type="radio"],</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.dropdown-item input[type="checkbox"] {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-right: 10px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>accent-color: #00FFFF;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.stats-panel {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: none;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: calc(100% - 120px);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>max-height: 200px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: rgba(26, 26, 26, 0.95);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 2px solid #00FFFF;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #00FF00;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 10px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 8px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-left: auto;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-top: 5px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.stats-panel.open {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: block;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.graph-container {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>flex-grow: 1;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-left: 300px;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #1A1A1A;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 98%;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>#graph {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 90%;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 99%;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin: 0.5% auto;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.plot.ly/plotly-2.32.0.min.js"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.jsdelivr.net/npm/flatpickr"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;body&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;h1&gt;SPRUCE Soil Temperature Dashboard&lt;/h1&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="container"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="sidebar" id="sidebar"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="sidebar-title"&gt;SPRUCE Data Explorer&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="button-container"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;span class="button-label"&gt;Plot:&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-toggle" id="plot-toggle"&gt;Select Plots&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-menu" id="plot-menu"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;!-- Dynamically populated --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="button-container"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;span class="button-label"&gt;Independent:&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-toggle" id="independent-toggle"&gt;Temp_target&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-menu" id="independent-menu"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="independent" id="Temp_target" value="Temp_target" checked&gt;&lt;label for="Temp_target"&gt;Target Temperature (°C)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="independent" id="CO2_trmt" value="CO2_trmt"&gt;&lt;label for="CO2_trmt"&gt;CO₂ Treatment (ppm)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="independent" id="WS_10" value="WS_10"&gt;&lt;label for="WS_10"&gt;Wind Speed (m/s)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="independent" id="WD_10" value="WD_10"&gt;&lt;label for="WD_10"&gt;Wind Direction (°)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="independent" id="PAR_2" value="PAR_2"&gt;&lt;label for="PAR_2"&gt;PAR (µmol/m²s)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="independent" id="PREC_6" value="PREC_6"&gt;&lt;label for="PREC_6"&gt;Precipitation (mm)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="button-container"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;span class="button-label"&gt;Dependent:&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-toggle" id="dependent-toggle"&gt;TS_0__A1&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-menu" id="dependent-menu"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="TS_0__A1" value="TS_0__A1" checked&gt;&lt;label for="TS_0__A1"&gt;Soil Temp 0 cm (A1, °C)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="TS_-5__A2" value="TS_-5__A2"&gt;&lt;label for="TS_-5__A2"&gt;Soil Temp -5 cm (A2, °C)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="TS_-10__A3" value="TS_-10__A3"&gt;&lt;label for="TS_-10__A3"&gt;Soil Temp -10 cm (A3, °C)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="TS_-20__A4" value="TS_-20__A4"&gt;&lt;label for="TS_-20__A4"&gt;Soil Temp -20 cm (A4, °C)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="TS_-100__A8" value="TS_-100__A8"&gt;&lt;label for="TS_-100__A8"&gt;Soil Temp -100 cm (A8, °C)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="TS_Hummock_A1" value="TS_Hummock_A1"&gt;&lt;label for="TS_Hummock_A1"&gt;Hummock Temp (A1, °C)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="WS_10" value="WS_10"&gt;&lt;label for="WS_10"&gt;Wind Speed (m/s)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="WD_10" value="WD_10"&gt;&lt;label for="WD_10"&gt;Wind Direction (°)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="PAR_2" value="PAR_2"&gt;&lt;label for="PAR_2"&gt;PAR (µmol/m²s)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="radio" name="dependent" id="PREC_6" value="PREC_6"&gt;&lt;label for="PREC_6"&gt;Precipitation (mm)&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="button-container"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;span class="button-label"&gt;Conditions:&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-toggle" id="condition-toggle"&gt;Select Conditions&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-menu" id="condition-menu"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="checkbox" id="WS_10_cond" value="WS_10"&gt;&lt;label for="WS_10_cond"&gt;Wind Speed&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="checkbox" id="WD_10_cond" value="WD_10"&gt;&lt;label for="WD_10_cond"&gt;Wind Direction&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="checkbox" id="PAR_2_cond" value="PAR_2"&gt;&lt;label for="PAR_2_cond"&gt;PAR&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="dropdown-item"&gt;&lt;input type="checkbox" id="PREC_6_cond" value="PREC_6"&gt;&lt;label for="PREC_6_cond"&gt;Precipitation&lt;/label&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="button-container"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;span class="button-label"&gt;Stats:&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="dropdown-toggle" id="stats-toggle"&gt;Show Stats&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="stats-panel" id="stats-panel"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div id="stats-content"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="graph-container" id="graph-container"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="graph"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const baseUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let allData = [];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const plots = Array.from({ length: 21 }, (_, i) =&gt; i + 1); // Plots 1-21</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const knownPlots = [4, 6, 7, 8, 10, 11, 13, 16, 17, 19, 20, 21]; // Known data plots</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Initial plot</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>Plotly.newPlot('graph', [], {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>title: 'Loading SPRUCE Data...',</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>plot_bgcolor: '#1A1A1A',</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>paper_bgcolor: '#1A1A1A',</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font: { color: '#FFFFFF' },</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>xaxis: { gridcolor: '#333333' },</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>yaxis: { gridcolor: '#333333' }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}, { responsive: true });</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Populate plot dropdown</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function populatePlotDropdown() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const plotMenu = document.getElementById('plot-menu');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>plotMenu.innerHTML = '';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>plots.forEach(plot =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const div = document.createElement('div');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>div.className = 'dropdown-item';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const input = document.createElement('input');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>input.type = 'checkbox';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>input.id = `plot-${plot}`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>input.value = plot;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>input.checked = true;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>input.addEventListener('change', updateGraph);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const label = document.createElement('label');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>label.htmlFor = `plot-${plot}`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>label.textContent = `Plot ${plot}`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>div.appendChild(input);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>div.appendChild(label);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>plotMenu.appendChild(div);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Fetch CSV data for a plot (example date used; adjust as needed)</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>async function fetchPlotData(plot) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const paddedPlot = plot.toString().padStart(2, '0');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Use a sample date; in practice, you'd need to fetch all dates or latest</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const sampleDate = plot === 4 ? '20160826' : '20190402'; // Example dates from your filenames</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const url = `${baseUrl}WEW PLOT_${paddedPlot}_Complete_Environ_${sampleDate}.csv`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>try {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const response = await fetch(url);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!response.ok) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (response.status === 404) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>console.log(`No data for Plot ${plot}`);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>return { plot, data: [], message: `No data for Plot ${plot}` };</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>throw new Error(`HTTP error: ${response.status}`);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const csvText = await response.text();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const result = Papa.parse(csvText, { header: true, dynamicTyping: true });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return { plot, data: result.data.map(row =&gt; ({ ...row, Plot: plot })) };</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} catch (error) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>console.error(`Error fetching Plot ${plot}:`, error);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return { plot, data: [], message: `No data for Plot ${plot}` };</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Load all data</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>async function loadData() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const promises = plots.map(plot =&gt; fetchPlotData(plot));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const results = await Promise.all(promises);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>allData = results.flatMap(result =&gt; result.data);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const noDataPlots = results.filter(result =&gt; result.message).map(result =&gt; result.message);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (allData.length === 0) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>Plotly.newPlot('graph', [], {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>title: 'No Data Loaded' + (noDataPlots.length ? '&lt;br&gt;' + noDataPlots.join('&lt;br&gt;') : ''),</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>plot_bgcolor: '#1A1A1A',</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>paper_bgcolor: '#1A1A1A',</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>font: { color: '#FFFFFF' }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>updateGraph();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Toggle dropdown</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function toggleDropdown(id) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const menu = document.getElementById(id);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>menu.classList.toggle('open');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Update graph</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function updateGraph() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const selectedPlots = Array.from(document.querySelectorAll('#plot-menu input:checked')).map(input =&gt; parseInt(input.value));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const independent = document.querySelector('#independent-menu input:checked').value;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const dependent = document.querySelector('#dependent-menu input:checked').value;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input =&gt; input.value);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Filter data</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let filteredData = allData.filter(row =&gt; selectedPlots.includes(row.Plot));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>conditions.forEach(cond =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>filteredData = filteredData.filter(row =&gt; row[cond] !== undefined &amp;&amp; row[cond] !== null &amp;&amp; row[cond] !== 0);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Group by plot for traces</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const traces = [];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const noDataPlots = [];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>selectedPlots.forEach(plot =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const plotData = filteredData.filter(row =&gt; row.Plot === plot);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (plotData.length === 0) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (!knownPlots.includes(plot)) noDataPlots.push(`No data for Plot ${plot}`);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>return;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const x = plotData.map(row =&gt; row[independent]).filter(v =&gt; v !== undefined &amp;&amp; v !== null);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const y = plotData.map(row =&gt; row[dependent]).filter(v =&gt; v !== undefined &amp;&amp; v !== null);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (x.length &gt; 0 &amp;&amp; y.length &gt; 0) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>traces.push({</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>x: x,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>y: y,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>mode: 'markers',</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>name: `Plot ${plot}`,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>marker: { size: 12, color: `#${Math.floor(Math.random()*16777215).toString(16)}` } // Random color per plot</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Calculate statistics</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const allY = filteredData.map(row =&gt; row[dependent]).filter(v =&gt; v !== undefined &amp;&amp; v !== null);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const statsText = allY.length &gt; 0 ?<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>`Mean: ${ (allY.reduce((sum, val) =&gt; sum + val, 0) / allY.length).toFixed(2) }, ` +</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>`Min: ${ Math.min(...allY).toFixed(2) }, Max: ${ Math.max(...allY).toFixed(2) }, Points: ${allY.length}` :</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>'No data points';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('stats-content').innerHTML = statsText;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Update plot</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const layout = {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>title: `${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}` +<span class="Apple-converted-space"> </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                       </span>(noDataPlots.length ? '&lt;br&gt;' + noDataPlots.join('&lt;br&gt;') : ''),</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>plot_bgcolor: '#1A1A1A',</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>paper_bgcolor: '#1A1A1A',</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>font: { color: '#FFFFFF' },</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>xaxis: { title: document.querySelector(`label[for="${independent}"]`).textContent, gridcolor: '#333333' },</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>yaxis: { title: document.querySelector(`label[for="${dependent}"]`).textContent, gridcolor: '#333333' },</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>showlegend: true</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (traces.length === 0) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>layout.title = 'No Data to Plot' + (noDataPlots.length ? '&lt;br&gt;' + noDataPlots.join('&lt;br&gt;') : '');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>Plotly.newPlot('graph', traces, layout, { responsive: true });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Event listeners</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('plot-toggle').addEventListener('click', () =&gt; toggleDropdown('plot-menu'));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('independent-toggle').addEventListener('click', () =&gt; toggleDropdown('independent-menu'));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('dependent-toggle').addEventListener('click', () =&gt; toggleDropdown('dependent-menu'));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('condition-toggle').addEventListener('click', () =&gt; toggleDropdown('condition-menu'));</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('stats-toggle').addEventListener('click', () =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const statsPanel = document.getElementById('stats-panel');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>statsPanel.classList.toggle('open');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('stats-toggle').textContent = statsPanel.classList.contains('open') ? 'Hide Stats' : 'Show Stats';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.querySelectorAll('#independent-menu input, #dependent-menu input').forEach(input =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>input.addEventListener('change', () =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (input.name === 'independent') {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>document.getElementById('independent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} else if (input.name === 'dependent') {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>document.getElementById('dependent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>updateGraph();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.querySelectorAll('#condition-menu input').forEach(input =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>input.addEventListener('change', updateGraph);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Initialize</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>populatePlotDropdown();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>loadData();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+</body>
+</html>
