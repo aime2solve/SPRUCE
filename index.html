@@ -1,4 +1,260 @@
-<script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPRUCE Soil Temperature Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            background-color: #000000;
+            font-family: 'Lato', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            color: #00FFFF;
+            text-align: center;
+            text-shadow: 0 0 10px #00CC66, 0 0 20px #00CC66;
+            padding: 3vh;
+            font-family: 'Orbitron', sans-serif;
+            font-size: calc(18px + 2vw);
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 300px;
+            background: rgba(26, 26, 26, 0.8);
+            border-right: 2px solid #00FFFF;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: fixed;
+            top: 15vh;
+            height: 85%;
+            transition: transform 0.3s ease;
+        }
+        .sidebar.collapsed {
+            transform: translateX(-280px);
+        }
+        .sidebar-tab {
+            position: absolute;
+            top: 0;
+            right: -40px;
+            width: 40px;
+            height: 40px;
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid #00FFFF;
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+            color: #00FFFF;
+            font-size: 18px;
+            line-height: 36px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 0 8px #00FFFF;
+        }
+        .sidebar-title {
+            font-family: 'Merriweather', serif;
+            font-size: 24px;
+            color: #DAA520;
+            text-align: center;
+            text-shadow: 0 0 10px #DAA520;
+        }
+        .button-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .button-label {
+            color: #FFFF00;
+            font-size: 12px;
+            margin-right: 10px;
+            width: 100px;
+            text-align: right;
+        }
+        .dropdown-toggle {
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            color: #00FFFF;
+            font-size: 10px;
+            padding: 4px 8px;
+            width: calc(100% - 120px);
+            text-align: left;
+            cursor: pointer;
+            box-shadow: 0 0 8px #00FFFF;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 110px;
+            width: calc(100% - 120px);
+            max-height: 0;
+            overflow-y: auto;
+            background: rgba(26, 26, 26, 0.95);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            color: #00FFFF;
+            font-size: 10px;
+            padding: 8px;
+            transition: max-height 0.5s ease;
+        }
+        .dropdown-menu.open {
+            display: block;
+            max-height: 400px;
+        }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+        .dropdown-item input[type="checkbox"] {
+            margin-right: 10px;
+            accent-color: #00FFFF;
+        }
+        #time-range-menu {
+            padding: 10px;
+        }
+        #time-range-menu .dropdown-item {
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        #time-range-menu input[type="text"] {
+            width: 100%;
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid #00FFFF;
+            color: #00FFFF;
+            padding: 4px;
+            margin-top: 5px;
+            font-size: 10px;
+        }
+        .stats-panel {
+            display: none;
+            width: calc(100% - 120px);
+            max-height: 200px;
+            background: rgba(26, 26, 26, 0.95);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            color: #00FF00;
+            font-size: 10px;
+            padding: 8px;
+            margin-left: auto;
+            margin-top: 5px;
+        }
+        .stats-panel.open {
+            display: block;
+        }
+        .graph-container {
+            flex-grow: 1;
+            margin-left: 300px;
+            background-color: #1A1A1A;
+            height: 98%;
+            transition: margin-left 0.3s ease;
+        }
+        .graph-container.full-width {
+            margin-left: 0;
+        }
+        #graph {
+            width: 90%;
+            height: 99%;
+            margin: 0.5% auto;
+        }
+    </style>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+</head>
+<body>
+    <h1>SPRUCE Soil Temperature Dashboard</h1>
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-tab" id="sidebar-tab">&gt;</div>
+            <div class="sidebar-title">SPRUCE Data Explorer</div>
+            <div class="button-container">
+                <span class="button-label">Plot:</span>
+                <div class="dropdown-toggle" id="plot-toggle">Select Plots</div>
+                <div class="dropdown-menu" id="plot-menu"></div>
+            </div>
+            <div class="button-container">
+                <span class="button-label">Independent:</span>
+                <div class="dropdown-toggle" id="independent-toggle">Target Temperature (°C)</div>
+                <div class="dropdown-menu" id="independent-menu">
+                    <div class="dropdown-item"><input type="checkbox" id="Temp_target" value="Temp_target"><label for="Temp_target">Target Temperature (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="CO2_trmt" value="CO2_trmt"><label for="CO2_trmt">CO₂ Treatment (ppm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WS_10" value="WS_10"><label for="WS_10">Wind Speed (m/s)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction (°)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
+                </div>
+            </div>
+            <div class="button-container">
+                <span class="button-label">Dependent:</span>
+                <div class="dropdown-toggle" id="dependent-toggle">Soil Temp 0 cm (A1, °C)</div>
+                <div class="dropdown-menu" id="dependent-menu">
+                    <div class="dropdown-item"><input type="checkbox" id="TS_0__A1" value="TS_0__A1"><label for="TS_0__A1">Soil Temp 0 cm (A1, °C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_-5__A2" value="TS_-5__A2"><label for="TS_-5__A2">Soil Temp -5 cm (A2, °C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_-10__A3" value="TS_-10__A3"><label for="TS_-10__A3">Soil Temp -10 cm (A3, °C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_-20__A4" value="TS_-20__A4"><label for="TS_-20__A4">Soil Temp -20 cm (A4, °C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_-100__A8" value="TS_-100__A8"><label for="TS_-100__A8">Soil Temp -100 cm (A8, °C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_Hummock_A1" value="TS_Hummock_A1"><label for="TS_Hummock_A1">Hummock Temp (A1, °C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WS_ Bind 10" value="WS_10"><label for="WS_10">Wind Speed (m/s)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction (°)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PAR_2_dep" value="PAR_2"><label for="PAR_2_dep">PAR (µmol/m²s)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PREC_6"><label for="PREC_6_dep">Precipitation (mm)</label></div>
+                </div>
+            </div>
+            <div class="button-container">
+                <span class="button-label">Conditions:</span>
+                <div class="dropdown-toggle" id="condition-toggle">Select Conditions</div>
+                <div class="dropdown-menu" id="condition-menu">
+                    <div class="dropdown-item"><input type="checkbox" id="WS_10_cond" value="WS_10"><label for="WS_10_cond">Wind Speed</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10_cond" value="WD_10"><label for="WD_10_cond">Wind Direction</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PAR_2_cond" value="PAR_2"><label for="PAR_2_cond">PAR</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6_cond" value="PREC_6"><label for="PREC_6_cond">Precipitation</label></div>
+                </div>
+            </div>
+            <div class="button-container">
+                <span class="button-label">Time Range:</span>
+                <div class="dropdown-toggle" id="time-range-toggle">Select Time Range</div>
+                <div class="dropdown-menu" id="time-range-menu">
+                    <div class="dropdown-item">
+                        <label for="start-date">Start Date:</label>
+                        <input type="text" id="start-date" placeholder="YYYY-MM-DD">
+                    </div>
+                    <div class="dropdown-item">
+                        <label for="end-date">End Date:</label>
+                        <input type="text" id="end-date" placeholder="YYYY-MM-DD">
+                    </div>
+                </div>
+            </div>
+            <div class="button-container">
+                <span class="button-label">Stats:</span>
+                <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
+                <div class="stats-panel" id="stats-panel">
+                    <div id="stats-content"></div>
+                </div>
+            </div>
+        </div>
+        <div class="graph-container" id="graph-container">
+            <div id="graph"></div>
+        </div>
+    </div>
+
+   <script>
     const baseUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/';
     let allData = [];
     let filteredData = [];
@@ -225,4 +481,18 @@
 
     populatePlotDropdown();
     loadData();
-</script>
+</script>   flatpickr('#end-date', {
+            dateFormat: 'Y-m-d',
+            onChange: (selectedDates) => {
+                endDate = selectedDates[0];
+                document.getElementById('time-range-toggle').textContent = 
+                    `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+                debounceUpdateGraph();
+            }
+        });
+
+        populatePlotDropdown();
+        loadData();
+    </script>
+</body>
+</html>
