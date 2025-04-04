@@ -41,7 +41,7 @@
             font-weight: bold;
             color: #555;
         }
-        .sidebar select, .sidebar input {
+        .sidebar select, .sidebar input, .sidebar button {
             width: 100%;
             padding: 5px;
             margin-bottom: 10px;
@@ -49,9 +49,18 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
+        .sidebar button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .sidebar button:hover {
+            background-color: #0056b3;
+        }
         #graph {
             width: 100%;
-            height: 500px;
+            height: 600px;
             background-color: #fff;
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -85,7 +94,7 @@
         <label for="depth-select">Soil Depth (cm):</label>
         <select id="depth-select">
             <option value="TS_0__A1">0 cm (A1)</option>
-            <option value="TS_-5__A2">-5 cm (A2)</option>
+            <option value="TS_-5__A2" selected>-5 cm (A2)</option>
             <option value="TS_-10__A3">-10 cm (A3)</option>
             <option value="TS_-20__A4">-20 cm (A4)</option>
             <option value="TS_-30__A5">-30 cm (A5)</option>
@@ -98,7 +107,7 @@
         <label for="view-select">View:</label>
         <select id="view-select">
             <option value="scatter">Scatter</option>
-            <option value="line">Line</option>
+            <option value="line" selected>Line</option>
             <option value="bar">Bar</option>
         </select>
 
@@ -111,6 +120,7 @@
 
         <label for="time-range">Time Range:</label>
         <input type="text" id="time-range" placeholder="Select date range">
+        <button id="clear-time-range">Clear Time Range</button>
 
         <div id="error-message"></div>
     </div>
@@ -123,14 +133,24 @@
     <script>
         let data = [];
         let errorMessage = document.getElementById('error-message');
+        let flatpickrInstance;
 
         // Initialize Flatpickr for time range
-        flatpickr("#time-range", {
+        flatpickrInstance = flatpickr("#time-range", {
             mode: "range",
             dateFormat: "Y-m-d",
             defaultDate: ["2014-01-01", "2014-12-31"],
             enableTime: false,
-            onChange: updateGraph
+            onChange: (selectedDates) => {
+                console.log('Time range selected:', selectedDates);
+                updateGraph();
+            }
+        });
+
+        // Clear time range button
+        document.getElementById('clear-time-range').addEventListener('click', () => {
+            flatpickrInstance.clear();
+            updateGraph();
         });
 
         // Load CSV data
@@ -234,13 +254,19 @@
 
             // Prepare data for plotting
             const x = filteredData.map(row => {
-                const val = parseFloat(row.Day_of_Year);
-                console.log('Parsing Day_of_Year:', row.Day_of_Year, '->', val);
+                const rawValue = row.Day_of_Year ? row.Day_of_Year.trim() : '';
+                const val = parseFloat(rawValue);
+                if (isNaN(val)) {
+                    console.log('Invalid Day_of_Year:', row.Day_of_Year);
+                }
                 return val;
             });
             const y = filteredData.map(row => {
-                const val = parseFloat(row[depthSelect]);
-                console.log('Parsing', depthSelect, ':', row[depthSelect], '->', val);
+                const rawValue = row[depthSelect] ? row[depthSelect].trim() : '';
+                const val = parseFloat(rawValue);
+                if (isNaN(val)) {
+                    console.log('Invalid', depthSelect, ':', row[depthSelect]);
+                }
                 return val;
             });
             const timestamps = filteredData.map(row => row.TIMESTAMP);
@@ -270,7 +296,9 @@
                 type: viewSelect === 'bar' ? 'bar' : 'scatter',
                 name: `${depthSelect} vs Day of Year`,
                 text: validTimestamps,
-                hovertemplate: `Day of Year: %{x}<br>${depthSelect}: %{y}°C<br>Timestamp: %{text}`
+                hovertemplate: `Day of Year: %{x}<br>${depthSelect}: %{y}°C<br>Timestamp: %{text}`,
+                line: { width: 1 },
+                marker: { size: 4 }
             };
 
             const traces = [trace];
@@ -287,7 +315,7 @@
                         y: validX.map(x => fit.slope * x + fit.intercept),
                         mode: 'lines',
                         name: 'Linear Fit',
-                        line: { color: 'red' }
+                        line: { color: 'red', width: 2 }
                     });
                 } else if (fitSelect === 'quadratic') {
                     fit = quadraticRegression(validX, validY);
@@ -297,7 +325,7 @@
                         y: validX.map(x => fit.a * x * x + fit.b * x + fit.c),
                         mode: 'lines',
                         name: 'Quadratic Fit',
-                        line: { color: 'red' }
+                        line: { color: 'red', width: 2 }
                     });
                 }
             } else if (fitSelect !== 'none') {
@@ -310,9 +338,13 @@
             // Plot the graph
             const layout = {
                 title: `Soil Temperature (${depthSelect}) vs Day of Year (Plot ${plotSelect}, CO2: ${co2Select}, Temp: ${tempSelect}°C)`,
-                xaxis: { title: 'Day of Year' },
+                xaxis: {
+                    title: 'Day of Year',
+                    rangeslider: { visible: true }
+                },
                 yaxis: { title: 'Soil Temperature (°C)' },
-                margin: { t: 50, b: 50, l: 50, r: 50 }
+                margin: { t: 50, b: 50, l: 50, r: 50 },
+                showlegend: true
             };
 
             Plotly.newPlot('graph', traces, layout).catch(err => {
