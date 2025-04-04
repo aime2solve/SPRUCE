@@ -4,1040 +4,326 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPRUCE Project Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
-        body, html {
+        body {
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            height: 100%;
-            width: 100%;
-            background-color: #000000;
-            font-family: 'Exo 2', sans-serif;
-            overflow: hidden;
             display: flex;
-            flex-direction: column;
-        }
-        h1 {
-            color: #00FFFF;
-            text-align: center;
-            text-shadow: 0 0 10px #00CC66, 0 0 20px #00CC66;
-            padding: 3vh;
-            font-family: 'Orbitron', sans-serif;
-            font-size: calc(18px + 2vw);
-            margin: 0;
-            flex-shrink: 0;
-            letter-spacing: 3px;
-            animation: pulseGlow 1.5s ease-in-out infinite alternate;
-        }
-        @keyframes pulseGlow {
-            from { text-shadow: 0 0 10px #00CC66, 0 0 20px #00CC66; }
-            to { text-shadow: 0 0 20px #00CC66, 0 0 40px #00CC66; }
-        }
-        .container {
-            display: flex;
-            flex-grow: 1;
-            overflow: hidden;
         }
         .sidebar {
-            width: 300px;
-            background: rgba(26, 26, 26, 0.8);
-            border-right: 2px solid #00FFFF;
-            box-shadow: 0 0 10px #00FFFF;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            position: fixed;
-            top: 15vh;
-            height: 85%;
-            transition: transform 0.3s ease;
-            z-index: 1000;
-        }
-        .sidebar.collapsed {
-            transform: translateX(-280px);
-        }
-        .sidebar-title {
-            font-family: 'Merriweather', serif;
-            font-size: 24px;
-            font-weight: 700;
-            color: #DAA520;
-            text-align: center;
-            text-shadow: 0 0 10px #DAA520, 0 0 20px #DAA520;
-            animation: goldGlow 1.5s ease-in-out infinite alternate;
-            margin-bottom: 10px;
-        }
-        @keyframes goldGlow {
-            from { text-shadow: 0 0 10px #DAA520, 0 0 20px #DAA520; }
-            to { text-shadow: 0 0 20px #DAA520, 0 0 40px #DAA520; }
-        }
-        .sidebar-subtitle {
-            font-family: 'Lato', sans-serif;
-            font-size: 16px;
-            color: #DAA520;
-            text-align: center;
-            text-shadow: 0 0 5px #DAA520;
-            margin-top: -10px;
-            margin-bottom: 10px;
-        }
-        .sidebar-toggle {
-            position: absolute;
-            top: 10px;
-            right: -20px;
-            width: 20px;
-            height: 40px;
-            background: rgba(26, 26, 26, 0.8);
-            border: 2px solid #00FFFF;
-            border-left: none;
-            border-radius: 0 10px 10px 0;
-            color: #00FFFF;
-            font-size: 12px;
-            line-height: 36px;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 0 8px #00FFFF;
-            z-index: 1100;
-        }
-        .mobile-toggle {
-            display: none;
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: rgba(26, 26, 26, 0.8);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            color: #00FFFF;
-            padding: 5px 10px;
-            cursor: pointer;
-            box-shadow: 0 0 8px #00FFFF;
-            z-index: 1100;
-        }
-        .button-container {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            position: relative;
-        }
-        .stats-container {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            position: relative;
-        }
-        .stats-header {
-            display: flex;
-            align-items: center;
-            width: 100%;
-        }
-        .button-label {
-            color: #FFFF00;
-            font-family: 'VT323', monospace;
-            font-size: 12px;
-            margin-right: 10px;
-            width: 100px;
-            text-align: right;
-            flex-shrink: 0;
-        }
-        .dropdown-toggle {
-            background: rgba(26, 26, 26, 0.8);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            color: #00FFFF;
-            font-family: 'Exo 2', sans-serif;
-            font-size: 10px;
-            padding: 4px 8px;
-            box-shadow: 0 0 8px #00FFFF;
-            cursor: pointer;
-            width: calc(100% - 120px);
-            text-align: left;
-        }
-        .dropdown-toggle:hover {
-            box-shadow: 0 0 12px #00FFFF;
-        }
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: calc(100% + 5px);
-            left: 110px;
-            width: calc(100% - 120px);
-            max-height: 400px;
+            width: 250px;
+            padding: 20px;
+            background-color: #f4f4f4;
+            height: 100vh;
             overflow-y: auto;
-            background: rgba(26, 26, 26, 0.95);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            box-shadow: 0 0 8px #00FFFF;
-            z-index: 1000;
-            padding: 8px;
-            color: #00FFFF;
-            font-family: 'Exo 2', sans-serif;
-            font-size: 10px;
-            transition: max-height 0.5s ease;
+            position: fixed;
         }
-        .dropdown-menu.open {
+        .main-content {
+            margin-left: 270px;
+            padding: 20px;
+            width: calc(100% - 270px);
+        }
+        .sidebar h2 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+        .sidebar label {
             display: block;
-            max-height: 400px;
+            margin: 10px 0 5px;
+            font-weight: bold;
         }
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 3px;
-        }
-        .dropdown-item input[type="radio"],
-        .dropdown-item input[type="checkbox"] {
-            margin-right: 10px;
-            accent-color: #00FFFF;
-        }
-        #time-range-menu {
-            width: calc(100% - 120px);
-            left: 110px;
-            padding: 10px;
-        }
-        #time-range-menu .dropdown-item {
-            flex-direction: column;
-            align-items: flex-start;
-            margin-bottom: 10px;
-        }
-        #time-range-menu input[type="text"] {
+        .sidebar select, .sidebar input {
             width: 100%;
-            background: rgba(26, 26, 26, 0.8);
-            border: 1px solid #00FFFF;
-            color: #00FFFF;
-            padding: 4px;
-            margin-top: 5px;
-            font-family: 'Exo 2', sans-serif;
-            font-size: 10px;
-            cursor: pointer;
-        }
-        .stats-panel {
-            display: none;
-            width: calc(100% - 120px);
-            max-height: 200px;
-            background: rgba(26, 26, 26, 0.95);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            box-shadow: 0 0 8px #00FFFF;
-            color: #00FF00;
-            font-family: 'VT323', monospace;
-            font-size: 10px;
-            padding: 8px;
-            overflow: hidden;
-            transition: max-height 0.5s ease;
-            margin-left: auto;
-            margin-top: 5px;
-        }
-        .stats-panel.open {
-            display: block;
-            max-height: 200px;
-        }
-        .stats-panel.collapsed {
-            border: none;
-        }
-        .stats-checkbox {
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-        }
-        .graph-container {
-            flex-grow: 1;
-            margin-left: 300px;
-            position: relative;
-            background-color: #1A1A1A;
-            overflow: hidden;
-            min-height: 200px;
-            height: 98%;
-            transition: margin-left 0.3s ease;
-        }
-        .graph-container.full-width {
-            margin-left: 0;
+            padding: 5px;
+            margin-bottom: 10px;
         }
         #graph {
-            width: 90%;
-            height: 99%;
-            margin: 0.5% auto;
-        }
-        #graph::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                to bottom,
-                rgba(0, 255, 255, 0.06),
-                rgba(0, 255, 255, 0.06) 2px,
-                transparent 2px,
-                transparent 4px
-            );
-            pointer-events: none;
-            z-index: 10;
+            height: 500px;
         }
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 250px;
-                transform: translateX(-230px);
-                gap: 15px;
-                top: 15vh;
-                height: 85%;
-            }
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            .mobile-toggle {
-                display: block;
-            }
-            .graph-container {
-                margin-left: 0;
-                height: 98%;
-            }
-            .button-label {
-                width: 80px;
-                font-size: 10px;
-            }
-            .dropdown-menu {
-                width: calc(100% - 90px);
-                left: 90px;
-                font-size: 8px;
-                padding: 6px;
-            }
-            #time-range-menu {
-                width: calc(100% - 90px);
-                left: 90px;
-            }
-            .stats-panel {
-                width: calc(100% - 90px);
-                font-size: 8px;
-            }
-            .dropdown-toggle {
-                font-size: 8px;
-                padding: 3px 6px;
-                width: calc(100% - 90px);
-            }
-            #graph {
-                width: 95%;
-                height: 99%;
-                margin: 0.5% auto;
-            }
-            .sidebar-title {
-                font-size: 20px;
-            }
-            .sidebar-subtitle {
-                font-size: 14px;
-            }
+        #stats {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e8e8e8;
+            border-radius: 5px;
         }
-        @media (max-width: 480px) {
-            h1 {
-                font-size: calc(14px + 2vw);
-            }
-            .sidebar {
-                width: 200px;
-                transform: translateX(-180px);
-                gap: 12px;
-            }
-            .graph-container {
-                height: 98%;
-            }
-            .sidebar-title {
-                font-size: 18px;
-            }
-            .sidebar-subtitle {
-                font-size: 12px;
-            }
-        }
-        @media (orientation: landscape) and (max-height: 500px) {
-            .sidebar {
-                top: 10vh;
-                height: 90%;
-            }
-            .graph-container {
-                height: 99%;
-            }
-            #graph {
-                height: 100%;
-                margin: 0 auto;
-            }
-            h1 {
-                padding: 1vh;
-                font-size: calc(12px + 1.5vw);
-            }
-            .sidebar-title {
-                font-size: 20px;
-            }
-            .sidebar-subtitle {
-                font-size: 14px;
-            }
+        #error-message {
+            color: red;
+            margin-top: 10px;
         }
     </style>
-    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
-    <h1>SPRUCE Project Dashboard</h1>
-    <div class="container">
-        <button class="mobile-toggle" id="mobile-toggle">☰</button>
-        <div class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebar-toggle">></button>
-            <div class="sidebar-title">SPRUCE Data</div>
-            <div class="sidebar-subtitle">2014-2024</div>
-            <div class="button-container">
-                <span class="button-label">Plot:</span>
-                <div class="dropdown-toggle" id="plot-toggle">Select Plots</div>
-                <div class="dropdown-menu" id="plot-menu"></div>
-            </div>
-            <div class="button-container">
-                <span class="button-label">CO2 Treatment:</span>
-                <div class="dropdown-toggle" id="co2-toggle">Select CO2 Levels</div>
-                <div class="dropdown-menu" id="co2-menu">
-                    <div class="dropdown-item"><input type="checkbox" id="CO2_500" value="500"><label for="CO2_500" style="color: #FF5555;">500 ppm</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="CO2_Ambient" value="Ambient"><label for="CO2_Ambient" style="color: #00CCCC;">Ambient</label></div>
-                </div>
-            </div>
-            <div class="button-container">
-                <span class="button-label">Temp Target:</span>
-                <div class="dropdown-toggle" id="temp-toggle">Select Temp Targets</div>
-                <div class="dropdown-menu" id="temp-menu"></div>
-            </div>
-            <div class="button-container">
-                <span class="button-label">Independent:</span>
-                <div class="dropdown-toggle" id="independent-toggle">Day of Year</div>
-                <div class="dropdown-menu" id="independent-menu">
-                    <div class="dropdown-item"><input type="radio" name="independent" id="Day_of_Year" value="Day_of_Year" checked><label for="Day_of_Year">Day of Year</label></div>
-                    <div class="dropdown-item"><input type="radio" name="independent" id="CO2_trmt" value="CO2_trmt"><label for="CO2_trmt">CO<sub>2</sub> Treatment</label></div>
-                    <div class="dropdown-item"><input type="radio" name="independent" id="Temp_target" value="Temp_target"><label for="Temp_target">Temperature Target</label></div>
-                    <div class="dropdown-item"><input type="radio" name="independent" id="WS_10" value="WS_10"><label for="WS_10">Wind Speed (10m)</label></div>
-                </div>
-            </div>
-            <div class="button-container">
-                <span class="button-label">Dependent:</span>
-                <div class="dropdown-toggle" id="dependent-toggle">Soil Temp (0cm)</div>
-                <div class="dropdown-menu" id="dependent-menu">
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="TS_0__A1" value="TS_0__A1" checked><label for="TS_0__A1">Soil Temp (0cm, A1)</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="TS_-5__A2" value="TS_-5__A2"><label for="TS_-5__A2">Soil Temp (-5cm, A2)</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="TS_-10__A3" value="TS_-10__A3"><label for="TS_-10__A3">Soil Temp (-10cm, A3)</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="TS_-20__A4" value="TS_-20__A4"><label for="TS_-20__A4">Soil Temp (-20cm, A4)</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="TS_Hummock_A1" value="TS_Hummock_A1"><label for="TS_Hummock_A1">Hummock Temp (A1)</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="TA_2_0__1" value="TA_2_0__1"><label for="TA_2_0__1">Air Temp (2m, 1)</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="RH_2_0__1" value="RH_2_0__1"><label for="RH_2_0__1">Relative Humidity (2m, 1)</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (2m)</label></div>
-                    <div class="dropdown-item"><input type="radio" name="dependent" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (6m)</label></div>
-                </div>
-            </div>
-            <div class="button-container">
-                <span class="button-label">Time Range:</span>
-                <div class="dropdown-toggle" id="time-range-toggle">Select Time Range</div>
-                <div class="dropdown-menu" id="time-range-menu">
-                    <div class="dropdown-item">
-                        <label for="start-date-input">Start Date:</label>
-                        <input type="text" id="start-date-input" placeholder="MM/DD/YYYY">
-                    </div>
-                    <div class="dropdown-item">
-                        <label for="end-date-input">End Date:</label>
-                        <input type="text" id="end-date-input" placeholder="MM/DD/YYYY">
-                    </div>
-                </div>
-            </div>
-            <div class="button-container">
-                <span class="button-label">View:</span>
-                <div class="dropdown-toggle" id="view-toggle">Scatter Plot</div>
-                <div class="dropdown-menu" id="view-menu">
-                    <div class="dropdown-item"><input type="radio" name="view" id="scatter" value="scatter" checked><label for="scatter">Scatter Plot</label></div>
-                    <div class="dropdown-item"><input type="radio" name="view" id="line" value="line"><label for="line">Line Plot</label></div>
-                    <div class="dropdown-item"><input type="radio" name="view" id="bar" value="bar"><label for="bar">Bar Chart</label></div>
-                </div>
-            </div>
-            <div class="button-container">
-                <span class="button-label">Fit Type:</span>
-                <div class="dropdown-toggle" id="fit-toggle">Auto</div>
-                <div class="dropdown-menu" id="fit-menu">
-                    <div class="dropdown-item"><input type="radio" name="fit" id="fit-auto" value="auto" checked><label for="fit-auto">Auto</label></div>
-                    <div class="dropdown-item"><input type="radio" name="fit" id="fit-linear" value="linear"><label for="fit-linear">Linear</label></div>
-                    <div class="dropdown-item"><input type="radio" name="fit" id="fit-quadratic" value="quadratic"><label for="fit-quadratic">Quadratic</label></div>
-                </div>
-            </div>
-            <div class="stats-container">
-                <div class="stats-header">
-                    <span class="button-label">Stats:</span>
-                    <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
-                </div>
-                <div class="stats-panel" id="stats-panel">
-                    <div id="stats-content"></div>
-                    <div class="stats-checkbox">
-                        <input type="checkbox" id="add-stats-to-chart" value="add-stats">
-                        <label for="add-stats-to-chart">Add Stats to Chart</label>
-                    </div>
-                </div>
-            </div>
-            <div class="button-container">
-                <span class="button-label">CSV:</span>
-                <div class="dropdown-toggle" id="csv-toggle" onclick="window.open('./spruce_data.csv', '_blank')">View CSV</div>
-            </div>
-        </div>
-        <div class="graph-container" id="graph-container">
-            <div id="graph"></div>
-        </div>
+    <div class="sidebar">
+        <h2>SPRUCE Dashboard</h2>
+        <label for="plot-select">Plot:</label>
+        <select id="plot-select"></select>
+
+        <label for="co2-select">CO2 Treatment:</label>
+        <select id="co2-select"></select>
+
+        <label for="temp-select">Temp Target (°C):</label>
+        <select id="temp-select"></select>
+
+        <label for="depth-select">Soil Depth (cm):</label>
+        <select id="depth-select">
+            <option value="TS_0__A1">0 cm (A1)</option>
+            <option value="TS_-5__A2">-5 cm (A2)</option>
+            <option value="TS_-10__A3">-10 cm (A3)</option>
+            <option value="TS_-20__A4">-20 cm (A4)</option>
+            <option value="TS_-30__A5">-30 cm (A5)</option>
+            <option value="TS_-40__A6">-40 cm (A6)</option>
+            <option value="TS_-50__A7">-50 cm (A7)</option>
+            <option value="TS_-100__A8">-100 cm (A8)</option>
+            <option value="TS_-200__A9">-200 cm (A9)</option>
+        </select>
+
+        <label for="view-select">View:</label>
+        <select id="view-select">
+            <option value="scatter">Scatter</option>
+            <option value="line">Line</option>
+            <option value="bar">Bar</option>
+        </select>
+
+        <label for="fit-select">Fit:</label>
+        <select id="fit-select">
+            <option value="none">None</option>
+            <option value="linear">Linear</option>
+            <option value="quadratic">Quadratic</option>
+        </select>
+
+        <label for="time-range">Time Range:</label>
+        <input type="text" id="time-range" placeholder="Select date range">
+
+        <div id="error-message"></div>
+    </div>
+
+    <div class="main-content">
+        <div id="graph"></div>
+        <div id="stats"></div>
     </div>
 
     <script>
-        console.log('Script started');
-
-        const conditionColors = {
-            '500': '#FF5555',
-            'Ambient': '#00CCCC'
-        };
-
-        const units = {
-            'Day_of_Year': 'days',
-            'CO2_trmt': 'ppm',
-            'Temp_target': '°C',
-            'WS_10': 'm/s',
-            'TS_0__A1': '°C',
-            'TS_-5__A2': '°C',
-            'TS_-10__A3': '°C',
-            'TS_-20__A4': '°C',
-            'TS_Hummock_A1': '°C',
-            'TA_2_0__1': '°C',
-            'RH_2_0__1': '%',
-            'PAR_2': 'µmol/m²s',
-            'PREC_6': 'mm'
-        };
-
-        const csvUrl = './spruce_data.csv';
         let data = [];
-        let statsText = '';
-        let startDate = null;
-        let endDate = null;
+        let errorMessage = document.getElementById('error-message');
 
-        Plotly.newPlot('graph', [{
-            x: [1, 2, 3],
-            y: [2, 4, 6],
-            mode: 'markers',
-            marker: { size: 12, color: '#00FFFF' },
-            name: 'Test Data'
-        }], {
-            title: 'Loading spruce_data.csv...',
-            plot_bgcolor: '#1A1A1A',
-            paper_bgcolor: '#1A1A1A',
-            font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
-            xaxis: { gridcolor: '#333333', automargin: true },
-            yaxis: { gridcolor: '#333333', automargin: true },
-            showlegend: false,
-            margin: { l: 50, r: 50, t: 120, b: 50 }
-        }, { responsive: true });
+        // Initialize Flatpickr for time range
+        flatpickr("#time-range", {
+            mode: "range",
+            dateFormat: "Y-m-d",
+            defaultDate: ["2014-01-01", "2014-12-31"],
+            onChange: updateGraph
+        });
 
-        fetch(csvUrl)
+        // Load CSV data
+        fetch('spruce_data.csv')
             .then(response => {
-                console.log('Fetch status:', response.status, 'URL:', csvUrl);
-                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error('Failed to load CSV - please upload spruce_data.csv to the repository');
+                }
                 return response.text();
             })
             .then(csvText => {
-                console.log('CSV length:', csvText.length);
-                console.log('CSV preview:', csvText.slice(0, 200));
                 Papa.parse(csvText, {
                     header: true,
-                    dynamicTyping: true,
+                    skipEmptyLines: true,
                     complete: function(results) {
-                        data = results.data.filter(row => row.Plot && row.TIMESTAMP);
-                        console.log('Parsed data (first 5 rows):', data.slice(0, 5));
-                        console.log('Total rows after filter:', data.length);
-                        if (data.length === 0) {
-                            console.error('No valid data - missing or invalid Plot/TIMESTAMP column');
-                            Plotly.newPlot('graph', [], layoutConfig('No valid data in CSV'));
+                        if (results.errors.length > 0) {
+                            errorMessage.textContent = 'CSV Parse Error: ' + results.errors[0].message;
                             return;
                         }
-                        populateSelectors();
+                        data = results.data;
+                        console.log('Loaded data:', data.slice(0, 5)); // Log first 5 rows for debugging
+                        populateDropdowns();
                         updateGraph();
-                    },
-                    error: function(error) {
-                        console.error('Parse error:', error);
-                        Plotly.newPlot('graph', [], layoutConfig('CSV Parse Error: ' + error.message));
                     }
                 });
             })
             .catch(error => {
-                console.error('Fetch error:', error);
-                Plotly.newPlot('graph', [], layoutConfig(`Failed to load CSV: ${error.message}`));
-                populateSelectorsFallback();
-                updateGraph();
+                errorMessage.textContent = error.message;
             });
 
-        function populateSelectors() {
-            console.log('Populating selectors');
+        // Populate dropdowns with unique values from the data
+        function populateDropdowns() {
+            const plotSelect = document.getElementById('plot-select');
+            const co2Select = document.getElementById('co2-select');
+            const tempSelect = document.getElementById('temp-select');
+
             const plots = [...new Set(data.map(row => row.Plot))].sort();
-            const co2Levels = ['500', 'Ambient'];
-            const tempTargets = [...new Set(data.map(row => row.Temp_target))].sort();
+            const co2s = [...new Set(data.map(row => row.CO2_trmt))].sort();
+            const temps = [...new Set(data.map(row => row.Temp_target))].sort();
 
-            const plotMenu = document.getElementById('plot-menu');
-            plotMenu.innerHTML = '';
             plots.forEach(plot => {
-                const div = document.createElement('div');
-                div.className = 'dropdown-item';
-                const input = document.createElement('input');
-                input.type = 'checkbox';
-                input.id = `plot-${plot}`;
-                input.value = plot;
-                input.checked = true;
-                input.addEventListener('change', updateGraph);
-                const label = document.createElement('label');
-                label.htmlFor = `plot-${plot}`;
-                label.textContent = `Plot ${plot}`;
-                div.appendChild(input);
-                div.appendChild(label);
-                plotMenu.appendChild(div);
+                const option = document.createElement('option');
+                option.value = plot;
+                option.textContent = `Plot ${plot}`;
+                plotSelect.appendChild(option);
             });
 
-            const co2Menu = document.getElementById('co2-menu');
-            co2Menu.querySelectorAll('input[type="checkbox"]').forEach(input => {
-                input.checked = true;
-                input.addEventListener('change', updateGraph);
+            co2s.forEach(co2 => {
+                const option = document.createElement('option');
+                option.value = co2;
+                option.textContent = co2 === 'Ambient' ? 'Ambient' : `${co2} ppm`;
+                co2Select.appendChild(option);
             });
 
-            const tempMenu = document.getElementById('temp-menu');
-            tempMenu.innerHTML = '';
-            tempTargets.forEach(temp => {
-                const div = document.createElement('div');
-                div.className = 'dropdown-item';
-                const input = document.createElement('input');
-                input.type = 'checkbox';
-                input.id = `temp-${temp}`;
-                input.value = temp;
-                input.checked = true;
-                input.addEventListener('change', updateGraph);
-                const label = document.createElement('label');
-                label.htmlFor = `temp-${temp}`;
-                label.textContent = `${temp} °C`;
-                div.appendChild(input);
-                div.appendChild(label);
-                tempMenu.appendChild(div);
+            temps.forEach(temp => {
+                const option = document.createElement('option');
+                option.value = temp;
+                option.textContent = `${temp}°C`;
+                tempSelect.appendChild(option);
             });
 
-            const independentMenu = document.getElementById('independent-menu');
-            independentMenu.querySelectorAll('input[type="radio"]').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    document.getElementById('independent-toggle').innerHTML = e.target.nextElementSibling.innerHTML;
-                    updateGraph();
-                });
-            });
-
-            const dependentMenu = document.getElementById('dependent-menu');
-            dependentMenu.querySelectorAll('input[type="radio"]').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    document.getElementById('dependent-toggle').textContent = e.target.nextElementSibling.textContent;
-                    updateGraph();
-                });
-            });
-
-            const viewMenu = document.getElementById('view-menu');
-            viewMenu.querySelectorAll('input[type="radio"]').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    document.getElementById('view-toggle').textContent = document.querySelector(`label[for="${e.target.id}"]`).textContent;
-                    updateGraph();
-                });
-            });
-
-            const fitMenu = document.getElementById('fit-menu');
-            fitMenu.querySelectorAll('input[type="radio"]').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    document.getElementById('fit-toggle').textContent = document.querySelector(`label[for="${e.target.id}"]`).textContent;
-                    updateGraph();
-                });
-            });
-
-            console.log('Plots:', plots);
-            console.log('Temp Targets:', tempTargets);
+            // Add event listeners to update the graph when selections change
+            plotSelect.addEventListener('change', updateGraph);
+            co2Select.addEventListener('change', updateGraph);
+            tempSelect.addEventListener('change', updateGraph);
+            document.getElementById('depth-select').addEventListener('change', updateGraph);
+            document.getElementById('view-select').addEventListener('change', updateGraph);
+            document.getElementById('fit-select').addEventListener('change', updateGraph);
         }
 
-        function populateSelectorsFallback() {
-            console.log('Populating selectors with fallback data');
-            const plots = [4]; // Example plot from CSV
-            const tempTargets = [4.5]; // Example temp target from CSV
+        // Update the graph based on selections
+        function updateGraph() {
+            const plotSelect = document.getElementById('plot-select').value;
+            const co2Select = document.getElementById('co2-select').value;
+            const tempSelect = document.getElementById('temp-select').value;
+            const depthSelect = document.getElementById('depth-select').value;
+            const viewSelect = document.getElementById('view-select').value;
+            const fitSelect = document.getElementById('fit-select').value;
+            const timeRange = document.getElementById('time-range').value.split(' to ');
 
-            const plotMenu = document.getElementById('plot-menu');
-            plotMenu.innerHTML = '';
-            plots.forEach(plot => {
-                const div = document.createElement('div');
-                div.className = 'dropdown-item';
-                const input = document.createElement('input');
-                input.type = 'checkbox';
-                input.id = `plot-${plot}`;
-                input.value = plot;
-                input.checked = true;
-                input.addEventListener('change', updateGraph);
-                const label = document.createElement('label');
-                label.htmlFor = `plot-${plot}`;
-                label.textContent = `Plot ${plot}`;
-                div.appendChild(input);
-                div.appendChild(label);
-                plotMenu.appendChild(div);
+            const startDate = timeRange[0] ? new Date(timeRange[0]) : null;
+            const endDate = timeRange[1] ? new Date(timeRange[1]) : new Date();
+
+            // Filter data based on selections
+            const filteredData = data.filter(row => {
+                const rowDate = new Date(row.TIMESTAMP);
+                return row.Plot === plotSelect &&
+                       row.CO2_trmt === co2Select &&
+                       row.Temp_target === tempSelect &&
+                       (!startDate || rowDate >= startDate) &&
+                       (!endDate || rowDate <= endDate);
             });
 
-            const co2Menu = document.getElementById('co2-menu');
-            co2Menu.querySelectorAll('input[type="checkbox"]').forEach(input => {
-                input.checked = true;
-                input.addEventListener('change', updateGraph);
-            });
+            console.log('Selections:', { plotSelect, co2Select, tempSelect, depthSelect, timeRange });
+            console.log('Filtered data (first 5):', filteredData.slice(0, 5));
 
-            const tempMenu = document.getElementById('temp-menu');
-            tempMenu.innerHTML = '';
-            tempTargets.forEach(temp => {
-                const div = document.createElement('div');
-                div.className = 'dropdown-item';
-                const input = document.createElement('input');
-                input.type = 'checkbox';
-                input.id = `temp-${temp}`;
-                input.value = temp;
-                input.checked = true;
-                input.addEventListener('change', updateGraph);
-                const label = document.createElement('label');
-                label.htmlFor = `temp-${temp}`;
-                label.textContent = `${temp} °C`;
-                div.appendChild(input);
-                div.appendChild(label);
-                tempMenu.appendChild(div);
-            });
-        }
-
-        function toggleDropdown(id) {
-            const allMenus = ['plot-menu', 'co2-menu', 'temp-menu', 'independent-menu', 'dependent-menu', 'time-range-menu', 'view-menu', 'fit-menu'];
-            allMenus.forEach(menuId => {
-                const menu = document.getElementById(menuId);
-                if (menuId !== id && menu.classList.contains('open')) {
-                    menu.classList.remove('open');
-                    menu.style.display = 'none';
-                }
-            });
-
-            const menu = document.getElementById(id);
-            if (menu.classList.contains('open')) {
-                menu.classList.remove('open');
-                menu.style.display = 'none';
-            } else {
-                menu.style.display = 'block';
-                menu.classList.add('open');
+            if (filteredData.length === 0) {
+                Plotly.newPlot('graph', [], { title: 'No data to plot after filtering' });
+                document.getElementById('stats').textContent = 'No data points available.';
+                return;
             }
-        }
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const graphContainer = document.getElementById('graph-container');
-            const toggle = document.getElementById('sidebar-toggle');
-            sidebar.classList.toggle('collapsed');
-            graphContainer.classList.toggle('full-width');
-            toggle.innerHTML = sidebar.classList.contains('collapsed') ? '<' : '>';
-            Plotly.Plots.resize(document.getElementById('graph'));
-            adjustTextSizes();
-        }
+            // Prepare data for plotting
+            const x = filteredData.map(row => parseFloat(row.Day_of_Year));
+            const y = filteredData.map(row => parseFloat(row[depthSelect]));
+            const timestamps = filteredData.map(row => row.TIMESTAMP);
 
-        function toggleMobileSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const graphContainer = document.getElementById('graph-container');
-            sidebar.classList.toggle('open');
-            sidebar.classList.toggle('collapsed');
-            graphContainer.classList.toggle('full-width');
-            Plotly.Plots.resize(document.getElementById('graph'));
-            adjustTextSizes();
-        }
+            // Remove any rows where x or y is NaN
+            const validData = x.map((val, i) => ({ x: val, y: y[i], timestamp: timestamps[i] }))
+                              .filter(d => !isNaN(d.x) && !isNaN(d.y));
 
-        function adjustTextSizes() {
-            const graphContainer = document.getElementById('graph-container');
-            const width = graphContainer.offsetWidth;
-            const height = graphContainer.offsetHeight;
-            const titleSize = Math.min(24, Math.max(12, width / 40));
-            const axisSize = Math.min(18, Math.max(10, Math.min(width, height) / 50));
-            return { titleSize, axisSize };
-        }
+            const validX = validData.map(d => d.x);
+            const validY = validData.map(d => d.y);
+            const validTimestamps = validData.map(d => d.timestamp);
 
-        function layoutConfig(title = 'Select Variables to Begin') {
-            const cleanTitle = title.replace(/_/g, ' ').replace('CO2', 'CO<sub>2</sub>');
-            const { titleSize, axisSize } = adjustTextSizes();
-            const addStats = document.getElementById('add-stats-to-chart')?.checked;
-            return {
-                plot_bgcolor: '#1A1A1A',
-                paper_bgcolor: '#1A1A1A',
-                font: { color: '#FFFFFF', family: 'Lato, sans-serif', size: 14 },
-                title: {
-                    text: addStats ? `${cleanTitle}<br><span style="color: #00FF00; font-family: 'VT323', monospace; font-size: 12px;">${statsText.replace(/<br>/g, ' ').replace('CO2', 'CO<sub>2</sub>')}</span>` : cleanTitle,
-                    font: { size: titleSize, color: '#00FFFF', family: 'Lato, sans-serif', weight: '700' },
-                    x: 0.5,
-                    xanchor: 'center',
-                    y: 0.97,
-                    yanchor: 'top',
-                    pad: { t: 20 },
-                    textShadow: '0 0 5px #00FFFF'
-                },
-                xaxis: { 
-                    gridcolor: '#333333', 
-                    automargin: true, 
-                    titlefont: { size: axisSize + 1, family: 'Lato, sans-serif' },
-                    tickfont: { size: axisSize + 1, family: 'Lato, sans-serif' }
-                },
-                yaxis: { 
-                    gridcolor: '#333333', 
-                    automargin: true, 
-                    titlefont: { size: axisSize + 1, family: 'Lato, sans-serif' },
-                    tickfont: { size: axisSize + 1, family: 'Lato, sans-serif' }
-                },
-                showlegend: false,
-                margin: { l: 60, r: 60, t: 120, b: 60 },
-                autosize: true
+            console.log('All data for regression - X:', validX);
+            console.log('Y:', validY);
+
+            // Create the main trace
+            const trace = {
+                x: validX,
+                y: validY,
+                mode: viewSelect === 'scatter' ? 'markers' : viewSelect === 'line' ? 'lines' : 'bars',
+                type: viewSelect === 'bar' ? 'bar' : 'scatter',
+                name: `${depthSelect} vs Day of Year`,
+                text: validTimestamps,
+                hovertemplate: `Day of Year: %{x}<br>${depthSelect}: %{y}°C<br>Timestamp: %{text}`
             };
+
+            const traces = [trace];
+
+            // Add regression fit if selected
+            let statsText = '';
+            if (fitSelect !== 'none' && validX.length >= 3) {
+                let fit;
+                if (fitSelect === 'linear') {
+                    fit = linearRegression(validX, validY);
+                    statsText = `Linear Fit: y = ${fit.slope.toFixed(2)}x + ${fit.intercept.toFixed(2)}`;
+                    traces.push({
+                        x: validX,
+                        y: validX.map(x => fit.slope * x + fit.intercept),
+                        mode: 'lines',
+                        name: 'Linear Fit',
+                        line: { color: 'red' }
+                    });
+                } else if (fitSelect === 'quadratic') {
+                    fit = quadraticRegression(validX, validY);
+                    statsText = `Quadratic Fit: y = ${fit.a.toFixed(2)}x² + ${fit.b.toFixed(2)}x + ${fit.c.toFixed(2)}`;
+                    traces.push({
+                        x: validX,
+                        y: validX.map(x => fit.a * x * x + fit.b * x + fit.c),
+                        mode: 'lines',
+                        name: 'Quadratic Fit',
+                        line: { color: 'red' }
+                    });
+                }
+            } else if (fitSelect !== 'none') {
+                statsText = 'Not enough data points for fit (need at least 3)';
+            }
+
+            console.log('Traces to plot:', traces.length > 0 ? traces : 'No traces generated');
+            console.log('Stats text:', statsText);
+
+            // Plot the graph
+            const layout = {
+                title: `Soil Temperature (${depthSelect}) vs Day of Year (Plot ${plotSelect}, CO2: ${co2Select}, Temp: ${tempSelect}°C)`,
+                xaxis: { title: 'Day of Year' },
+                yaxis: { title: 'Soil Temperature (°C)' }
+            };
+
+            Plotly.newPlot('graph', traces, layout);
+            document.getElementById('stats').textContent = statsText;
         }
 
+        // Linear regression
         function linearRegression(x, y) {
             const n = x.length;
-            if (n < 2) return { slope: NaN, intercept: NaN, r2: NaN };
             const sumX = x.reduce((a, b) => a + b, 0);
             const sumY = y.reduce((a, b) => a + b, 0);
             const sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
             const sumXX = x.map(xi => xi * xi).reduce((a, b) => a + b, 0);
-            const sumYY = y.map(yi => yi * yi).reduce((a, b) => a + b, 0);
+
             const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
             const intercept = (sumY - slope * sumX) / n;
-            const r2 = Math.pow((n * sumXY - sumX * sumY) / Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY)), 2);
-            return { slope, intercept, r2, type: 'linear' };
+
+            return { slope, intercept };
         }
 
+        // Quadratic regression
         function quadraticRegression(x, y) {
             const n = x.length;
-            if (n < 3) return { a: NaN, b: NaN, c: NaN, r2: NaN };
             const sumX = x.reduce((a, b) => a + b, 0);
+            const sumX2 = x.map(xi => xi * xi).reduce((a, b) => a + b, 0);
+            const sumX3 = x.map(xi => xi ** 3).reduce((a, b) => a + b, 0);
+            const sumX4 = x.map(xi => xi ** 4).reduce((a, b) => a + b, 0);
             const sumY = y.reduce((a, b) => a + b, 0);
-            const sumXX = x.reduce((a, b) => a + b * b, 0);
-            const sumXXX = x.reduce((a, b) => a + b * b * b, 0);
-            const sumXXXX = x.reduce((a, b) => a + b * b * b * b, 0);
-            const sumXY = x.reduce((a, b, i) => a + b * y[i], 0);
-            const sumXXY = x.reduce((a, b, i) => a + b * b * y[i], 0);
+            const sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
+            const sumX2Y = x.map((xi, i) => xi * xi * y[i]).reduce((a, b) => a + b, 0);
 
-            const denom = n * sumXX * sumXXXX - sumXX * sumXX + sumX * (sumXXX * sumX - sumXX * sumXXX);
-            const a = (n * (sumXXY * sumXX - sumXY * sumXXX) + sumX * (sumXY * sumXXXX - sumXXY * sumXXX)) / denom;
-            const b = (n * sumXXXX * sumXY - sumXX * sumXXY + sumX * (sumXX * sumXXY - sumXY * sumXXX)) / denom;
-            const c = (sumY * sumXX * sumXXXX - sumX * sumXXY * sumXXXX + sumXX * (sumXY * sumXXX - sumY * sumXXXX)) / denom;
+            const denom = n * sumX2 * sumX4 - sumX2 * sumX2 * sumX2 + 2 * sumX * sumX2 * sumX3 - n * sumX3 * sumX3 - sumX * sumX * sumX4;
+            const a = (n * sumX2 * sumX2Y + sumX * sumX3 * sumY + sumX2 * sumX * sumXY - sumX2 * sumX2 * sumY - n * sumX3 * sumXY - sumX * sumX2Y * sumX2) / denom;
+            const b = (n * sumX4 * sumXY + sumX2 * sumX2 * sumY + sumX * sumX2Y * sumX2 - sumX2 * sumX3 * sumY - n * sumX2 * sumX2Y - sumX * sumX4 * sumY) / denom;
+            const c = (sumX2 * sumX4 * sumY + sumX3 * sumX2 * sumXY + sumX * sumX2Y * sumX3 - sumX2 * sumX2 * sumX2Y - sumX * sumX4 * sumXY - sumX3 * sumX3 * sumY) / denom;
 
-            const yMean = sumY / n;
-            const ssTot = y.reduce((a, b) => a + (b - yMean) ** 2, 0);
-            const yPred = x.map(xi => a * xi * xi + b * xi + c);
-            const ssRes = y.reduce((a, b, i) => a + (b - yPred[i]) ** 2, 0);
-            const r2 = 1 - ssRes / ssTot;
-
-            return { a, b, c, r2, type: 'quadratic' };
+            return { a, b, c };
         }
-
-        function bestFitCurve(x, y, fitType = 'auto') {
-            console.log('Fitting curve - X:', x, 'Y:', y, 'Fit Type:', fitType);
-            const fits = {};
-            fits.linear = linearRegression(x, y);
-            fits.quadratic = quadraticRegression(x, y);
-
-            if (fitType !== 'auto') {
-                console.log(`Forced ${fitType} fit:`, fits[fitType]);
-                return fits[fitType];
-            }
-
-            const validFits = Object.values(fits).filter(f => !isNaN(f.r2));
-            if (validFits.length === 0) return { type: 'none', r2: NaN };
-            const bestFit = validFits.reduce((prev, curr) => curr.r2 > prev.r2 ? curr : prev);
-            console.log('Best fit selected:', bestFit);
-            return bestFit;
-        }
-
-        function updateGraph() {
-            console.log('Updating graph');
-            const plots = Array.from(document.getElementById('plot-menu').querySelectorAll('input:checked')).map(input => input.value);
-            const co2Levels = Array.from(document.getElementById('co2-menu').querySelectorAll('input:checked')).map(input => input.value);
-            const tempTargets = Array.from(document.getElementById('temp-menu').querySelectorAll('input:checked')).map(input => input.value);
-            const independent = document.querySelector('#independent-menu input:checked').value;
-            const dependent = document.querySelector('#dependent-menu input:checked').value;
-            const view = document.querySelector('#view-menu input:checked').value;
-            const fitType = document.querySelector('#fit-menu input:checked').value;
-
-            console.log('Selections:', { plots, co2Levels, tempTargets, independent, dependent, view, fitType });
-
-            let filteredData = data;
-            if (plots.length > 0) filteredData = filteredData.filter(row => plots.includes(row.Plot));
-            if (co2Levels.length > 0) filteredData = filteredData.filter(row => co2Levels.includes(String(row.CO2_trmt)));
-            if (tempTargets.length > 0) filteredData = filteredData.filter(row => tempTargets.includes(row.Temp_target));
-            if (startDate || endDate) {
-                filteredData = filteredData.filter(row => {
-                    if (!row.TIMESTAMP) return true;
-                    const rowDate = new Date(row.TIMESTAMP);
-                    return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= endDate);
-                });
-            }
-
-            console.log('Filtered data (first 5):', filteredData.slice(0, 5));
-            let traces = [];
-            let layout = layoutConfig(`${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}`);
-
-            if (view === 'scatter' || view === 'line') {
-                const plots = [...new Set(filteredData.map(row => row.Plot))];
-                plots.forEach(plot => {
-                    const plotData = filteredData.filter(row => row.Plot === plot);
-                    const co2Level = plotData[0]?.CO2_trmt || 'Unknown';
-                    const x = plotData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
-                    const y = plotData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-                    console.log(`Plot ${plot}: X=${x}, Y=${y}`);
-                    if (x.length > 0 && y.length > 0) {
-                        traces.push({
-                            x: x,
-                            y: y,
-                            mode: view === 'scatter' ? 'markers' : 'lines+markers',
-                            name: `Plot ${plot}`,
-                            marker: { size: 12, color: conditionColors[co2Level] || '#FFFFFF', line: { width: 2, color: '#FFFFFF' } },
-                            line: view === 'line' ? { color: conditionColors[co2Level] || '#FFFFFF', width: 2 } : undefined
-                        });
-                    }
-                });
-
-                const allX = filteredData.map(row => row[independent] !== undefined ? parseFloat(row[independent]) : NaN).filter(v => !isNaN(v));
-                const allY = filteredData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-                console.log('All data for regression - X:', allX, 'Y:', allY);
-                statsText = '';
-                if (allX.length >= 3 && allX.length === allY.length) {
-                    const fit = bestFitCurve(allX, allY, fitType);
-                    const xRange = Array.from({ length: 100 }, (_, i) => Math.min(...allX) + i * (Math.max(...allX) - Math.min(...allX)) / 99);
-                    if (fit.type === 'linear' && !isNaN(fit.slope) && !isNaN(fit.intercept)) {
-                        traces.push({
-                            x: xRange,
-                            y: xRange.map(xi => fit.slope * xi + fit.intercept),
-                            mode: 'lines',
-                            name: 'Linear Fit',
-                            line: { color: '#FF00FF', width: 2, dash: 'solid' }
-                        });
-                        statsText = `Linear Fit: y = ${fit.slope.toFixed(2)}x + ${fit.intercept.toFixed(2)}, R² = ${fit.r2.toFixed(3)}, Points: ${allX.length}`;
-                    } else if (fit.type === 'quadratic' && !isNaN(fit.a) && !isNaN(fit.b) && !isNaN(fit.c)) {
-                        traces.push({
-                            x: xRange,
-                            y: xRange.map(xi => fit.a * xi * xi + fit.b * xi + fit.c),
-                            mode: 'lines',
-                            name: 'Quadratic Fit',
-                            line: { color: '#FF00FF', width: 2, dash: 'dash' }
-                        });
-                        statsText = `Quadratic Fit: y = ${fit.a.toFixed(3)}x² + ${fit.b.toFixed(2)}x + ${fit.c.toFixed(2)}, R² = ${fit.r2.toFixed(3)}, Points: ${allX.length}`;
-                    } else {
-                        statsText = 'Fit failed - insufficient valid data';
-                    }
-                } else {
-                    statsText = 'Not enough data points for fit (need at least 3)';
-                }
-                console.log('Stats text:', statsText);
-                document.getElementById('stats-content').innerHTML = statsText;
-
-                layout.xaxis.title = `${independent.replace(/_/g, ' ').replace('CO2', 'CO<sub>2</sub>')} (${units[independent] || ''})`;
-                layout.yaxis.title = `${dependent.replace(/_/g, ' ').replace('CO2', 'CO<sub>2</sub>')} (${units[dependent] || ''})`;
-            } else if (view === 'bar') {
-                const plots = [...new Set(filteredData.map(row => row.Plot))];
-                const x = plots;
-                const y = plots.map(plot => {
-                    const plotData = filteredData.filter(row => row.Plot === plot);
-                    const values = plotData.map(row => row[dependent] !== undefined ? parseFloat(row[dependent]) : NaN).filter(v => !isNaN(v));
-                    return values.length ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
-                });
-                const co2Levels = plots.map(plot => filteredData.find(row => row.Plot === plot)?.CO2_trmt || 'Unknown');
-                traces.push({
-                    x: x,
-                    y: y,
-                    type: 'bar',
-                    marker: {
-                        color: co2Levels.map(dt => conditionColors[dt] || '#FFFFFF'),
-                        line: { width: 2, color: '#FFFFFF' }
-                    }
-                });
-                layout.xaxis.title = 'Plot';
-                layout.yaxis.title = `${dependent.replace(/_/g, ' ').replace('CO2', 'CO<sub>2</sub>')} (${units[dependent] || ''})`;
-                document.getElementById('stats-content').innerHTML = '';
-            }
-
-            console.log('Traces to plot:', traces);
-            if (traces.length === 0) {
-                console.warn('No traces generated');
-                Plotly.newPlot('graph', [], layoutConfig('No data to plot after filtering'));
-                return;
-            }
-            Plotly.newPlot('graph', traces, layout, { responsive: true })
-                .then(() => console.log('Plot rendered successfully'))
-                .catch(err => console.error('Plotly error:', err));
-        }
-
-        document.getElementById('plot-toggle').addEventListener('click', () => toggleDropdown('plot-menu'));
-        document.getElementById('co2-toggle').addEventListener('click', () => toggleDropdown('co2-menu'));
-        document.getElementById('temp-toggle').addEventListener('click', () => toggleDropdown('temp-menu'));
-        document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
-        document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
-        document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
-        document.getElementById('view-toggle').addEventListener('click', () => toggleDropdown('view-menu'));
-        document.getElementById('fit-toggle').addEventListener('click', () => toggleDropdown('fit-menu'));
-        document.getElementById('stats-toggle').addEventListener('click', () => {
-            const statsPanel = document.getElementById('stats-panel');
-            if (statsPanel.classList.contains('open')) {
-                statsPanel.classList.remove('open');
-                statsPanel.classList.add('collapsed');
-                statsPanel.style.display = 'none';
-                document.getElementById('stats-toggle').textContent = 'Show Stats';
-            } else {
-                statsPanel.classList.remove('collapsed');
-                statsPanel.classList.add('open');
-                statsPanel.style.display = 'block';
-                document.getElementById('stats-toggle').textContent = 'Hide Stats';
-            }
-        });
-
-        document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
-        document.getElementById('mobile-toggle').addEventListener('click', toggleMobileSidebar);
-
-        document.getElementById('add-stats-to-chart')?.addEventListener('change', () => {
-            updateGraph();
-        });
-
-        const startPicker = flatpickr("#start-date-input", {
-            dateFormat: "m/d/Y",
-            onChange: function(selectedDates, dateStr) {
-                startDate = selectedDates[0];
-                document.getElementById('time-range-toggle').textContent = 
-                    `${startDate ? startDate.toLocaleDateString('en-US') : 'Start'} - ${endDate ? endDate.toLocaleDateString('en-US') : 'End'}`;
-                updateGraph();
-            }
-        });
-
-        const endPicker = flatpickr("#end-date-input", {
-            dateFormat: "m/d/Y",
-            onChange: function(selectedDates, dateStr) {
-                endDate = selectedDates[0];
-                document.getElementById('time-range-toggle').textContent = 
-                    `${startDate ? startDate.toLocaleDateString('en-US') : 'Start'} - ${endDate ? endDate.toLocaleDateString('en-US') : 'End'}`;
-                updateGraph();
-            }
-        });
-
-        document.querySelectorAll('#start-date-input, #end-date-input').forEach(input => {
-            input.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const picker = this._flatpickr;
-                    const dateStr = this.value;
-                    picker.setDate(dateStr, true);
-                    picker.close();
-                    if (this.id === 'start-date-input') {
-                        startDate = picker.selectedDates[0];
-                    } else {
-                        endDate = picker.selectedDates[0];
-                    }
-                    document.getElementById('time-range-toggle').textContent = 
-                        `${startDate ? startDate.toLocaleDateString('en-US') : 'Start'} - ${endDate ? endDate.toLocaleDateString('en-US') : 'End'}`;
-                    updateGraph();
-                }
-            });
-        });
-
-        window.addEventListener('resize', () => {
-            Plotly.Plots.resize(document.getElementById('graph'));
-            adjustTextSizes();
-            updateGraph();
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            adjustTextSizes();
-        });
     </script>
 </body>
 </html>
