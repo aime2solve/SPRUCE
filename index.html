@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPRUCE Project Dashboard</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
+            background-color: #f0f0f0;
         }
         .sidebar {
             width: 250px;
@@ -22,6 +23,7 @@
             height: 100vh;
             overflow-y: auto;
             position: fixed;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
         }
         .main-content {
             margin-left: 270px;
@@ -31,30 +33,40 @@
         .sidebar h2 {
             font-size: 1.5em;
             margin-bottom: 20px;
+            color: #333;
         }
         .sidebar label {
             display: block;
             margin: 10px 0 5px;
             font-weight: bold;
+            color: #555;
         }
         .sidebar select, .sidebar input {
             width: 100%;
             padding: 5px;
             margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
         }
         #graph {
             width: 100%;
             height: 500px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         #stats {
             margin-top: 20px;
             padding: 10px;
             background-color: #e8e8e8;
             border-radius: 5px;
+            color: #333;
         }
         #error-message {
             color: red;
             margin-top: 10px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -117,6 +129,7 @@
             mode: "range",
             dateFormat: "Y-m-d",
             defaultDate: ["2014-01-01", "2014-12-31"],
+            enableTime: false,
             onChange: updateGraph
         });
 
@@ -138,7 +151,7 @@
                             return;
                         }
                         data = results.data;
-                        console.log('Loaded data:', data.slice(0, 5)); // Log first 5 rows for debugging
+                        console.log('Loaded data:', data.slice(0, 5));
                         populateDropdowns();
                         updateGraph();
                     }
@@ -154,9 +167,9 @@
             const co2Select = document.getElementById('co2-select');
             const tempSelect = document.getElementById('temp-select');
 
-            const plots = [...new Set(data.map(row => row.Plot))].sort();
-            const co2s = [...new Set(data.map(row => row.CO2_trmt))].sort();
-            const temps = [...new Set(data.map(row => row.Temp_target))].sort();
+            const plots = [...new Set(data.map(row => row.Plot))].filter(p => p).sort();
+            const co2s = [...new Set(data.map(row => row.CO2_trmt))].filter(c => c).sort();
+            const temps = [...new Set(data.map(row => row.Temp_target))].filter(t => t).sort();
 
             plots.forEach(plot => {
                 const option = document.createElement('option');
@@ -179,7 +192,6 @@
                 tempSelect.appendChild(option);
             });
 
-            // Add event listeners to update the graph when selections change
             plotSelect.addEventListener('change', updateGraph);
             co2Select.addEventListener('change', updateGraph);
             tempSelect.addEventListener('change', updateGraph);
@@ -198,8 +210,8 @@
             const fitSelect = document.getElementById('fit-select').value;
             const timeRange = document.getElementById('time-range').value.split(' to ');
 
-            const startDate = timeRange[0] ? new Date(timeRange[0]) : null;
-            const endDate = timeRange[1] ? new Date(timeRange[1]) : new Date();
+            const startDate = timeRange[0] ? new Date(timeRange[0]) : new Date('2014-01-01');
+            const endDate = timeRange[1] ? new Date(timeRange[1]) : new Date('2014-12-31');
 
             // Filter data based on selections
             const filteredData = data.filter(row => {
@@ -207,8 +219,8 @@
                 return row.Plot === plotSelect &&
                        row.CO2_trmt === co2Select &&
                        row.Temp_target === tempSelect &&
-                       (!startDate || rowDate >= startDate) &&
-                       (!endDate || rowDate <= endDate);
+                       rowDate >= startDate &&
+                       rowDate <= endDate;
             });
 
             console.log('Selections:', { plotSelect, co2Select, tempSelect, depthSelect, timeRange });
@@ -221,11 +233,19 @@
             }
 
             // Prepare data for plotting
-            const x = filteredData.map(row => parseFloat(row.Day_of_Year));
-            const y = filteredData.map(row => parseFloat(row[depthSelect]));
+            const x = filteredData.map(row => {
+                const val = parseFloat(row.Day_of_Year);
+                console.log('Parsing Day_of_Year:', row.Day_of_Year, '->', val);
+                return val;
+            });
+            const y = filteredData.map(row => {
+                const val = parseFloat(row[depthSelect]);
+                console.log('Parsing', depthSelect, ':', row[depthSelect], '->', val);
+                return val;
+            });
             const timestamps = filteredData.map(row => row.TIMESTAMP);
 
-            // Remove any rows where x or y is NaN
+            // Remove rows where x or y is NaN
             const validData = x.map((val, i) => ({ x: val, y: y[i], timestamp: timestamps[i] }))
                               .filter(d => !isNaN(d.x) && !isNaN(d.y));
 
@@ -235,6 +255,12 @@
 
             console.log('All data for regression - X:', validX);
             console.log('Y:', validY);
+
+            if (validX.length === 0) {
+                Plotly.newPlot('graph', [], { title: 'No valid data points to plot (check for missing or invalid values)' });
+                document.getElementById('stats').textContent = 'No valid data points available.';
+                return;
+            }
 
             // Create the main trace
             const trace = {
@@ -278,17 +304,21 @@
                 statsText = 'Not enough data points for fit (need at least 3)';
             }
 
-            console.log('Traces to plot:', traces.length > 0 ? traces : 'No traces generated');
+            console.log('Traces to plot:', traces);
             console.log('Stats text:', statsText);
 
             // Plot the graph
             const layout = {
                 title: `Soil Temperature (${depthSelect}) vs Day of Year (Plot ${plotSelect}, CO2: ${co2Select}, Temp: ${tempSelect}°C)`,
                 xaxis: { title: 'Day of Year' },
-                yaxis: { title: 'Soil Temperature (°C)' }
+                yaxis: { title: 'Soil Temperature (°C)' },
+                margin: { t: 50, b: 50, l: 50, r: 50 }
             };
 
-            Plotly.newPlot('graph', traces, layout);
+            Plotly.newPlot('graph', traces, layout).catch(err => {
+                console.error('Plotly rendering error:', err);
+                document.getElementById('graph').innerHTML = 'Error rendering graph. Please check the console for details.';
+            });
             document.getElementById('stats').textContent = statsText;
         }
 
