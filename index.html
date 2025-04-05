@@ -23,18 +23,19 @@
         h1 { 
             color: #00FFFF; 
             text-align: center; 
-            padding: 1vh; /* Reduced padding to bump sidebar up */
+            padding: 1vh; 
             font-family: 'Orbitron', sans-serif; 
             font-size: calc(16px + 1.5vw); 
             margin: 0; 
             text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; 
             flex-shrink: 0; 
+            z-index: 11; /* Ensure title is above sidebar */
         }
         .container { 
             display: flex; 
             flex-grow: 1; 
             overflow: hidden; 
-            height: calc(100vh - 2vh); /* Adjusted to match reduced header */
+            height: calc(100vh - 2vh); 
         }
         .sidebar { 
             width: 250px; 
@@ -44,16 +45,16 @@
             display: flex; 
             flex-direction: column; 
             gap: 15px; 
-            position: fixed; 
-            top: 2vh; /* Bumped up to align with reduced header */
-            height: calc(100vh - 2vh); 
+            position: absolute; 
+            top: 80px; /* Below title and Plotly toolbar (~40px + buffer) */
+            height: calc(100vh - 90px); /* Adjusted to fit below chart top */
             transition: transform 0.3s ease; 
             z-index: 10; 
         }
         .sidebar.collapsed { transform: translateX(-230px); }
         .sidebar-tab { 
             position: absolute; 
-            top: 0; /* Aligned with top of sidebar */
+            top: 0; 
             right: -40px; 
             width: 40px; 
             height: 40px; 
@@ -75,7 +76,7 @@
             text-align: center; 
             text-shadow: 0 0 10px #DAA520; 
             line-height: 1.2; 
-            margin-top: 0; /* Removed margin to bump up */
+            margin-top: 0; 
         }
         .sidebar-title span { display: block; font-size: 14px; }
         .button-container { display: flex; align-items: center; width: 100%; position: relative; }
@@ -112,7 +113,7 @@
         }
         .dropdown-menu.open { max-height: 200px; visibility: visible; }
         .dropdown-item { display: flex; align-items: center; margin-bottom: 3px; }
-        #dependent-menu .dropdown-item label { margin-left: 5px; }
+        #dependent-menu .dropdown-item label, #independent-menu .dropdown-item label { margin-left: 5px; }
         #condition-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 8px; }
         #stats-menu #stats-content { color: #00FF00; font-family: 'VT323', monospace; font-size: 12px; }
         #time-range-menu { padding: 10px; }
@@ -130,7 +131,7 @@
             flex-grow: 1; 
             margin-left: 250px; 
             background-color: #1A1A1A; 
-            height: calc(100vh - 2vh); /* Adjusted to fit viewable area */
+            height: calc(100vh - 2vh); 
             transition: margin-left 0.3s ease; 
             position: relative; 
             z-index: 1; 
@@ -163,36 +164,6 @@
         <div class="sidebar" id="sidebar">
             <div class="sidebar-tab" id="sidebar-tab"><</div>
             <div class="sidebar-title">SPRUCE<br><span>Data Explorer</span></div>
-            <div class="button-container">
-                <span class="button-label">Independent:</span>
-                <div class="dropdown-toggle" id="independent-toggle">Target Temperature (°C)</div>
-                <div class="dropdown-menu" id="independent-menu">
-                    <div class="dropdown-item"><input type="checkbox" id="Temp_target" value="Temp_target" checked><label for="Temp_target">Target Temperature (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="CO2_trmt" value="CO2_trmt"><label for="CO2_trmt">CO₂ Treatment (ppm)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TIMESTAMP" value="TIMESTAMP"><label for="TIMESTAMP">Time</label></div>
-                </div>
-            </div>
-            <div class="button-container">
-                <span class="button-label">Dependent:</span>
-                <div class="dropdown-toggle" id="dependent-toggle">Select Dependent</div>
-                <div class="dropdown-menu" id="dependent-menu">
-                    <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0"><label for="TS_0" style="color: #00FFFF;">Soil Temp 0 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_5" value="TS_5"><label for="TS_5" style="color: #FFFF00;">Soil Temp 5 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_10" value="TS_10"><label for="TS_10" style="color: #FF00FF;">Soil Temp 10 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_20" value="TS_20"><label for="TS_20" style="color: #00FF00;">Soil Temp 20 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_30" value="TS_30"><label for="TS_30" style="color: #FF0000;">Soil Temp 30 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_40" value="TS_40"><label for="TS_40" style="color: #0000FF;">Soil Temp 40 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_50" value="TS_50"><label for="TS_50" style="color: #FFA500;">Soil Temp 50 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_100" value="TS_100"><label for="TS_100" style="color: #800080;">Soil Temp 100 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_200" value="TS_200"><label for="TS_200" style="color: #008080;">Soil Temp 200 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0" value="TA_2_0"><label for="TA_2_0" style="color: #FF6347;">Ambient Temp 2m (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0" style="color: #4682B4;">Relative Humidity 2m (%)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="WS_10" value="WS_10"><label for="WS_10" style="color: #FFD700;">Wind Speed 10m (m/s)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10" style="color: #6A5ACD;">Wind Direction 10m (°)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2" style="color: #20B2AA;">PAR (µmol/m²s)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6" style="color: #DAA520;">Precipitation (mm)</label></div>
-                </div>
-            </div>
             <div class="button-container">
                 <span class="button-label">Conditions:</span>
                 <div class="dropdown-toggle" id="condition-toggle">Select Conditions</div>
@@ -230,21 +201,47 @@
                 </div>
             </div>
             <div class="button-container">
+                <span class="button-label">X-Axis:</span>
+                <div class="dropdown-toggle" id="independent-toggle">Target Temperature (°C)</div>
+                <div class="dropdown-menu" id="independent-menu">
+                    <div class="dropdown-item"><input type="checkbox" id="Temp_target" value="Temp_target" checked><label for="Temp_target">Target Temperature (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="CO2_trmt" value="CO2_trmt"><label for="CO2_trmt">CO₂ Treatment (ppm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TIMESTAMP" value="TIMESTAMP"><label for="TIMESTAMP">Time</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0" value="TA_2_0"><label for="TA_2_0">Ambient Temp 2m (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0">Relative Humidity 2m (%)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WS_10" value="WS_10"><label for="WS_10">Wind Speed 10m (m/s)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction 10m (°)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
+                </div>
+            </div>
+            <div class="button-container">
+                <span class="button-label">Y-Axis:</span>
+                <div class="dropdown-toggle" id="dependent-toggle">Select Dependent</div>
+                <div class="dropdown-menu" id="dependent-menu">
+                    <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0"><label for="TS_0" style="color: #00FFFF;">Soil Temp 0 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_5" value="TS_5"><label for="TS_5" style="color: #FFFF00;">Soil Temp 5 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_10" value="TS_10"><label for="TS_10" style="color: #FF00FF;">Soil Temp 10 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_20" value="TS_20"><label for="TS_20" style="color: #00FF00;">Soil Temp 20 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_30" value="TS_30"><label for="TS_30" style="color: #FF0000;">Soil Temp 30 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_40" value="TS_40"><label for="TS_40" style="color: #0000FF;">Soil Temp 40 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_50" value="TS_50"><label for="TS_50" style="color: #FFA500;">Soil Temp 50 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_100" value="TS_100"><label for="TS_100" style="color: #800080;">Soil Temp 100 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_200" value="TS_200"><label for="TS_200" style="color: #008080;">Soil Temp 200 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0_dep" value="TA_2_0"><label for="TA_2_0_dep" style="color: #FF6347;">Ambient Temp 2m (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0_dep" value="RH_2_0"><label for="RH_2_0_dep" style="color: #4682B4;">Relative Humidity 2m (%)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WS_10_dep" value="WS_10"><label for="WS_10_dep" style="color: #FFD700;">Wind Speed 10m (m/s)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10_dep" value="WD_10"><label for="WD_10_dep" style="color: #6A5ACD;">Wind Direction 10m (°)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PAR_2_dep" value="PAR_2"><label for="PAR_2_dep" style="color: #20B2AA;">PAR (µmol/m²s)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PREC_6"><label for="PREC_6_dep" style="color: #DAA520;">Precipitation (mm)</label></div>
+                </div>
+            </div>
+            <div class="button-container">
                 <span class="button-label">Time Range:</span>
                 <div class="dropdown-toggle" id="time-range-toggle">2016-01-01 - 2025-04-05</div>
                 <div class="dropdown-menu" id="time-range-menu">
                     <div class="dropdown-item"><label for="start-date">Start Date:</label><input type="text" id="start-date" value="2016-01-01"></div>
                     <div class="dropdown-item"><label for="end-date">End Date:</label><input type="text" id="end-date" value="2025-04-05"></div>
-                </div>
-            </div>
-            <div class="button-container">
-                <span class="button-label">Stats:</span>
-                <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
-                <div class="dropdown-menu" id="stats-menu">
-                    <div id="stats-content"></div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="show-fit" checked><label for="show-fit">Show Fit & Stats on Chart</label>
-                    </div>
                 </div>
             </div>
             <div class="button-container">
@@ -256,6 +253,16 @@
                     <div class="dropdown-item"><input type="radio" name="chart-type" id="bar" value="bar"><label for="bar">Bar</label></div>
                     <div class="dropdown-item"><input type="radio" name="chart-type" id="area" value="area"><label for="area">Area</label></div>
                     <div class="dropdown-item"><input type="radio" name="chart-type" id="box" value="box"><label for="box">Box</label></div>
+                </div>
+            </div>
+            <div class="button-container">
+                <span class="button-label">Stats:</span>
+                <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
+                <div class="dropdown-menu" id="stats-menu">
+                    <div id="stats-content"></div>
+                    <div class="dropdown-item">
+                        <input type="checkbox" id="show-fit" checked><label for="show-fit">Show Fit & Stats on Chart</label>
+                    </div>
                 </div>
             </div>
             <div class="button-container">
@@ -300,6 +307,7 @@
                     row.TIMESTAMP = new Date(row.TIMESTAMP);
                     return !isNaN(row.TIMESTAMP);
                 });
+                console.log('Loaded data sample:', allData.slice(0, 5));
                 dataLoaded = true;
                 updateGraph();
             } catch (error) {
@@ -333,6 +341,7 @@
         }
 
         function filterByConditions(data, conditions) {
+            if (!conditions.length) return data;
             const selectedConditions = conditions.map(c => conditionMap[c]);
             return data.filter(row => {
                 return selectedConditions.some(cond => 
@@ -344,8 +353,9 @@
         }
 
         function calculateRegression(x, y) {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] }));
-            const yValues = y.slice().sort((a, b) => a - b);
+            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => d.y !== null && !isNaN(d.y));
+            if (pairedData.length < 2) return { slope: NaN, intercept: NaN, rSquared: NaN };
+            const yValues = pairedData.map(d => d.y).sort((a, b) => a - b);
             const q1 = yValues[Math.floor(yValues.length * 0.25)];
             const q3 = yValues[Math.floor(yValues.length * 0.75)];
             const iqr = q3 - q1;
@@ -447,7 +457,17 @@
             const chartType = document.querySelector('#chart-type-menu input:checked').value;
             const showFit = document.getElementById('show-fit').checked;
 
+            if (!dependents.length) {
+                document.getElementById('graph').innerHTML = 'Please select at least one dependent variable.';
+                return;
+            }
+
             let workingData = filterByConditions(allData, conditions);
+            if (!workingData.length) {
+                document.getElementById('graph').innerHTML = 'No data matches the selected conditions.';
+                return;
+            }
+
             if (startDate || endDate) {
                 workingData = workingData.filter(row => {
                     const rowDate = row.TIMESTAMP;
@@ -460,26 +480,33 @@
                 workingData = getWeeklyTimestamps(workingData, startDate, endDate);
             }
 
+            console.log('Filtered and aggregated data sample:', workingData.slice(0, 5));
+
             const traces = [];
             const fitTraces = [];
             dependents.forEach((dep, i) => {
                 const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : row[independent]).filter(v => v !== undefined && v !== null);
                 const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
 
+                if (xValues.length === 0 || yValues.length === 0) {
+                    console.log(`No valid data for ${dep} vs ${independent}`);
+                    return;
+                }
+
                 traces.push({
                     x: xValues,
                     y: yValues,
                     mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
                     type: chartType === 'scatter' ? 'scattergl' : chartType === 'area' ? 'scattergl' : chartType,
-                    name: document.querySelector(`label[for="${dep}"]`)?.textContent || dep,
+                    name: document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep,
                     marker: { color: colors[i % colors.length], size: 8 },
                     line: (chartType === 'line' || chartType === 'area') ? { color: colors[i % colors.length], width: 2 } : undefined,
                     fill: chartType === 'area' ? 'tozeroy' : undefined
                 });
 
-                if (showFit) {
+                if (showFit && xValues.length > 1) {
                     const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
-                    const { slope, intercept } = calculateRegression(xNum, yValues);
+                    const { slope, intercept, rSquared } = calculateRegression(xNum, yValues);
                     if (!isNaN(slope) && !isNaN(intercept)) {
                         const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Math.max(...xNum)];
                         const yFit = xFit.map(x => slope * (independent === 'TIMESTAMP' ? x.getTime() : x) + intercept);
@@ -488,14 +515,14 @@
                             y: yFit,
                             mode: 'lines',
                             type: 'scattergl',
-                            name: `${document.querySelector(`label[for="${dep}"]`)?.textContent || dep} (fit)`,
+                            name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (fit)`,
                             line: { color: colors[i % colors.length], width: 2, dash: 'dash' }
                         });
                     }
                 }
             });
 
-            if (!traces.some(trace => trace.x.length > 0 && trace.y.length > 0)) {
+            if (!traces.length) {
                 document.getElementById('graph').innerHTML = 'No plottable data for selected variables.';
                 return;
             }
@@ -505,7 +532,7 @@
                 const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
                 if (yValues.length > 0) {
                     const { slope, rSquared } = calculateRegression(xValues, yValues);
-                    return `${document.querySelector(`label[for="${dep}"]`)?.textContent || dep}: Slope: ${slope.toFixed(4)}, R²: ${rSquared.toFixed(4)}`;
+                    return `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Slope: ${slope.toFixed(4)}, R²: ${rSquared.toFixed(4)}`;
                 }
                 return `${dep}: No valid data points`;
             }).join('<br>');
@@ -513,8 +540,9 @@
 
             const xAxisTitle = independent === 'CO2_trmt' ? 'CO₂ Treatment (ppm)' : 
                               independent === 'TIMESTAMP' ? 'Time' : 
-                              'Target Temperature (°C)';
-            const yAxisTitle = dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"]`)?.textContent || 'Measurements' : 'Measurements';
+                              independent === 'Temp_target' ? 'Target Temperature (°C)' :
+                              document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
+            const yAxisTitle = dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || 'Measurements' : 'Measurements';
 
             const annotations = showFit ? dependents.map((dep, i) => {
                 const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : row[independent]).filter(v => v !== undefined && v !== null);
@@ -526,7 +554,7 @@
                         y: 1 - (i * 0.05),
                         xref: 'paper',
                         yref: 'paper',
-                        text: `${document.querySelector(`label[for="${dep}"]`)?.textContent || dep}: Slope: ${slope.toFixed(4)}, R²: ${rSquared.toFixed(4)}`,
+                        text: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Slope: ${slope.toFixed(4)}, R²: ${rSquared.toFixed(4)}`,
                         showarrow: false,
                         font: { color: '#00FF00', family: 'VT323, monospace', size: 12 }
                     };
@@ -561,19 +589,25 @@
                     zerolinecolor: '#444',
                     automargin: true
                 },
-                margin: { t: 80, b: 60, l: 100, r: 40 }, // Adjusted bottom margin
+                margin: { t: 80, b: 60, l: 100, r: 40 },
                 showlegend: legendVisible,
                 legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.8)' },
                 annotations: annotations
             };
 
-            Plotly.newPlot('graph', showFit ? traces.concat(fitTraces) : traces, layout).catch(err => console.error('Plotly error:', err));
+            console.log('Traces:', traces);
+            console.log('Layout:', layout);
+
+            Plotly.newPlot('graph', showFit ? traces.concat(fitTraces) : traces, layout).catch(err => {
+                console.error('Plotly error:', err);
+                document.getElementById('graph').innerHTML = 'Error rendering plot.';
+            });
         }
 
         document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
+        document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
         document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
         document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
-        document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
         document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
         document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
         document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
