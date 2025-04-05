@@ -6,7 +6,7 @@
     <title>SPRUCE Soil Temperature Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://unpkg.com/@observablehq/plot@0.6.13/dist/plot.umd.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/dist/plot.umd.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
         body, html {
@@ -115,7 +115,7 @@
             width: calc(100% - 120px);
             max-height: 0;
             overflow-y: auto;
-            background: rgba(26, 26, 26, 0.85);
+            background: rgba(26, 26, 26, 0.9); /* Less transparent */
             border: 2px solid #00FFFF;
             border-radius: 10px;
             color: #00FFFF;
@@ -218,7 +218,7 @@
                     <div class="dropdown-item"><input type="checkbox" id="Temp_target" value="Temp_target"><label for="Temp_target">Target Temperature (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="CO2_trmt" value="CO2_trmt"><label for="CO2_trmt">CO₂ Treatment (ppm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WS_10" value="WS_10"><label for="WS_10">Wind Speed (m/s)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction (°)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WS_10"><label for="WD_10">Wind Direction (°)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
                 </div>
@@ -415,7 +415,7 @@
                 console.error('Plot object not available - library issue');
                 document.getElementById('graph').innerHTML = 'Plotting library not loaded';
                 const script = document.createElement('script');
-                script.src = 'https://unpkg.com/@observablehq/plot@0.6.13/dist/plot.umd.min.js';
+                script.src = 'https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/dist/plot.umd.min.js';
                 script.onload = () => {
                     console.log('Plot library reloaded:', window.Plot, 'plot method:', window.Plot ? window.Plot.plot : 'undefined');
                     if (window.Plot && typeof window.Plot.plot === 'function') updateGraph();
