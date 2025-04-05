@@ -6,7 +6,7 @@
     <title>Comparative Biospheromics</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Merriweather:wght@700&family=Exo+2:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="./plot.umd.min.js" defer></script>
+    <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
         body, html {
@@ -23,186 +23,41 @@
         h1 {
             color: #00FFFF;
             text-align: center;
-            text-shadow: 0 0 5px #00CC66, 0 0 10px #00CC66; /* Mellow shadow */
+            text-shadow: 0 0 3px #00CC66;
             padding: 3vh;
             font-family: 'Orbitron', sans-serif;
             font-size: calc(18px + 2vw);
             margin: 0;
-            animation: mellowPulse 3s infinite alternate; /* Slower, subtler pulse */
+            animation: faintPulse 5s infinite alternate;
         }
-        @keyframes mellowPulse {
-            0% { text-shadow: 0 0 5px #00CC66, 0 0 10px #00CC66; }
-            100% { text-shadow: 0 0 10px #00FFFF, 0 0 15px #00CC66; } /* Toned down */
+        @keyframes faintPulse {
+            0% { text-shadow: 0 0 3px #00CC66; }
+            100% { text-shadow: 0 0 5px #00FFFF; }
         }
-        .container {
-            display: flex;
-            flex-grow: 1;
-            overflow: hidden;
-        }
-        .sidebar {
-            width: 250px;
-            background: rgba(26, 26, 26, 0.8);
-            border-right: 2px solid #00FFFF;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            position: fixed;
-            top: 15vh;
-            height: 85%;
-            transition: transform 0.3s ease;
-        }
-        .sidebar.collapsed {
-            transform: translateX(-230px);
-        }
-        .sidebar-tab {
-            position: absolute;
-            top: 0;
-            right: -40px;
-            width: 40px;
-            height: 40px;
-            background: rgba(26, 26, 26, 0.8);
-            border: 2px solid #00FFFF;
-            border-left: none;
-            border-radius: 0 10px 10px 0;
-            color: #00FFFF;
-            font-size: 18px;
-            line-height: 36px;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 0 8px #00FFFF;
-        }
-        .sidebar-title {
-            font-family: 'Exo 2', sans-serif;
-            font-size: 24px;
-            color: #DAA520;
-            text-align: center;
-            text-shadow: 0 0 10px #DAA520;
-            line-height: 1.2;
-        }
-        .sidebar-title span {
-            display: block;
-            font-size: 16px;
-        }
-        .button-container {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            position: relative;
-        }
-        .button-label {
-            color: #FFFF00;
-            font-size: 12px;
-            margin-right: 10px;
-            width: 100px;
-            text-align: right;
-            padding-left: 10px;
-        }
-        .dropdown-toggle, #analyze-button {
-            background: rgba(26, 26, 26, 0.8);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            color: #00FFFF;
-            font-size: 10px;
-            padding: 4px 8px;
-            width: calc(100% - 120px);
-            text-align: left;
-            cursor: pointer;
-            box-shadow: 0 0 8px #00FFFF;
-        }
-        #analyze-button {
-            text-align: center;
-        }
-        .dropdown-menu {
-            position: absolute;
-            top: 100%;
-            left: 110px;
-            width: calc(100% - 120px);
-            max-height: 0;
-            overflow-y: auto;
-            background: rgba(26, 26, 26, 0.9);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            color: #00FFFF;
-            font-size: 10px;
-            padding: 8px;
-            transition: max-height 0.5s ease;
-            visibility: hidden;
-            z-index: 10;
-        }
-        .dropdown-menu.open {
-            max-height: 600px;
-            visibility: visible;
-        }
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 3px;
-        }
-        #condition-menu .dropdown-item {
-            flex-direction: column;
-            align-items: flex-start;
-            margin-bottom: 8px;
-        }
-        #condition-menu .range-options {
-            margin-left: 20px;
-            margin-top: 5px;
-        }
-        #condition-menu .range-options .dropdown-item {
-            margin-bottom: 3px;
-        }
-        #time-range-menu {
-            padding: 10px;
-        }
-        #time-range-menu .dropdown-item {
-            flex-direction: column;
-            align-items: flex-start;
-            margin-bottom: 10px;
-        }
-        #time-range-menu input[type="text"] {
-            width: 100%;
-            background: rgba(26, 26, 26, 0.8);
-            border: 1px solid #00FFFF;
-            color: #00FFFF;
-            padding: 4px;
-            margin-top: 5px;
-            font-size: 10px;
-        }
-        .stats-panel {
-            position: absolute;
-            top: 100%;
-            left: 110px;
-            width: calc(100% - 120px);
-            max-height: 0;
-            background: rgba(26, 26, 26, 0.95);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            color: #00FF00;
-            font-size: 10px;
-            padding: 8px;
-            overflow: hidden;
-            transition: max-height 0.5s ease;
-            visibility: hidden;
-        }
-        .stats-panel.open {
-            max-height: 200px;
-            visibility: visible;
-        }
-        .graph-container {
-            flex-grow: 1;
-            margin-left: 250px;
-            background-color: #1A1A1A;
-            height: 98%;
-            transition: margin-left 0.3s ease;
-        }
-        .graph-container.full-width {
-            margin-left: 0;
-        }
-        #graph {
-            width: 90%;
-            height: 99%;
-            margin: 0.5% auto;
-        }
+        .container { display: flex; flex-grow: 1; overflow: hidden; }
+        .sidebar { width: 250px; background: rgba(26, 26, 26, 0.8); border-right: 2px solid #00FFFF; padding: 15px; display: flex; flex-direction: column; gap: 20px; position: fixed; top: 15vh; height: 85%; transition: transform 0.3s ease; }
+        .sidebar.collapsed { transform: translateX(-230px); }
+        .sidebar-tab { position: absolute; top: 0; right: -40px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-left: none; border-radius: 0 10px 10px 0; color: #00FFFF; font-size: 18px; line-height: 36px; text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; }
+        .sidebar-title { font-family: 'Exo 2', sans-serif; font-size: 24px; color: #DAA520; text-align: center; text-shadow: 0 0 10px #DAA520; line-height: 1.2; }
+        .sidebar-title span { display: block; font-size: 16px; }
+        .button-container { display: flex; align-items: center; width: 100%; position: relative; }
+        .button-label { color: #FFFF00; font-size: 12px; margin-right: 10px; width: 100px; text-align: right; padding-left: 10px; }
+        .dropdown-toggle, #analyze-button { background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 10px; padding: 4px 8px; width: calc(100% - 120px); text-align: left; cursor: pointer; box-shadow: 0 0 8px #00FFFF; }
+        #analyze-button { text-align: center; }
+        .dropdown-menu { position: absolute; top: 100%; left: 110px; width: calc(100% - 120px); max-height: 0; overflow-y: auto; background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 10px; padding: 8px; transition: max-height 0.5s ease; visibility: hidden; z-index: 10; }
+        .dropdown-menu.open { max-height: 600px; visibility: visible; }
+        .dropdown-item { display: flex; align-items: center; margin-bottom: 3px; }
+        #condition-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 8px; }
+        #condition-menu .range-options { margin-left: 20px; margin-top: 5px; }
+        #condition-menu .range-options .dropdown-item { margin-bottom: 3px; }
+        #time-range-menu { padding: 10px; }
+        #time-range-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 10px; }
+        #time-range-menu input[type="text"] { width: 100%; background: rgba(26, 26, 26, 0.8); border: 1px solid #00FFFF; color: #00FFFF; padding: 4px; margin-top: 5px; font-size: 10px; }
+        .stats-panel { position: absolute; top: 100%; left: 110px; width: calc(100% - 120px); max-height: 0; background: rgba(26, 26, 26, 0.95); border: 2px solid #00FFFF; border-radius: 10px; color: #00FF00; font-size: 10px; padding: 8px; overflow: hidden; transition: max-height 0.5s ease; visibility: hidden; }
+        .stats-panel.open { max-height: 200px; visibility: visible; }
+        .graph-container { flex-grow: 1; margin-left: 250px; background-color: #1A1A1A; height: 98%; transition: margin-left 0.3s ease; }
+        .graph-container.full-width { margin-left: 0; }
+        #graph { width: 90%; height: 99%; margin: 0.5% auto; }
         #dependent-menu label[for="TS_0__A1"] { color: #FF5555; }
         #dependent-menu label[for="TS_-5__A2"] { color: #55FF55; }
         #dependent-menu label[for="TS_-10__A3"] { color: #5555FF; }
@@ -392,7 +247,12 @@
             sidebar.classList.toggle('collapsed');
             graphContainer.classList.toggle('full-width');
             tab.textContent = sidebar.classList.contains('collapsed') ? '<' : '>';
-            if (dataLoaded && window.Plot && window.Plot.resize) window.Plot.resize(document.getElementById('graph').firstChild);
+            if (dataLoaded && typeof Plotly !== 'undefined' && Plotly.relayout) {
+                Plotly.relayout('graph', {
+                    width: document.getElementById('graph').clientWidth,
+                    height: document.getElementById('graph').clientHeight
+                });
+            }
         }
 
         function enforceSingleSelection(groupId, changedId) {
@@ -425,10 +285,10 @@
                 return;
             }
 
-            console.log('Checking Plot availability:', window.Plot, 'plot method:', window.Plot ? window.Plot.plot : 'undefined');
-            if (!window.Plot || typeof window.Plot.plot !== 'function') {
-                console.error('Plot object not available - library issue');
-                document.getElementById('graph').innerHTML = 'Plotting library not loaded - ensure plot.umd.min.js is correctly loaded';
+            console.log('Checking Plotly availability:', typeof Plotly);
+            if (typeof Plotly === 'undefined' || typeof Plotly.newPlot !== 'function') {
+                console.error('Plotly not available - library issue');
+                document.getElementById('graph').innerHTML = 'Plotly library not loaded';
                 return;
             }
 
@@ -473,26 +333,41 @@
                 'RH_2_0_1': '#FF55AA'
             };
 
-            const marks = dependents.map(dep => 
-                window.Plot.dot(workingData, {
-                    x: independent,
-                    y: dep,
-                    fill: colorMap[dep],
-                    r: 6,
-                    title: d => `Plot ${d.Plot}\n${independent}: ${d[independent]}\n${dep}: ${d[dep]}`
-                })
-            );
+            // Create traces for each dependent variable
+            const traces = dependents.map(dep => ({
+                x: workingData.map(row => row[independent]),
+                y: workingData.map(row => row[dep]),
+                mode: 'markers',
+                type: 'scattergl', // Use WebGL for performance with large datasets
+                marker: { color: colorMap[dep], size: 6 },
+                name: document.querySelector(`label[for="${dep}"]`)?.textContent || dep,
+                hoverinfo: 'text',
+                text: workingData.map(row => `Plot ${row.Plot}<br>${independent}: ${row[independent]}<br>${dep}: ${row[dep]}`)
+            }));
 
-            const plot = window.Plot.plot({
+            const layout = {
                 width: document.getElementById('graph').clientWidth,
                 height: document.getElementById('graph').clientHeight,
-                style: { background: '#1A1A1A', color: '#FFFFFF', fontFamily: 'Lato, sans-serif' },
-                x: { label: document.querySelector(`label[for="${independent}"]`)?.textContent || independent, grid: true, type: 'linear' },
-                y: { label: 'Dependent Variables', grid: true, type: 'linear' },
-                marks: marks
-            });
-            document.getElementById('graph').appendChild(plot);
+                plot_bgcolor: '#1A1A1A',
+                paper_bgcolor: '#1A1A1A',
+                font: { color: '#FFFFFF', family: 'Lato, sans-serif' },
+                xaxis: {
+                    title: document.querySelector(`label[for="${independent}"]`)?.textContent || independent,
+                    gridcolor: '#444',
+                    zerolinecolor: '#444'
+                },
+                yaxis: {
+                    title: 'Dependent Variables',
+                    gridcolor: '#444',
+                    zerolinecolor: '#444'
+                },
+                margin: { t: 20, b: 60, l: 60, r: 20 },
+                showlegend: true
+            };
 
+            Plotly.newPlot('graph', traces, layout);
+
+            // Stats calculation
             const statsText = dependents.map(dep => {
                 const allY = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null);
                 return allY.length > 0 ? 
