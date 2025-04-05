@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparative Biospheromics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Exo+2:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Exo+2:wght=700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -17,8 +17,7 @@
             font-family: 'Orbitron', sans-serif; 
             font-size: calc(18px + 2vw); 
             margin: 0; 
-            text-shadow: 0 0 4px #00FFFF, 1px 1px 1px rgba(0, 204, 102, 0.7), -1px -1px 1px rgba(0, 204, 102, 0.7); 
-            filter: blur(0.5px); 
+            text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; 
         }
         .container { display: flex; flex-grow: 1; overflow: hidden; }
         .sidebar { width: 250px; background: rgba(26, 26, 26, 0.8); border-right: 2px solid #00FFFF; padding: 15px; display: flex; flex-direction: column; gap: 20px; position: fixed; top: 15vh; height: 85%; transition: transform 0.3s ease; }
@@ -93,11 +92,12 @@
                     <div class="dropdown-item"><input type="checkbox" id="TS_50" value="TS_50"><label for="TS_50">Soil Temp 50 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_100" value="TS_100"><label for="TS_100">Soil Temp 100 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_200" value="TS_200"><label for="TS_200">Soil Temp 200 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0_1" value="TA_2_0_1"><label for="TA_2_0_1">Ambient Temp 2m (1, °C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0_2" value="TA_2_0_2"><label for="TA_2_0_2">Ambient Temp 2m (2, °C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0_1" value="RH_2_0_1"><label for="RH_2_0_1">Relative Humidity 2m (1, %)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0_2" value="RH_2_0_2"><label for="RH_2_0_2">Relative Humidity 2m (2, %)</label></div>
-                    <!-- Ambient CO2 not found in sample; assuming CO2_trmt is treatment, not ambient -->
+                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0" value="TA_2_0"><label for="TA_2_0">Ambient Temp 2m (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0">Relative Humidity 2m (%)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WS_10" value="WS_10"><label for="WS_10">Wind Speed 10m (m/s)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction 10m (°)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
                 </div>
             </div>
             <div class="button-container">
@@ -193,7 +193,7 @@
                 input.type = 'checkbox';
                 input.id = `plot-${plot}`;
                 input.value = plot;
-                input.checked = false; // Default unchecked
+                input.checked = false;
                 const label = document.createElement('label');
                 label.htmlFor = `plot-${plot}`;
                 label.textContent = `Plot ${plot}`;
@@ -285,16 +285,25 @@
             return { slope, rSquared };
         }
 
-        function aggregateSoilDepths(data) {
+        function aggregateVariables(data) {
             const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
             const zones = ['A', 'B', 'C'];
             return data.map(row => {
                 const newRow = { ...row };
+                // Aggregate soil temperatures
                 depths.forEach(depth => {
                     const keys = zones.map(zone => `TS_${depth}_${zone}${depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 : depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9}`);
                     const values = keys.map(k => row[k]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
                     newRow[`TS_${depth}`] = values.length > 0 ? values.reduce((sum, v) => sum + parseFloat(v), 0) / values.length : null;
                 });
+                // Aggregate air temperature
+                const taKeys = ['TA_2_0_1', 'TA_2_0_2'];
+                const taValues = taKeys.map(k => row[k]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
+                newRow['TA_2_0'] = taValues.length > 0 ? taValues.reduce((sum, v) => sum + parseFloat(v), 0) / taValues.length : null;
+                // Aggregate relative humidity
+                const rhKeys = ['RH_2_0_1', 'RH_2_0_2'];
+                const rhValues = rhKeys.map(k => row[k]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
+                newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + parseFloat(v), 0) / rhValues.length : null;
                 return newRow;
             });
         }
@@ -307,7 +316,7 @@
                     const weekStart = new Date(date);
                     weekStart.setDate(weekStart.getDate() - weekStart.getDay());
                     weekStart.setHours(0, 0, 0, 0);
-                    const key = weekStart.getTime();
+                    const key = weekStart.toISOString().split('T')[0];
                     if (!weeklyData[key]) weeklyData[key] = { TIMESTAMP: weekStart, values: {} };
                     Object.keys(row).forEach(k => {
                         if (k !== 'TIMESTAMP') weeklyData[key].values[k] = (weeklyData[key].values[k] || []).concat(row[k]);
@@ -368,8 +377,8 @@
                 console.log(`After ${key} filter:`, workingData.length);
             });
 
-            workingData = aggregateSoilDepths(workingData);
-            console.log('After soil depth aggregation:', workingData.length);
+            workingData = aggregateVariables(workingData);
+            console.log('After variable aggregation:', workingData.length);
 
             if (independent === 'TIMESTAMP') {
                 workingData = getWeeklyTimestamps(workingData, startDate, endDate);
@@ -379,13 +388,13 @@
             console.log('Sample working data (first 5):', workingData.slice(0, 5).map(row => ({
                 TIMESTAMP: row.TIMESTAMP.toISOString().split('T')[0],
                 Plot: row.Plot,
-                [independent]: independent === 'TIMESTAMP' ? row[independent] : row[independent],
+                [independent]: independent === 'TIMESTAMP' ? row.TIMESTAMP : row[independent],
                 ...dependents.reduce((acc, dep) => ({ ...acc, [dep]: row[dep] }), {})
             })));
             
             const traces = dependents.map((dep, i) => {
-                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row[independent] : row[independent]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
-                const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
+                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : row[independent]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
+                const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
                 console.log(`Trace for ${dep}: x=${xValues.length}, y=${yValues.length}`);
                 console.log(`Sample ${independent} (first 5):`, xValues.slice(0, 5));
                 console.log(`Sample ${dep} (first 5):`, yValues.slice(0, 5));
@@ -395,8 +404,8 @@
                     mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
                     type: chartType === 'scatter' ? 'scattergl' : chartType === 'area' ? 'scattergl' : chartType,
                     name: document.querySelector(`label[for="${dep}"]`)?.textContent || dep,
-                    marker: { color: colors[i % colors.length] },
-                    line: (chartType === 'line' || chartType === 'area') ? { color: colors[i % colors.length] } : undefined,
+                    marker: { color: colors[i % colors.length], size: 8 },
+                    line: (chartType === 'line' || chartType === 'area') ? { color: colors[i % colors.length], width: 2 } : undefined,
                     fill: chartType === 'area' ? 'tozeroy' : undefined
                 };
             });
@@ -408,8 +417,8 @@
             }
 
             const statsText = dependents.map(dep => {
-                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row[independent].getTime() : row[independent]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
-                const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
+                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : row[independent]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
+                const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
                 if (yValues.length > 0) {
                     const { slope, rSquared } = calculateRegression(xValues, yValues);
                     return `${document.querySelector(`label[for="${dep}"]`)?.textContent || dep}: ` +
@@ -453,7 +462,7 @@
                 },
                 margin: { t: 80, b: 60, l: 60, r: 20 },
                 showlegend: true,
-                legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top' }
+                legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.8)' }
             };
             console.log('Plotly layout:', JSON.stringify(layout, null, 2));
             console.log('Plotting with Plotly');
