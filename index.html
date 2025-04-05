@@ -359,20 +359,27 @@
 
         function updateConditionsBasedOnVariables(independent, dependents) {
             const conditionCheckboxes = document.querySelectorAll('#condition-menu input[type="checkbox"]');
+            const tempVars = dependents.some(dep => dep.startsWith('TS_') || dep === 'TA_2_0');
+            const co2Vars = independent === 'CO2_trmt';
+
             conditionCheckboxes.forEach(checkbox => {
                 const cond = conditionMap[checkbox.value];
-                const needsTemp = independent === 'Temp_target' || dependents.some(dep => dep.startsWith('TS_') || dep === 'TA_2_0');
-                const needsCO2 = independent === 'CO2_trmt';
-                if (needsTemp && needsCO2) {
-                    checkbox.checked = true; // All conditions relevant
-                } else if (needsTemp) {
-                    checkbox.checked = cond.temp > 0 || cond.co2 === 'Ambient'; // Vary temp, keep ambient CO₂
-                } else if (needsCO2) {
-                    checkbox.checked = cond.co2 === 900; // Vary CO₂, keep temp constant
+                if (co2Vars) {
+                    // Prioritize CO2 variation, select one Ambient and one Elevated per temp level
+                    if (cond.co2 === 'Ambient') {
+                        checkbox.checked = ['ambient_ambient', '2.25_ambient', '4.5_ambient', '6.75_ambient', '9_ambient'].includes(checkbox.value);
+                    } else {
+                        checkbox.checked = ['ambient_elevated', '2.25_elevated', '4.5_elevated', '6.75_elevated', '9_elevated'].includes(checkbox.value);
+                    }
+                } else if (independent === 'Temp_target') {
+                    checkbox.checked = true; // All conditions for temp variation
+                } else if (tempVars) {
+                    checkbox.checked = cond.temp > 0 || cond.co2 === 'Ambient'; // Vary temp, keep ambient CO2
                 } else {
-                    checkbox.checked = true; // Default to all if no specific need
+                    checkbox.checked = true; // Default to all
                 }
             });
+
             document.getElementById('condition-toggle').textContent = 
                 Array.from(conditionCheckboxes)
                     .filter(cb => cb.checked)
@@ -522,8 +529,8 @@
             const traces = [];
             const fitTraces = [];
             dependents.forEach((dep, i) => {
-                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : row[independent]).filter(v => v !== undefined && v !== null);
-                const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
+                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent]) || 0).filter(v => v !== undefined && v !== null);
+                const yValues = workingData.map(row => parseFloat(row[dep])).filter(v => v !== undefined && v !== null && !isNaN(v));
 
                 if (xValues.length === 0 || yValues.length === 0) {
                     console.log(`No valid data for ${dep} vs ${independent}`);
@@ -565,8 +572,8 @@
             }
 
             const statsText = dependents.map(dep => {
-                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : row[independent]).filter(v => v !== undefined && v !== null);
-                const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
+                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : parseFloat(row[independent]) || 0).filter(v => v !== undefined && v !== null);
+                const yValues = workingData.map(row => parseFloat(row[dep])).filter(v => v !== undefined && v !== null && !isNaN(v));
                 if (yValues.length > 0) {
                     const { slope, rSquared } = calculateRegression(xValues, yValues);
                     return `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Slope: ${slope.toFixed(4)}, R²: ${rSquared.toFixed(4)}`;
@@ -584,8 +591,8 @@
                                `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit})`;
 
             const annotations = showFit ? dependents.map((dep, i) => {
-                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : row[independent]).filter(v => v !== undefined && v !== null);
-                const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
+                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : parseFloat(row[independent]) || 0).filter(v => v !== undefined && v !== null);
+                const yValues = workingData.map(row => parseFloat(row[dep])).filter(v => v !== undefined && v !== null && !isNaN(v));
                 if (yValues.length > 0) {
                     const { slope, rSquared } = calculateRegression(xValues, yValues);
                     return {
@@ -628,7 +635,7 @@
                     zerolinecolor: '#444',
                     automargin: true
                 },
-                margin: { t: 80, b: 80, l: 100, r: 40 }, // Increased bottom margin for x-axis label
+                margin: { t: 80, b: 80, l: 100, r: 40 },
                 showlegend: true,
                 legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.8)' },
                 annotations: annotations
