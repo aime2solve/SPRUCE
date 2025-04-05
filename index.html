@@ -9,31 +9,10 @@
     <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            background-color: #000000;
-            font-family: 'Lato', sans-serif;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        h1 {
-            color: #00FFFF;
-            text-align: center;
-            text-shadow: 0 0 3px #00CC66;
-            padding: 3vh;
-            font-family: 'Orbitron', sans-serif;
-            font-size: calc(18px + 2vw);
-            margin: 0;
-            animation: faintPulse 5s infinite alternate;
-        }
-        @keyframes faintPulse {
-            0% { text-shadow: 0 0 3px #00CC66; }
-            100% { text-shadow: 0 0 5px #00FFFF; }
-        }
+        /* Unchanged styles */
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background-color: #000000; font-family: 'Lato', sans-serif; overflow: hidden; display: flex; flex-direction: column; }
+        h1 { color: #00FFFF; text-align: center; text-shadow: 0 0 3px #00CC66; padding: 3vh; font-family: 'Orbitron', sans-serif; font-size: calc(18px + 2vw); margin: 0; animation: faintPulse 5s infinite alternate; }
+        @keyframes faintPulse { 0% { text-shadow: 0 0 3px #00CC66; } 100% { text-shadow: 0 0 5px #00FFFF; } }
         .container { display: flex; flex-grow: 1; overflow: hidden; }
         .sidebar { width: 250px; background: rgba(26, 26, 26, 0.8); border-right: 2px solid #00FFFF; padding: 15px; display: flex; flex-direction: column; gap: 20px; position: fixed; top: 15vh; height: 85%; transition: transform 0.3s ease; }
         .sidebar.collapsed { transform: translateX(-230px); }
@@ -225,6 +204,10 @@
                     row.TIMESTAMP = new Date(row.TIMESTAMP);
                 });
                 console.log('Sample data (first row):', allData[0]);
+                console.log('Data date range:', 
+                    'Min:', new Date(Math.min(...allData.map(row => row.TIMESTAMP))).toISOString().split('T')[0],
+                    'Max:', new Date(Math.max(...allData.map(row => row.TIMESTAMP))).toISOString().split('T')[0]);
+                console.log('CO2_trmt sample:', allData.map(row => row.CO2_trmt).slice(0, 5));
                 dataLoaded = true;
                 updateGraph();
             } catch (error) {
@@ -264,10 +247,11 @@
 
         function filterByConditionRange(data, condition, ranges) {
             if (!ranges.length) return data;
+            console.log(`Filtering ${condition} with ranges:`, ranges);
             return data.filter(row => {
                 const value = row[condition];
                 if (value === undefined || value === null) return false;
-                return ranges.some(range => {
+                const passes = ranges.some(range => {
                     if (range.endsWith('+')) {
                         const min = parseFloat(range);
                         return value >= min;
@@ -275,6 +259,7 @@
                     const [min, max] = range.split('-').map(parseFloat);
                     return value >= min && value <= max;
                 });
+                return passes;
             });
         }
 
@@ -302,14 +287,19 @@
             }));
 
             let workingData = allData.filter(row => selectedPlots.includes(row.Plot));
+            console.log('After plot filter:', workingData.length);
             if (startDate || endDate) {
+                console.log('Time range:', startDate?.toISOString().split('T')[0], endDate?.toISOString().split('T')[0]);
                 workingData = workingData.filter(row => {
                     const rowDate = row.TIMESTAMP;
                     return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= endDate);
                 });
+                console.log('After time filter:', workingData.length);
             }
             conditions.forEach(({ key, ranges }) => {
+                const preLength = workingData.length;
                 workingData = filterByConditionRange(workingData, key, ranges);
+                console.log(`After ${key} filter (${ranges.join(', ')}): ${preLength} -> ${workingData.length}`);
             });
 
             console.log(`Plotting ${workingData.length} rows with ${independent} vs [${dependents.join(', ')}]`);
@@ -333,12 +323,11 @@
                 'RH_2_0_1': '#FF55AA'
             };
 
-            // Create traces for each dependent variable
             const traces = dependents.map(dep => ({
                 x: workingData.map(row => row[independent]),
                 y: workingData.map(row => row[dep]),
                 mode: 'markers',
-                type: 'scattergl', // Use WebGL for performance with large datasets
+                type: 'scattergl',
                 marker: { color: colorMap[dep], size: 6 },
                 name: document.querySelector(`label[for="${dep}"]`)?.textContent || dep,
                 hoverinfo: 'text',
@@ -367,7 +356,6 @@
 
             Plotly.newPlot('graph', traces, layout);
 
-            // Stats calculation
             const statsText = dependents.map(dep => {
                 const allY = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null);
                 return allY.length > 0 ? 
