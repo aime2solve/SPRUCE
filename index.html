@@ -96,7 +96,7 @@
                         <div class="range-options">
                             <div class="dropdown-item"><input type="checkbox" id="WS_10_0_2" value="0-2"><label for="WS_10_0_2">0-2</label></div>
                             <div class="dropdown-item"><input type="checkbox" id="WS_10_2_5" value="2-5"><label for="WS_10_2_5">2-5</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="WS_10_5_plus" value="5+"><label for="WS_10_5_plus">5+</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="WS_10_5_plus" value="5+"><label for="WS_10_5_plus">5+</label></多元>
                         </div>
                     </div>
                     <div class="dropdown-item">
@@ -210,6 +210,10 @@
                 console.log('WD_10 sample (first 10):', allData.map(row => row.WD_10).slice(0, 10));
                 console.log('PAR_2 sample (first 10):', allData.map(row => row.PAR_2).slice(0, 10));
                 console.log('PREC_6 sample (first 10):', allData.map(row => row.PREC_6).slice(0, 10));
+                console.log('CO2_trmt sample (first 10):', allData.map(row => row.CO2_trmt).slice(0, 10));
+                console.log('TS_0__A1 sample (first 10):', allData.map(row => row.TS_0__A1).slice(0, 10));
+                console.log('TS_-10__A3 sample (first 10):', allData.map(row => row.TS_-10__A3).slice(0, 10));
+                console.log('TS_-100__A8 sample (first 10):', allData.map(row => row.TS_-100__A8).slice(0, 10));
                 dataLoaded = true;
                 updateGraph();
             } catch (error) {
@@ -255,7 +259,7 @@
                 const value = row[condition];
                 if (value === undefined || value === null || isNaN(parseFloat(value))) {
                     console.log(`Row with ${condition} = ${value} included (missing/invalid)`);
-                    return true; // Include rows with missing/invalid data
+                    return true;
                 }
                 const numericValue = parseFloat(value);
                 const passes = ranges.some(range => {
@@ -317,6 +321,12 @@
                 return;
             }
 
+            // Log sample values for independent and dependent variables
+            console.log(`${independent} sample (first 5):`, workingData.slice(0, 5).map(row => row[independent]));
+            dependents.forEach(dep => {
+                console.log(`${dep} sample (first 5):`, workingData.slice(0, 5).map(row => row[dep]));
+            });
+
             const colorMap = {
                 'TS_0__A1': '#FF5555',
                 'TS_-5__A2': '#55FF55',
@@ -330,16 +340,28 @@
                 'RH_2_0_1': '#FF55AA'
             };
 
-            const traces = dependents.map(dep => ({
-                x: workingData.map(row => row[independent]),
-                y: workingData.map(row => row[dep]),
-                mode: 'markers',
-                type: 'scattergl',
-                marker: { color: colorMap[dep], size: 6 },
-                name: document.querySelector(`label[for="${dep}"]`)?.textContent || dep,
-                hoverinfo: 'text',
-                text: workingData.map(row => `Plot ${row.Plot}<br>${independent}: ${row[independent]}<br>${dep}: ${row[dep]}`)
-            }));
+            const traces = dependents.map(dep => {
+                const xValues = workingData.map(row => row[independent]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
+                const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
+                console.log(`Trace for ${dep}: xValues length = ${xValues.length}, yValues length = ${yValues.length}`);
+                return {
+                    x: xValues,
+                    y: yValues,
+                    mode: 'markers',
+                    type: 'scattergl',
+                    marker: { color: colorMap[dep], size: 6 },
+                    name: document.querySelector(`label[for="${dep}"]`)?.textContent || dep,
+                    hoverinfo: 'text',
+                    text: workingData.map(row => `Plot ${row.Plot}<br>${independent}: ${row[independent]}<br>${dep}: ${row[dep]}`).filter((_, i) => xValues[i] !== undefined && yValues[i] !== undefined)
+                };
+            });
+
+            // Check if any trace has valid data
+            const hasValidData = traces.some(trace => trace.x.length > 0 && trace.y.length > 0);
+            if (!hasValidData) {
+                document.getElementById('graph').innerHTML = 'No plottable data for selected variables. Check variable availability.';
+                return;
+            }
 
             const layout = {
                 width: document.getElementById('graph').clientWidth,
@@ -364,12 +386,12 @@
             Plotly.newPlot('graph', traces, layout);
 
             const statsText = dependents.map(dep => {
-                const allY = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null);
+                const allY = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
                 return allY.length > 0 ? 
                     `<span style="color: ${colorMap[dep]}">${document.querySelector(`label[for="${dep}"]`)?.textContent || dep}</span>: ` +
                     `Mean: ${(allY.reduce((sum, val) => sum + val, 0) / allY.length).toFixed(2)}, ` +
                     `Min: ${Math.min(...allY).toFixed(2)}, Max: ${Math.max(...allY).toFixed(2)}, Points: ${allY.length}` :
-                    `${dep}: No data points`;
+                    `${dep}: No valid data points`;
             }).join('<br>');
             document.getElementById('stats-content').innerHTML = statsText;
         }
