@@ -3,23 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comparative Biospheromics</title>
+    <title>Comparative Biospheromics Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; background-color: #000000; font-family: 'Lato', sans-serif; overflow: hidden; display: flex; flex-direction: column; }
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            height: 100vh; 
+            width: 100vw; 
+            background-color: #000000; 
+            font-family: 'Lato', sans-serif; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+        }
         h1 { 
             color: #00FFFF; 
             text-align: center; 
-            padding: 3vh; 
+            padding: 2vh; 
             font-family: 'Orbitron', sans-serif; 
-            font-size: calc(18px + 2vw); 
+            font-size: calc(16px + 1.5vw); 
             margin: 0; 
             text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; 
+            flex-shrink: 0; 
         }
-        .container { display: flex; flex-grow: 1; overflow: hidden; }
+        .container { 
+            display: flex; 
+            flex-grow: 1; 
+            overflow: hidden; 
+            height: calc(100vh - 2vh - 2vh); /* Adjust for h1 padding */
+        }
         .sidebar { 
             width: 250px; 
             background: rgba(26, 26, 26, 0.8); 
@@ -27,10 +43,10 @@
             padding: 15px; 
             display: flex; 
             flex-direction: column; 
-            gap: 20px; 
+            gap: 15px; 
             position: fixed; 
-            top: 15vh; 
-            height: 85%; 
+            top: calc(2vh + 2vh); /* h1 height + padding */
+            height: calc(100vh - 4vh); 
             transition: transform 0.3s ease; 
             z-index: 10; 
         }
@@ -52,8 +68,8 @@
             cursor: pointer; 
             box-shadow: 0 0 8px #00FFFF; 
         }
-        .sidebar-title { font-family: 'Exo 2', sans-serif; font-size: 24px; color: #DAA520; text-align: center; text-shadow: 0 0 10px #DAA520; line-height: 1.2; }
-        .sidebar-title span { display: block; font-size: 16px; }
+        .sidebar-title { font-family: 'Exo 2', sans-serif; font-size: 20px; color: #DAA520; text-align: center; text-shadow: 0 0 10px #DAA520; line-height: 1.2; }
+        .sidebar-title span { display: block; font-size: 14px; }
         .button-container { display: flex; align-items: center; width: 100%; position: relative; }
         .button-label { color: #FFFF00; font-size: 12px; margin-right: 10px; width: 100px; text-align: right; padding-left: 10px; }
         .dropdown-toggle, #analyze-button { 
@@ -100,10 +116,11 @@
             flex-grow: 1; 
             margin-left: 250px; 
             background-color: #1A1A1A; 
-            height: calc(100vh - 15vh); 
+            height: calc(100vh - 4vh); 
             transition: margin-left 0.3s ease; 
             position: relative; 
             z-index: 1; 
+            overflow: hidden; 
         }
         .graph-container.full-width { margin-left: 0; }
         #graph { 
@@ -112,13 +129,25 @@
             min-width: 320px; 
             min-height: 240px; 
         }
+        .legend-tab { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            background: rgba(26, 26, 26, 0.8); 
+            border: 2px solid #00FFFF; 
+            border-radius: 5px; 
+            color: #00FFFF; 
+            padding: 5px 10px; 
+            cursor: pointer; 
+            z-index: 5; 
+        }
     </style>
 </head>
 <body>
-    <h1>Comparative Biospheromics</h1>
+    <h1>Comparative Biospheromics Dashboard</h1>
     <div class="container">
         <div class="sidebar" id="sidebar">
-            <div class="sidebar-tab" id="sidebar-tab">></div>
+            <div class="sidebar-tab" id="sidebar-tab"><</div>
             <div class="sidebar-title">SPRUCE<br><span>Data Explorer</span></div>
             <div class="button-container">
                 <span class="button-label">Plot:</span>
@@ -186,9 +215,9 @@
                     <div class="dropdown-item">
                         <input type="checkbox" id="PREC_6_cond" value="PREC_6" checked><label for="PREC_6_cond">Precipitation (mm)</label>
                         <div class="range-options">
-                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_0_1" value="0-1" checked><label for="PRE C_6_0_1">0-1</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_1_5" value="1-5" checked><label for="PRE C_6_1_5">1-5</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_5_plus" value="5+" checked><label for="PRE C_6_5_plus">5+</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_0_1" value="0-1" checked><label for="PREC_6_0_1">0-1</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_1_5" value="1-5" checked><label for="PREC_6_1_5">1-5</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_5_plus" value="5+" checked><label for="PREC_6_5_plus">5+</label></div>
                         </div>
                     </div>
                 </div>
@@ -206,6 +235,9 @@
                 <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
                 <div class="dropdown-menu" id="stats-menu">
                     <div id="stats-content"></div>
+                    <div class="dropdown-item">
+                        <input type="checkbox" id="show-fit" checked><label for="show-fit">Show Fit & Stats on Chart</label>
+                    </div>
                 </div>
             </div>
             <div class="button-container">
@@ -226,6 +258,7 @@
         </div>
         <div class="graph-container" id="graph-container">
             <div id="graph"></div>
+            <div class="legend-tab" id="legend-tab">Legend</div>
         </div>
     </div>
 
@@ -237,6 +270,7 @@
         let endDate = null;
         let dataLoaded = false;
         const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#FFD700', '#6A5ACD', '#20B2AA', '#DAA520'];
+        let legendVisible = true;
 
         function populatePlotDropdown() {
             const plotMenu = document.getElementById('plot-menu');
@@ -298,7 +332,7 @@
             const tab = document.getElementById('sidebar-tab');
             sidebar.classList.toggle('collapsed');
             graphContainer.classList.toggle('full-width');
-            tab.textContent = sidebar.classList.contains('collapsed') ? '<' : '>';
+            tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
             if (dataLoaded && typeof Plotly !== 'undefined') {
                 Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
             }
@@ -404,6 +438,15 @@
             return Math.max(240, height);
         }
 
+        function toggleLegend() {
+            legendVisible = !legendVisible;
+            Plotly.relayout('graph', { 
+                showlegend: legendVisible,
+                'legend.x': legendVisible ? 1 : -9999 // Off-screen when hidden
+            });
+            document.getElementById('legend-tab').textContent = legendVisible ? 'Legend' : 'Legend';
+        }
+
         function updateGraph() {
             console.log('Starting updateGraph');
             document.getElementById('graph').innerHTML = '';
@@ -427,6 +470,7 @@
                 ranges: Array.from(document.querySelectorAll(`#condition-menu input:checked:not([id$="_cond"])[id^="${el.id.split('_cond')[0]}"]`)).map(input => input.value)
             }));
             const chartType = document.querySelector('#chart-type-menu input:checked').value;
+            const showFit = document.getElementById('show-fit').checked;
 
             console.log('Selected plots:', selectedPlots);
             console.log('Independent:', independent);
@@ -465,6 +509,7 @@
             })));
             
             const traces = [];
+            const fitTraces = [];
             dependents.forEach((dep, i) => {
                 const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : row[independent]).filter(v => v !== undefined && v !== null);
                 const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
@@ -483,19 +528,21 @@
                     fill: chartType === 'area' ? 'tozeroy' : undefined
                 });
 
-                const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
-                const { slope, intercept } = calculateRegression(xNum, yValues);
-                if (!isNaN(slope) && !isNaN(intercept)) {
-                    const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Math.max(...xNum)];
-                    const yFit = xFit.map(x => slope * (independent === 'TIMESTAMP' ? x.getTime() : x) + intercept);
-                    traces.push({
-                        x: xFit,
-                        y: yFit,
-                        mode: 'lines',
-                        type: 'scattergl',
-                        name: `${document.querySelector(`label[for="${dep}"]`)?.textContent || dep} (fit)`,
-                        line: { color: colors[i % colors.length], width: 2, dash: 'dash' }
-                    });
+                if (showFit) {
+                    const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
+                    const { slope, intercept } = calculateRegression(xNum, yValues);
+                    if (!isNaN(slope) && !isNaN(intercept)) {
+                        const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Math.max(...xNum)];
+                        const yFit = xFit.map(x => slope * (independent === 'TIMESTAMP' ? x.getTime() : x) + intercept);
+                        fitTraces.push({
+                            x: xFit,
+                            y: yFit,
+                            mode: 'lines',
+                            type: 'scattergl',
+                            name: `${document.querySelector(`label[for="${dep}"]`)?.textContent || dep} (fit)`,
+                            line: { color: colors[i % colors.length], width: 2, dash: 'dash' }
+                        });
+                    }
                 }
             });
 
@@ -524,7 +571,7 @@
                               'Target Temperature (°C)';
             const yAxisTitle = dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"]`)?.textContent || 'Measurements' : 'Measurements';
 
-            const annotations = dependents.map((dep, i) => {
+            const annotations = showFit ? dependents.map((dep, i) => {
                 const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : row[independent]).filter(v => v !== undefined && v !== null);
                 const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
                 if (yValues.length > 0) {
@@ -540,7 +587,7 @@
                     };
                 }
                 return null;
-            }).filter(a => a !== null);
+            }).filter(a => a !== null) : [];
 
             const layout = {
                 width: calculateGraphWidth(),
@@ -549,7 +596,7 @@
                 paper_bgcolor: '#1A1A1A',
                 font: { color: '#FFFFFF', size: 12 },
                 title: {
-                    text: `Comparative Biospheromics: ${independent === 'CO2_trmt' ? 'CO₂' : independent === 'TIMESTAMP' ? 'Time' : 'Temperature'} vs. Measurements`,
+                    text: `Comparative Biospheromics Dashboard: ${independent === 'CO2_trmt' ? 'CO₂' : independent === 'TIMESTAMP' ? 'Time' : 'Temperature'} vs. Measurements`,
                     font: { size: 16 },
                     x: 0.5,
                     xanchor: 'center',
@@ -566,16 +613,17 @@
                 yaxis: {
                     title: { text: yAxisTitle, font: { size: 14 } },
                     gridcolor: '#444',
-                    zerolinecolor: '#444'
+                    zerolinecolor: '#444',
+                    automargin: true // Prevent y-axis spill
                 },
-                margin: { t: 80, b: 60, l: 60, r: 20 },
-                showlegend: true,
+                margin: { t: 80, b: 60, l: 80, r: 40 }, // Increased left margin
+                showlegend: legendVisible,
                 legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.8)' },
                 annotations: annotations
             };
             console.log('Plotly layout:', JSON.stringify(layout, null, 2));
             console.log('Plotting with Plotly');
-            Plotly.newPlot('graph', traces, layout).catch(err => console.error('Plotly error:', err));
+            Plotly.newPlot('graph', showFit ? traces.concat(fitTraces) : traces, layout).catch(err => console.error('Plotly error:', err));
         }
 
         document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
@@ -590,6 +638,8 @@
             console.log('Analyze button clicked');
             loadData();
         });
+        document.getElementById('legend-tab').addEventListener('click', toggleLegend);
+        document.getElementById('show-fit').addEventListener('change', updateGraph);
 
         document.querySelectorAll('#independent-menu input').forEach(input => {
             input.addEventListener('change', () => {
