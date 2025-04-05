@@ -9,7 +9,7 @@
     <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
-        /* Unchanged styles */
+        /* Unchanged styles - omitted for brevity */
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background-color: #000000; font-family: 'Lato', sans-serif; overflow: hidden; display: flex; flex-direction: column; }
         h1 { color: #00FFFF; text-align: center; text-shadow: 0 0 3px #00CC66; padding: 3vh; font-family: 'Orbitron', sans-serif; font-size: calc(18px + 2vw); margin: 0; animation: faintPulse 5s infinite alternate; }
         @keyframes faintPulse { 0% { text-shadow: 0 0 3px #00CC66; } 100% { text-shadow: 0 0 5px #00FFFF; } }
@@ -111,7 +111,9 @@
                     <div class="dropdown-item">
                         <input type="checkbox" id="PAR_2_cond" value="PAR_2"><label for="PAR_2_cond">PAR (µmol/m²s)</label>
                         <div class="range-options">
-                            <div class="dropdown-item"><input type="checkbox" id="PAR_2_0_50" value="0-50"><label for="PAR_2_0_50">0-50</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="PAR_2_
+
+0_50" value="0-50"><label for="PAR_2_0_50">0-50</label></div>
                             <div class="dropdown-item"><input type="checkbox" id="PAR_2_50_100" value="50-100"><label for="PAR_2_50_100">50-100</label></div>
                             <div class="dropdown-item"><input type="checkbox" id="PAR_2_100_plus" value="100+"><label for="PAR_2_100_plus">100+</label></div>
                         </div>
@@ -207,7 +209,7 @@
                 console.log('Data date range:', 
                     'Min:', new Date(Math.min(...allData.map(row => row.TIMESTAMP))).toISOString().split('T')[0],
                     'Max:', new Date(Math.max(...allData.map(row => row.TIMESTAMP))).toISOString().split('T')[0]);
-                console.log('CO2_trmt sample:', allData.map(row => row.CO2_trmt).slice(0, 5));
+                console.log('WS_10 sample:', allData.map(row => row.WS_10).slice(0, 10)); // Added to inspect WS_10
                 dataLoaded = true;
                 updateGraph();
             } catch (error) {
@@ -248,16 +250,22 @@
         function filterByConditionRange(data, condition, ranges) {
             if (!ranges.length) return data;
             console.log(`Filtering ${condition} with ranges:`, ranges);
+            console.log(`Sample ${condition} values:`, data.slice(0, 5).map(row => row[condition]));
             return data.filter(row => {
                 const value = row[condition];
-                if (value === undefined || value === null) return false;
+                // Handle missing or non-numeric values gracefully
+                if (value === undefined || value === null || isNaN(parseFloat(value))) {
+                    console.log(`Skipping row with ${condition}: ${value}`);
+                    return true; // Include rows with missing data (adjust as needed)
+                }
+                const numericValue = parseFloat(value);
                 const passes = ranges.some(range => {
                     if (range.endsWith('+')) {
                         const min = parseFloat(range);
-                        return value >= min;
+                        return numericValue >= min;
                     }
                     const [min, max] = range.split('-').map(parseFloat);
-                    return value >= min && value <= max;
+                    return numericValue >= min && numericValue <= max;
                 });
                 return passes;
             });
@@ -306,7 +314,7 @@
             console.log('Sample working data (first row):', workingData[0] || 'No data after filtering');
 
             if (workingData.length === 0) {
-                document.getElementById('graph').innerHTML = 'No data matches the selected filters';
+                document.getElementById('graph').innerHTML = 'No data matches the selected filters. Try adjusting conditions.';
                 return;
             }
 
