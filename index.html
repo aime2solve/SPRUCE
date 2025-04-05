@@ -10,8 +10,15 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background-color: #000000; font-family: 'Lato', sans-serif; overflow: hidden; display: flex; flex-direction: column; }
-        h1 { color: #00FFFF; text-align: center; padding: 3vh; font-family: 'Orbitron', sans-serif; font-size: calc(18px + 2vw); margin: 0; animation: glowPulse 2s infinite alternate; }
-        @keyframes glowPulse { 0% { text-shadow: 0 0 2px #00CC66; } 100% { text-shadow: 0 0 5px #00FFFF; } }
+        h1 { 
+            color: #00FFFF; 
+            text-align: center; 
+            padding: 3vh; 
+            font-family: 'Orbitron', sans-serif; 
+            font-size: calc(18px + 2vw); 
+            margin: 0; 
+            text-shadow: 0 0 5px #00FFFF, 1px 1px 2px #00CC66, -1px -1px 2px #00CC66; 
+        }
         .container { display: flex; flex-grow: 1; overflow: hidden; }
         .sidebar { width: 250px; background: rgba(26, 26, 26, 0.8); border-right: 2px solid #00FFFF; padding: 15px; display: flex; flex-direction: column; gap: 20px; position: fixed; top: 15vh; height: 85%; transition: transform 0.3s ease; }
         .sidebar.collapsed { transform: translateX(-230px); }
@@ -51,8 +58,9 @@
                 <span class="button-label">Independent:</span>
                 <div class="dropdown-toggle" id="independent-toggle">Target Temperature (°C)</div>
                 <div class="dropdown-menu" id="independent-menu">
-                    <div class="dropdown-item"><input type="checkbox" id="Temp_target" value="Temp_target"><label for="Temp_target">Target Temperature (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="CO2_trmt" value="CO2_trmt"><label for="CO2_trmt">CO₂ Treatment (ppm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="Temp_target" value="Temp_target" checked><label for="Temp_target">Target Temperature (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="CO2_trmt" value="CO2_trmt"><label for="CO2_trmt">CO&#8322; Treatment (ppm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TIMESTAMP" value="TIMESTAMP"><label for="TIMESTAMP">Time</label></div>
                 </div>
             </div>
             <div class="button-container">
@@ -68,8 +76,11 @@
                     <div class="dropdown-item"><input type="checkbox" id="TS_50_A7" value="TS_50_A7"><label for="TS_50_A7">Soil Temp 50 cm (A7, °C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_100_A8" value="TS_100_A8"><label for="TS_100_A8">Soil Temp 100 cm (A8, °C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_200_A9" value="TS_200_A9"><label for="TS_200_A9">Soil Temp 200 cm (A9, °C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0_1" value="TA_2_0_1"><label for="TA_2_0_1">Air Temp 2m (1, °C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0_1" value="TA_2_0_1"><label for="TA_2_0_1">Ambient Temp 2m (1, °C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0_2" value="TA_2_0_2"><label for="TA_2_0_2">Ambient Temp 2m (2, °C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="RH_2_0_1" value="RH_2_0_1"><label for="RH_2_0_1">Relative Humidity 2m (1, %)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0_2" value="RH_2_0_2"><label for="RH_2_0_2">Relative Humidity 2m (2, %)</label></div>
+                    <!-- Placeholder for ambient CO2 - not explicitly in sample, assuming CO2_trmt is treatment, not ambient -->
                 </div>
             </div>
             <div class="button-container">
@@ -77,35 +88,35 @@
                 <div class="dropdown-toggle" id="condition-toggle">Select Conditions</div>
                 <div class="dropdown-menu" id="condition-menu">
                     <div class="dropdown-item">
-                        <input type="checkbox" id="WS_10_cond" value="WS_10"><label for="WS_10_cond">Wind Speed (m/s)</label>
+                        <input type="checkbox" id="WS_10_cond" value="WS_10" checked><label for="WS_10_cond">Wind Speed (m/s)</label>
                         <div class="range-options">
-                            <div class="dropdown-item"><input type="checkbox" id="WS_10_0_2" value="0-2"><label for="WS_10_0_2">0-2</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="WS_10_2_5" value="2-5"><label for="WS_10_2_5">2-5</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="WS_10_5_plus" value="5+"><label for="WS_10_5_plus">5+</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="WS_10_0_2" value="0-2" checked><label for="WS_10_0_2">0-2</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="WS_10_2_5" value="2-5" checked><label for="WS_10_2_5">2-5</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="WS_10_5_plus" value="5+" checked><label for="WS_10_5_plus">5+</label></div>
                         </div>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="WD_10_cond" value="WD_10"><label for="WD_10_cond">Wind Direction (°)</label>
+                        <input type="checkbox" id="WD_10_cond" value="WD_10" checked><label for="WD_10_cond">Wind Direction (°)</label>
                         <div class="range-options">
-                            <div class="dropdown-item"><input type="checkbox" id="WD_10_0_90" value="0-90"><label for="WD_10_0_90">0-90</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="WD_10_90_180" value="90-180"><label for="WD_10_90_180">90-180</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="WD_10_180_360" value="180-360"><label for="WD_10_180_360">180-360</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="WD_10_0_90" value="0-90" checked><label for="WD_10_0_90">0-90</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="WD_10_90_180" value="90-180" checked><label for="WD_10_90_180">90-180</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="WD_10_180_360" value="180-360" checked><label for="WD_10_180_360">180-360</label></div>
                         </div>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="PAR_2_cond" value="PAR_2"><label for="PAR_2_cond">PAR (µmol/m²s)</label>
+                        <input type="checkbox" id="PAR_2_cond" value="PAR_2" checked><label for="PAR_2_cond">PAR (µmol/m²s)</label>
                         <div class="range-options">
-                            <div class="dropdown-item"><input type="checkbox" id="PAR_2_0_50" value="0-50"><label for="PAR_2_0_50">0-50</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="PAR_2_50_100" value="50-100"><label for="PAR_2_50_100">50-100</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="PAR_2_100_plus" value="100+"><label for="PAR_2_100_plus">100+</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="PAR_2_0_50" value="0-50" checked><label for="PAR_2_0_50">0-50</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="PAR_2_50_100" value="50-100" checked><label for="PAR_2_50_100">50-100</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="PAR_2_100_plus" value="100+" checked><label for="PAR_2_100_plus">100+</label></div>
                         </div>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="PREC_6_cond" value="PREC_6"><label for="PREC_6_cond">Precipitation (mm)</label>
+                        <input type="checkbox" id="PREC_6_cond" value="PREC_6" checked><label for="PREC_6_cond">Precipitation (mm)</label>
                         <div class="range-options">
-                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_0_1" value="0-1"><label for="PREC_6_0_1">0-1</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_1_5" value="1-5"><label for="PREC_6_1_5">1-5</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_5_plus" value="5+"><label for="PREC_6_5_plus">5+</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_0_1" value="0-1" checked><label for="PREC_6_0_1">0-1</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_1_5" value="1-5" checked><label for="PREC_6_1_5">1-5</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_5_plus" value="5+" checked><label for="PREC_6_5_plus">5+</label></div>
                         </div>
                     </div>
                 </div>
@@ -155,7 +166,7 @@
         let startDate = null;
         let endDate = null;
         let dataLoaded = false;
-        const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4'];
+        const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#FFD700', '#6A5ACD'];
 
         function populatePlotDropdown() {
             const plotMenu = document.getElementById('plot-menu');
@@ -234,7 +245,7 @@
             console.log(`Filtering ${condition} with ranges:`, ranges);
             return data.filter(row => {
                 const value = row[condition];
-                if (value === undefined || value === null || isNaN(parseFloat(value))) return true;
+                if (value === undefined || value === null || isNaN(parseFloat(value))) return true; // Keep nulls to maximize data
                 const numericValue = parseFloat(value);
                 return ranges.some(range => {
                     if (range.endsWith('+')) return numericValue >= parseFloat(range);
@@ -308,12 +319,12 @@
             console.log('Sample working data (first 5):', workingData.slice(0, 5).map(row => ({
                 TIMESTAMP: row.TIMESTAMP.toISOString().split('T')[0],
                 Plot: row.Plot,
-                [independent]: row[independent],
+                [independent]: independent === 'TIMESTAMP' ? row[independent].getTime() : row[independent],
                 ...dependents.reduce((acc, dep) => ({ ...acc, [dep]: row[dep] }), {})
             })));
             
             const traces = dependents.map((dep, i) => {
-                const xValues = workingData.map(row => row[independent]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
+                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row[independent].getTime() : row[independent]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
                 const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
                 console.log(`Trace for ${dep}: x=${xValues.length}, y=${yValues.length}`);
                 console.log(`Sample ${independent} (first 5):`, xValues.slice(0, 5));
@@ -336,7 +347,7 @@
             }
 
             const statsText = dependents.map(dep => {
-                const xValues = workingData.map(row => row[independent]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
+                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row[independent].getTime() : row[independent]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
                 const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
                 if (yValues.length > 0) {
                     const { slope, rSquared } = calculateRegression(xValues, yValues);
@@ -356,7 +367,7 @@
                 paper_bgcolor: '#1A1A1A',
                 font: { color: '#FFFFFF', size: 12 },
                 title: {
-                    text: `Comparative Biospheromics: ${independent === 'CO2_trmt' ? 'CO₂' : 'Temperature'} vs. Soil Temperature`,
+                    text: `Comparative Biospheromics: ${independent === 'CO2_trmt' ? 'CO&#8322;' : independent === 'TIMESTAMP' ? 'Time' : 'Temperature'} vs. Measurements`,
                     font: { size: 16 },
                     x: 0.5,
                     xanchor: 'center',
@@ -364,12 +375,16 @@
                     yanchor: 'top'
                 },
                 xaxis: {
-                    title: { text: independent === 'CO2_trmt' ? 'CO₂ Treatment (ppm)' : 'Target Temperature (°C)', font: { size: 14 } },
+                    title: { 
+                        text: independent === 'CO2_trmt' ? 'CO&#8322; Treatment (ppm)' : independent === 'TIMESTAMP' ? 'Time' : 'Target Temperature (°C)', 
+                        font: { size: 14 } 
+                    },
                     gridcolor: '#444',
-                    zerolinecolor: '#444'
+                    zerolinecolor: '#444',
+                    type: independent === 'TIMESTAMP' ? 'date' : 'linear'
                 },
                 yaxis: {
-                    title: { text: 'Soil Temperature (°C)', font: { size: 14 } },
+                    title: { text: 'Measurements', font: { size: 14 } },
                     gridcolor: '#444',
                     zerolinecolor: '#444'
                 },
