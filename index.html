@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparative Biospheromics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Exo+2:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -20,14 +20,54 @@
             text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; 
         }
         .container { display: flex; flex-grow: 1; overflow: hidden; }
-        .sidebar { width: 250px; background: rgba(26, 26, 26, 0.8); border-right: 2px solid #00FFFF; padding: 15px; display: flex; flex-direction: column; gap: 20px; position: fixed; top: 15vh; height: 85%; transition: transform 0.3s ease; }
+        .sidebar { 
+            width: 250px; 
+            background: rgba(26, 26, 26, 0.8); 
+            border-right: 2px solid #00FFFF; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+            position: fixed; 
+            top: 15vh; 
+            height: 85%; 
+            transition: transform 0.3s ease; 
+            z-index: 10; 
+        }
         .sidebar.collapsed { transform: translateX(-230px); }
-        .sidebar-tab { position: absolute; top: 0; right: -40px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-left: none; border-radius: 0 10px 10px 0; color: #00FFFF; font-size: 18px; line-height: 36px; text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; }
+        .sidebar-tab { 
+            position: absolute; 
+            top: 0; 
+            right: -40px; 
+            width: 40px; 
+            height: 40px; 
+            background: rgba(26, 26, 26, 0.8); 
+            border: 2px solid #00FFFF; 
+            border-left: none; 
+            border-radius: 0 10px 10px 0; 
+            color: #00FFFF; 
+            font-size: 18px; 
+            line-height: 36px; 
+            text-align: center; 
+            cursor: pointer; 
+            box-shadow: 0 0 8px #00FFFF; 
+        }
         .sidebar-title { font-family: 'Exo 2', sans-serif; font-size: 24px; color: #DAA520; text-align: center; text-shadow: 0 0 10px #DAA520; line-height: 1.2; }
         .sidebar-title span { display: block; font-size: 16px; }
         .button-container { display: flex; align-items: center; width: 100%; position: relative; }
         .button-label { color: #FFFF00; font-size: 12px; margin-right: 10px; width: 100px; text-align: right; padding-left: 10px; }
-        .dropdown-toggle, #analyze-button { background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 10px; padding: 4px 8px; width: calc(100% - 120px); text-align: left; cursor: pointer; box-shadow: 0 0 8px #00FFFF; }
+        .dropdown-toggle, #analyze-button { 
+            background: rgba(26, 26, 26, 0.8); 
+            border: 2px solid #00FFFF; 
+            border-radius: 10px; 
+            color: #00FFFF; 
+            font-size: 10px; 
+            padding: 4px 8px; 
+            width: calc(100% - 120px); 
+            text-align: left; 
+            cursor: pointer; 
+            box-shadow: 0 0 8px #00FFFF; 
+        }
         #analyze-button { text-align: center; }
         .dropdown-menu { 
             position: absolute; 
@@ -52,12 +92,26 @@
         #condition-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 8px; }
         #condition-menu .range-options { margin-left: 20px; margin-top: 5px; }
         #condition-menu .range-options .dropdown-item { margin-bottom: 3px; }
+        #stats-menu #stats-content { color: #00FF00; font-family: 'VT323', monospace; font-size: 12px; }
         #time-range-menu { padding: 10px; }
         #time-range-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 10px; }
         #time-range-menu input[type="text"] { width: 100%; background: rgba(26, 26, 26, 0.8); border: 1px solid #00FFFF; color: #00FFFF; padding: 4px; margin-top: 5px; font-size: 10px; }
-        .graph-container { flex-grow: 1; margin-left: 250px; background-color: #1A1A1A; height: 98%; transition: margin-left 0.3s ease; }
+        .graph-container { 
+            flex-grow: 1; 
+            margin-left: 250px; 
+            background-color: #1A1A1A; 
+            height: calc(100vh - 15vh); 
+            transition: margin-left 0.3s ease; 
+            position: relative; 
+            z-index: 1; 
+        }
         .graph-container.full-width { margin-left: 0; }
-        #graph { width: 100%; height: 100%; }
+        #graph { 
+            width: 100%; 
+            height: 100%; 
+            min-width: 320px; /* Minimum mobile size */
+            min-height: 240px; 
+        }
     </style>
 </head>
 <body>
@@ -133,7 +187,7 @@
                         <input type="checkbox" id="PREC_6_cond" value="PREC_6" checked><label for="PREC_6_cond">Precipitation (mm)</label>
                         <div class="range-options">
                             <div class="dropdown-item"><input type="checkbox" id="PREC_6_0_1" value="0-1" checked><label for="PREC_6_0_1">0-1</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_1_5" value="1-5" checked><label for="PRE C_6_1_5">1-5</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_1_5" value="1-5" checked><label for="PREC_6_1_5">1-5</label></div>
                             <div class="dropdown-item"><input type="checkbox" id="PREC_6_5_plus" value="5+" checked><label for="PREC_6_5_plus">5+</label></div>
                         </div>
                     </div>
@@ -245,7 +299,7 @@
             graphContainer.classList.toggle('full-width');
             tab.textContent = sidebar.classList.contains('collapsed') ? '<' : '>';
             if (dataLoaded && typeof Plotly !== 'undefined') {
-                Plotly.relayout('graph', { width: graphContainer.clientWidth, height: graphContainer.clientHeight });
+                Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
             }
         }
 
@@ -273,275 +327,11 @@
 
         function calculateRegression(x, y) {
             const n = x.length;
-            if (n === 0) return { slope: NaN, rSquared: NaN };
+            if (n === 0) return { slope: NaN, intercept: NaN, rSquared: NaN };
             const sumX = x.reduce((a, b) => a + b, 0);
             const sumY = y.reduce((a, b) => a + b, 0);
             const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
             const sumXX = x.reduce((sum, xi) => sum + xi * xi, 0);
-            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-            const yPred = x.map(xi => slope * xi + sumY / n - slope * sumX / n);
-            const ssTot = y.reduce((sum, yi, i) => sum + Math.pow(yi - sumY / n, 2), 0);
-            const ssRes = y.reduce((sum, yi, i) => sum + Math.pow(yi - yPred[i], 2), 0);
-            const rSquared = ssTot === 0 ? NaN : 1 - (ssRes / ssTot);
-            return { slope, rSquared };
-        }
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX...
 
-        function aggregateVariables(data) {
-            const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
-            const zones = ['A', 'B', 'C'];
-            return data.map(row => {
-                const newRow = { ...row };
-                depths.forEach(depth => {
-                    const keys = zones.map(zone => `TS_${depth}_${zone}${depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 : depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9}`);
-                    const values = keys.map(k => row[k]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
-                    newRow[`TS_${depth}`] = values.length > 0 ? values.reduce((sum, v) => sum + parseFloat(v), 0) / values.length : null;
-                });
-                const taKeys = ['TA_2_0_1', 'TA_2_0_2'];
-                const taValues = taKeys.map(k => row[k]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
-                newRow['TA_2_0'] = taValues.length > 0 ? taValues.reduce((sum, v) => sum + parseFloat(v), 0) / taValues.length : null;
-                const rhKeys = ['RH_2_0_1', 'RH_2_0_2'];
-                const rhValues = rhKeys.map(k => row[k]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
-                newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + parseFloat(v), 0) / rhValues.length : null;
-                return newRow;
-            });
-        }
-
-        function getWeeklyTimestamps(data, start, end) {
-            const weeklyData = {};
-            data.forEach(row => {
-                const date = row.TIMESTAMP;
-                if ((!start || date >= start) && (!end || date <= new Date(end.getTime() + 24 * 60 * 60 * 1000 - 1))) {
-                    const weekStart = new Date(date);
-                    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-                    weekStart.setHours(0, 0, 0, 0);
-                    const key = weekStart.toISOString().split('T')[0];
-                    if (!weeklyData[key]) weeklyData[key] = { TIMESTAMP: weekStart, values: {} };
-                    Object.keys(row).forEach(k => {
-                        if (k !== 'TIMESTAMP') weeklyData[key].values[k] = (weeklyData[key].values[k] || []).concat(row[k]);
-                    });
-                }
-            });
-            return Object.values(weeklyData).map(w => ({
-                TIMESTAMP: w.TIMESTAMP,
-                ...Object.keys(w.values).reduce((acc, k) => ({
-                    ...acc,
-                    [k]: w.values[k].filter(v => v !== null && !isNaN(parseFloat(v))).reduce((sum, v) => sum + parseFloat(v), 0) / w.values[k].length || null
-                }), {})
-            }));
-        }
-
-        function updateGraph() {
-            console.log('Starting updateGraph');
-            document.getElementById('graph').innerHTML = '';
-            if (!dataLoaded) {
-                console.log('Data not loaded yet');
-                document.getElementById('graph').innerHTML = 'Please click Analyze to load data';
-                return;
-            }
-            if (typeof Plotly === 'undefined') {
-                console.error('Plotly not loaded');
-                document.getElementById('graph').innerHTML = 'Plotly library not loaded';
-                return;
-            }
-
-            const selectedPlots = Array.from(document.querySelectorAll('#plot-menu input:checked')).map(input => parseInt(input.value));
-            const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || 'Temp_target';
-            const dependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
-            const conditionElements = Array.from(document.querySelectorAll('#condition-menu input:checked')).filter(el => el.id.endsWith('_cond'));
-            const conditions = conditionElements.map(el => ({
-                key: el.value,
-                ranges: Array.from(document.querySelectorAll(`#condition-menu input:checked:not([id$="_cond"])[id^="${el.id.split('_cond')[0]}"]`)).map(input => input.value)
-            }));
-            const chartType = document.querySelector('#chart-type-menu input:checked').value;
-
-            console.log('Selected plots:', selectedPlots);
-            console.log('Independent:', independent);
-            console.log('Dependents:', dependents);
-            console.log('Conditions:', conditions.map(c => ({ [c.key]: c.ranges })));
-            console.log('Chart type:', chartType);
-
-            let workingData = selectedPlots.length > 0 ? allData.filter(row => selectedPlots.includes(row.Plot)) : allData;
-            console.log('After plot filter:', workingData.length);
-            if (startDate || endDate) {
-                console.log('Filtering by time:', startDate?.toISOString().split('T')[0], endDate?.toISOString().split('T')[0]);
-                workingData = workingData.filter(row => {
-                    const rowDate = row.TIMESTAMP;
-                    return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1));
-                });
-                console.log('After time filter:', workingData.length);
-            }
-            conditions.forEach(({ key, ranges }) => {
-                workingData = filterByConditionRange(workingData, key, ranges);
-                console.log(`After ${key} filter:`, workingData.length);
-            });
-
-            workingData = aggregateVariables(workingData);
-            console.log('After variable aggregation:', workingData.length);
-
-            if (independent === 'TIMESTAMP') {
-                workingData = getWeeklyTimestamps(workingData, startDate, endDate);
-                console.log('After weekly aggregation:', workingData.length);
-            }
-
-            console.log('Sample working data (first 5):', workingData.slice(0, 5).map(row => ({
-                TIMESTAMP: row.TIMESTAMP.toISOString().split('T')[0],
-                Plot: row.Plot,
-                [independent]: independent === 'TIMESTAMP' ? row.TIMESTAMP : row[independent],
-                ...dependents.reduce((acc, dep) => ({ ...acc, [dep]: row[dep] }), {})
-            })));
-            
-            const traces = dependents.map((dep, i) => {
-                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : row[independent]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
-                const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
-                console.log(`Trace for ${dep}: x=${xValues.length}, y=${yValues.length}`);
-                console.log(`Sample ${independent} (first 5):`, xValues.slice(0, 5));
-                console.log(`Sample ${dep} (first 5):`, yValues.slice(0, 5));
-                return {
-                    x: xValues,
-                    y: yValues,
-                    mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
-                    type: chartType === 'scatter' ? 'scattergl' : chartType === 'area' ? 'scattergl' : chartType,
-                    name: document.querySelector(`label[for="${dep}"]`)?.textContent || dep,
-                    marker: { color: colors[i % colors.length], size: 8 },
-                    line: (chartType === 'line' || chartType === 'area') ? { color: colors[i % colors.length], width: 2 } : undefined,
-                    fill: chartType === 'area' ? 'tozeroy' : undefined
-                };
-            });
-
-            if (!traces.some(trace => trace.x.length > 0 && trace.y.length > 0)) {
-                console.log('No plottable data');
-                document.getElementById('graph').innerHTML = 'No plottable data for selected variables.';
-                return;
-            }
-
-            const statsText = dependents.map(dep => {
-                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : row[independent]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
-                const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
-                if (yValues.length > 0) {
-                    const { slope, rSquared } = calculateRegression(xValues, yValues);
-                    return `${document.querySelector(`label[for="${dep}"]`)?.textContent || dep}: ` +
-                           `Slope: ${slope.toFixed(4)}, R²: ${rSquared.toFixed(4)}`;
-                }
-                return `${dep}: No valid data points`;
-            }).join('<br>');
-            document.getElementById('stats-content').innerHTML = statsText;
-
-            const timeRangeMs = (endDate || new Date()).getTime() - (startDate || allData[0].TIMESTAMP).getTime();
-            const timeUnit = timeRangeMs > 365 * 24 * 60 * 60 * 1000 ? 'month' : timeRangeMs > 30 * 24 * 60 * 60 * 1000 ? 'week' : 'day';
-
-            const xAxisTitle = independent === 'CO2_trmt' ? 'CO₂ Treatment (ppm)' : 
-                              independent === 'TIMESTAMP' ? 'Time' : 
-                              'Target Temperature (°C)';
-            const yAxisTitle = dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"]`)?.textContent || 'Measurements' : 'Measurements';
-
-            const layout = {
-                width: document.getElementById('graph-container').clientWidth,
-                height: document.getElementById('graph-container').clientHeight,
-                plot_bgcolor: '#1A1A1A',
-                paper_bgcolor: '#1A1A1A',
-                font: { color: '#FFFFFF', size: 12 },
-                title: {
-                    text: `Comparative Biospheromics: ${independent === 'CO2_trmt' ? 'CO₂' : independent === 'TIMESTAMP' ? 'Time' : 'Temperature'} vs. Measurements`,
-                    font: { size: 16 },
-                    x: 0.5,
-                    xanchor: 'center',
-                    y: 0.95,
-                    yanchor: 'top'
-                },
-                xaxis: {
-                    title: { text: xAxisTitle, font: { size: 14 } },
-                    gridcolor: '#444',
-                    zerolinecolor: '#444',
-                    type: independent === 'TIMESTAMP' ? 'date' : 'linear',
-                    dtick: independent === 'TIMESTAMP' ? (timeUnit === 'month' ? 'M1' : timeUnit === 'week' ? '604800000' : '86400000') : undefined
-                },
-                yaxis: {
-                    title: { text: yAxisTitle, font: { size: 14 } },
-                    gridcolor: '#444',
-                    zerolinecolor: '#444'
-                },
-                margin: { t: 80, b: 60, l: 60, r: 20 },
-                showlegend: true,
-                legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.8)' }
-            };
-            console.log('Plotly layout:', JSON.stringify(layout, null, 2));
-            console.log('Plotting with Plotly');
-            Plotly.newPlot('graph', traces, layout).catch(err => console.error('Plotly error:', err));
-        }
-
-        document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
-        document.getElementById('plot-toggle').addEventListener('click', () => toggleDropdown('plot-menu'));
-        document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
-        document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
-        document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
-        document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
-        document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
-        document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
-        document.getElementById('analyze-button').addEventListener('click', () => {
-            console.log('Analyze button clicked');
-            loadData();
-        });
-
-        document.querySelectorAll('#independent-menu input').forEach(input => {
-            input.addEventListener('change', () => {
-                enforceSingleSelection('independent-menu', input.id);
-                document.getElementById('independent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
-            });
-            if (input.id === 'Temp_target') input.checked = true;
-        });
-
-        document.querySelectorAll('#dependent-menu input').forEach(input => {
-            input.addEventListener('change', () => {
-                document.getElementById('dependent-toggle').textContent = 
-                    Array.from(document.querySelectorAll('#dependent-menu input:checked'))
-                        .map(input => document.querySelector(`label[for="${input.id}"]`).textContent)
-                        .join(', ') || 'Select Dependent';
-            });
-        });
-
-        document.querySelectorAll('#condition-menu input').forEach(input => {
-            input.addEventListener('change', () => {
-                if (input.id.endsWith('_cond') && input.checked) {
-                    const rangeOptions = document.querySelectorAll(`#condition-menu input:not([id$="_cond"])[id^="${input.id.split('_cond')[0]}"]`);
-                    rangeOptions.forEach(option => option.checked = true);
-                }
-            });
-        });
-
-        document.querySelectorAll('#chart-type-menu input').forEach(input => {
-            input.addEventListener('change', () => {
-                document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
-            });
-        });
-
-        flatpickr('#start-date', {
-            dateFormat: 'Y-m-d',
-            onChange: (selectedDates) => {
-                startDate = selectedDates[0];
-                document.getElementById('time-range-toggle').textContent = 
-                    `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
-            }
-        });
-
-        flatpickr('#end-date', {
-            dateFormat: 'Y-m-d',
-            onChange: (selectedDates) => {
-                endDate = selectedDates[0];
-                document.getElementById('time-range-toggle').textContent = 
-                    `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
-            }
-        });
-
-        window.addEventListener('resize', () => {
-            if (dataLoaded && typeof Plotly !== 'undefined') {
-                Plotly.relayout('graph', { 
-                    width: document.getElementById('graph-container').clientWidth, 
-                    height: document.getElementById('graph-container').clientHeight 
-                });
-            }
-        });
-
-        populatePlotDropdown();
-    </script>
-</body>
-</html>
+Something went wrong, please try again.
