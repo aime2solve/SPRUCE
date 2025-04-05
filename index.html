@@ -29,7 +29,7 @@
             margin: 0; 
             text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; 
             flex-shrink: 0; 
-            z-index: 11; /* Ensure title is above sidebar */
+            z-index: 11; 
         }
         .container { 
             display: flex; 
@@ -46,8 +46,8 @@
             flex-direction: column; 
             gap: 15px; 
             position: absolute; 
-            top: 80px; /* Below title and Plotly toolbar (~40px + buffer) */
-            height: calc(100vh - 90px); /* Adjusted to fit below chart top */
+            top: 80px; 
+            height: calc(100vh - 90px); 
             transition: transform 0.3s ease; 
             z-index: 10; 
         }
@@ -283,7 +283,6 @@
         let endDate = new Date('2025-04-05');
         let dataLoaded = false;
         const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#FFD700', '#6A5ACD', '#20B2AA', '#DAA520'];
-        let legendVisible = true;
 
         const conditionMap = {
             'ambient_ambient': { temp: 0, co2: 'Ambient', plot: 7 },
@@ -296,6 +295,12 @@
             '6.75_elevated': { temp: 6.75, co2: 900, plot: 13 },
             '9_ambient': { temp: 9, co2: 'Ambient', plot: 8 },
             '9_elevated': { temp: 9, co2: 900, plot: 16 }
+        };
+
+        const unitMap = {
+            'TS_0': '°C', 'TS_5': '°C', 'TS_10': '°C', 'TS_20': '°C', 'TS_30': '°C', 
+            'TS_40': '°C', 'TS_50': '°C', 'TS_100': '°C', 'TS_200': '°C', 'TA_2_0': '°C',
+            'RH_2_0': '%', 'WS_10': 'm/s', 'WD_10': '°', 'PAR_2': 'µmol/m²s', 'PREC_6': 'mm'
         };
 
         async function loadData() {
@@ -327,10 +332,10 @@
             const tab = document.getElementById('sidebar-tab');
             sidebar.classList.toggle('collapsed');
             graphContainer.classList.toggle('full-width');
-            tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
             if (dataLoaded && typeof Plotly !== 'undefined') {
                 Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
             }
+            tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
         }
 
         function enforceSingleSelection(groupId, changedId) {
@@ -350,6 +355,29 @@
                     Math.abs(row.Temp_target - cond.temp) < 0.1
                 );
             });
+        }
+
+        function updateConditionsBasedOnVariables(independent, dependents) {
+            const conditionCheckboxes = document.querySelectorAll('#condition-menu input[type="checkbox"]');
+            conditionCheckboxes.forEach(checkbox => {
+                const cond = conditionMap[checkbox.value];
+                const needsTemp = independent === 'Temp_target' || dependents.some(dep => dep.startsWith('TS_') || dep === 'TA_2_0');
+                const needsCO2 = independent === 'CO2_trmt';
+                if (needsTemp && needsCO2) {
+                    checkbox.checked = true; // All conditions relevant
+                } else if (needsTemp) {
+                    checkbox.checked = cond.temp > 0 || cond.co2 === 'Ambient'; // Vary temp, keep ambient CO₂
+                } else if (needsCO2) {
+                    checkbox.checked = cond.co2 === 900; // Vary CO₂, keep temp constant
+                } else {
+                    checkbox.checked = true; // Default to all if no specific need
+                }
+            });
+            document.getElementById('condition-toggle').textContent = 
+                Array.from(conditionCheckboxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => document.querySelector(`label[for="${cb.id}"]`).textContent)
+                    .join(', ') || 'Select Conditions';
         }
 
         function calculateRegression(x, y) {
@@ -436,8 +464,7 @@
         }
 
         function toggleLegend() {
-            legendVisible = !legendVisible;
-            Plotly.relayout('graph', { showlegend: legendVisible });
+            Plotly.relayout('graph', { showlegend: !Plotly.getPlot('graph')?.layout?.showlegend });
         }
 
         function updateGraph() {
@@ -452,17 +479,19 @@
             }
 
             const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || 'Temp_target';
-            const dependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
+            const allDependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
             const conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
             const chartType = document.querySelector('#chart-type-menu input:checked').value;
             const showFit = document.getElementById('show-fit').checked;
 
-            if (!dependents.length) {
+            if (!allDependents.length) {
                 document.getElementById('graph').innerHTML = 'Please select at least one dependent variable.';
                 return;
             }
 
-            let workingData = filterByConditions(allData, conditions);
+            updateConditionsBasedOnVariables(independent, allDependents);
+            const updatedConditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
+            let workingData = filterByConditions(allData, updatedConditions);
             if (!workingData.length) {
                 document.getElementById('graph').innerHTML = 'No data matches the selected conditions.';
                 return;
@@ -481,6 +510,14 @@
             }
 
             console.log('Filtered and aggregated data sample:', workingData.slice(0, 5));
+
+            const units = allDependents.map(dep => unitMap[dep]);
+            const commonUnit = units[0];
+            const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
+            if (!dependents.length) {
+                document.getElementById('graph').innerHTML = 'Selected dependent variables have different units.';
+                return;
+            }
 
             const traces = [];
             const fitTraces = [];
@@ -542,7 +579,9 @@
                               independent === 'TIMESTAMP' ? 'Time' : 
                               independent === 'Temp_target' ? 'Target Temperature (°C)' :
                               document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
-            const yAxisTitle = dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || 'Measurements' : 'Measurements';
+            const yAxisTitle = dependents.length === 1 ? 
+                               document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent :
+                               `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit})`;
 
             const annotations = showFit ? dependents.map((dep, i) => {
                 const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : row[independent]).filter(v => v !== undefined && v !== null);
@@ -589,8 +628,8 @@
                     zerolinecolor: '#444',
                     automargin: true
                 },
-                margin: { t: 80, b: 60, l: 100, r: 40 },
-                showlegend: legendVisible,
+                margin: { t: 80, b: 80, l: 100, r: 40 }, // Increased bottom margin for x-axis label
+                showlegend: true,
                 legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.8)' },
                 annotations: annotations
             };
