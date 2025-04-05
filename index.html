@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparative Biospheromics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Exo+2:wght=700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Exo+2:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -48,6 +48,7 @@
         }
         .dropdown-menu.open { max-height: 200px; visibility: visible; }
         .dropdown-item { display: flex; align-items: center; margin-bottom: 3px; }
+        #dependent-menu .dropdown-item label { margin-left: 5px; }
         #condition-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 8px; }
         #condition-menu .range-options { margin-left: 20px; margin-top: 5px; }
         #condition-menu .range-options .dropdown-item { margin-bottom: 3px; }
@@ -56,7 +57,7 @@
         #time-range-menu input[type="text"] { width: 100%; background: rgba(26, 26, 26, 0.8); border: 1px solid #00FFFF; color: #00FFFF; padding: 4px; margin-top: 5px; font-size: 10px; }
         .graph-container { flex-grow: 1; margin-left: 250px; background-color: #1A1A1A; height: 98%; transition: margin-left 0.3s ease; }
         .graph-container.full-width { margin-left: 0; }
-        #graph { width: 90%; height: 99%; margin: 0.5% auto; }
+        #graph { width: 100%; height: 100%; }
     </style>
 </head>
 <body>
@@ -83,21 +84,21 @@
                 <span class="button-label">Dependent:</span>
                 <div class="dropdown-toggle" id="dependent-toggle">Select Dependent</div>
                 <div class="dropdown-menu" id="dependent-menu">
-                    <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0"><label for="TS_0">Soil Temp 0 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_5" value="TS_5"><label for="TS_5">Soil Temp 5 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_10" value="TS_10"><label for="TS_10">Soil Temp 10 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_20" value="TS_20"><label for="TS_20">Soil Temp 20 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_30" value="TS_30"><label for="TS_30">Soil Temp 30 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_40" value="TS_40"><label for="TS_40">Soil Temp 40 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_50" value="TS_50"><label for="TS_50">Soil Temp 50 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_100" value="TS_100"><label for="TS_100">Soil Temp 100 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_200" value="TS_200"><label for="TS_200">Soil Temp 200 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0" value="TA_2_0"><label for="TA_2_0">Ambient Temp 2m (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0">Relative Humidity 2m (%)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="WS_10" value="WS_10"><label for="WS_10">Wind Speed 10m (m/s)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction 10m (°)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0"><label for="TS_0" style="color: #00FFFF;">Soil Temp 0 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_5" value="TS_5"><label for="TS_5" style="color: #FFFF00;">Soil Temp 5 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_10" value="TS_10"><label for="TS_10" style="color: #FF00FF;">Soil Temp 10 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_20" value="TS_20"><label for="TS_20" style="color: #00FF00;">Soil Temp 20 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_30" value="TS_30"><label for="TS_30" style="color: #FF0000;">Soil Temp 30 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_40" value="TS_40"><label for="TS_40" style="color: #0000FF;">Soil Temp 40 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_50" value="TS_50"><label for="TS_50" style="color: #FFA500;">Soil Temp 50 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_100" value="TS_100"><label for="TS_100" style="color: #800080;">Soil Temp 100 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_200" value="TS_200"><label for="TS_200" style="color: #008080;">Soil Temp 200 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0" value="TA_2_0"><label for="TA_2_0" style="color: #FF6347;">Ambient Temp 2m (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0" style="color: #4682B4;">Relative Humidity 2m (%)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WS_10" value="WS_10"><label for="WS_10" style="color: #FFD700;">Wind Speed 10m (m/s)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10" style="color: #6A5ACD;">Wind Direction 10m (°)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2" style="color: #20B2AA;">PAR (µmol/m²s)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6" style="color: #DAA520;">Precipitation (mm)</label></div>
                 </div>
             </div>
             <div class="button-container">
@@ -132,7 +133,7 @@
                         <input type="checkbox" id="PREC_6_cond" value="PREC_6" checked><label for="PREC_6_cond">Precipitation (mm)</label>
                         <div class="range-options">
                             <div class="dropdown-item"><input type="checkbox" id="PREC_6_0_1" value="0-1" checked><label for="PREC_6_0_1">0-1</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_1_5" value="1-5" checked><label for="PREC_6_1_5">1-5</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_1_5" value="1-5" checked><label for="PRE C_6_1_5">1-5</label></div>
                             <div class="dropdown-item"><input type="checkbox" id="PREC_6_5_plus" value="5+" checked><label for="PREC_6_5_plus">5+</label></div>
                         </div>
                     </div>
@@ -181,7 +182,7 @@
         let startDate = null;
         let endDate = null;
         let dataLoaded = false;
-        const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#FFD700', '#6A5ACD', '#20B2AA', '#DAA520', '#7FFF00', '#DC143C', '#00CED1', '#9400D3', '#FF1493', '#1E90FF', '#32CD32', '#FF4500', '#2E8B57', '#ADFF2F', '#FF69B4', '#CD5C5C', '#4B0082', '#F0E68C', '#E6E6FA'];
+        const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#FFD700', '#6A5ACD', '#20B2AA', '#DAA520'];
 
         function populatePlotDropdown() {
             const plotMenu = document.getElementById('plot-menu');
@@ -244,7 +245,7 @@
             graphContainer.classList.toggle('full-width');
             tab.textContent = sidebar.classList.contains('collapsed') ? '<' : '>';
             if (dataLoaded && typeof Plotly !== 'undefined') {
-                Plotly.relayout('graph', { width: document.getElementById('graph').clientWidth, height: document.getElementById('graph').clientHeight });
+                Plotly.relayout('graph', { width: graphContainer.clientWidth, height: graphContainer.clientHeight });
             }
         }
 
@@ -290,17 +291,14 @@
             const zones = ['A', 'B', 'C'];
             return data.map(row => {
                 const newRow = { ...row };
-                // Aggregate soil temperatures
                 depths.forEach(depth => {
                     const keys = zones.map(zone => `TS_${depth}_${zone}${depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 : depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9}`);
                     const values = keys.map(k => row[k]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
                     newRow[`TS_${depth}`] = values.length > 0 ? values.reduce((sum, v) => sum + parseFloat(v), 0) / values.length : null;
                 });
-                // Aggregate air temperature
                 const taKeys = ['TA_2_0_1', 'TA_2_0_2'];
                 const taValues = taKeys.map(k => row[k]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
                 newRow['TA_2_0'] = taValues.length > 0 ? taValues.reduce((sum, v) => sum + parseFloat(v), 0) / taValues.length : null;
-                // Aggregate relative humidity
                 const rhKeys = ['RH_2_0_1', 'RH_2_0_2'];
                 const rhValues = rhKeys.map(k => row[k]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
                 newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + parseFloat(v), 0) / rhValues.length : null;
@@ -393,7 +391,7 @@
             })));
             
             const traces = dependents.map((dep, i) => {
-                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : row[independent]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
+                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : row[independent]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
                 const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
                 console.log(`Trace for ${dep}: x=${xValues.length}, y=${yValues.length}`);
                 console.log(`Sample ${independent} (first 5):`, xValues.slice(0, 5));
@@ -431,9 +429,14 @@
             const timeRangeMs = (endDate || new Date()).getTime() - (startDate || allData[0].TIMESTAMP).getTime();
             const timeUnit = timeRangeMs > 365 * 24 * 60 * 60 * 1000 ? 'month' : timeRangeMs > 30 * 24 * 60 * 60 * 1000 ? 'week' : 'day';
 
+            const xAxisTitle = independent === 'CO2_trmt' ? 'CO₂ Treatment (ppm)' : 
+                              independent === 'TIMESTAMP' ? 'Time' : 
+                              'Target Temperature (°C)';
+            const yAxisTitle = dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"]`)?.textContent || 'Measurements' : 'Measurements';
+
             const layout = {
-                width: document.getElementById('graph').clientWidth,
-                height: document.getElementById('graph').clientHeight,
+                width: document.getElementById('graph-container').clientWidth,
+                height: document.getElementById('graph-container').clientHeight,
                 plot_bgcolor: '#1A1A1A',
                 paper_bgcolor: '#1A1A1A',
                 font: { color: '#FFFFFF', size: 12 },
@@ -446,17 +449,14 @@
                     yanchor: 'top'
                 },
                 xaxis: {
-                    title: { 
-                        text: independent === 'CO2_trmt' ? 'CO₂ Treatment (ppm)' : independent === 'TIMESTAMP' ? 'Time' : 'Target Temperature (°C)', 
-                        font: { size: 14 } 
-                    },
+                    title: { text: xAxisTitle, font: { size: 14 } },
                     gridcolor: '#444',
                     zerolinecolor: '#444',
                     type: independent === 'TIMESTAMP' ? 'date' : 'linear',
                     dtick: independent === 'TIMESTAMP' ? (timeUnit === 'month' ? 'M1' : timeUnit === 'week' ? '604800000' : '86400000') : undefined
                 },
                 yaxis: {
-                    title: { text: 'Measurements', font: { size: 14 } },
+                    title: { text: yAxisTitle, font: { size: 14 } },
                     gridcolor: '#444',
                     zerolinecolor: '#444'
                 },
@@ -529,6 +529,15 @@
                 endDate = selectedDates[0];
                 document.getElementById('time-range-toggle').textContent = 
                     `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (dataLoaded && typeof Plotly !== 'undefined') {
+                Plotly.relayout('graph', { 
+                    width: document.getElementById('graph-container').clientWidth, 
+                    height: document.getElementById('graph-container').clientHeight 
+                });
             }
         });
 
