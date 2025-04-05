@@ -263,7 +263,14 @@
         </div>
     </div>
 
-    <script>
+   <script>
+    // Ensure Observable Plot is loaded
+    if (typeof Plot === 'undefined') {
+        console.error('Observable Plot library not loaded!');
+    } else {
+        console.log('Observable Plot loaded successfully');
+    }
+
     let allData = [];
     const plots = Array.from({ length: 21 }, (_, i) => i + 1);
     const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily.json';
@@ -306,7 +313,6 @@
             if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
             allData = await response.json();
             console.log(`Loaded ${allData.length} rows`);
-            // Convert TIMESTAMP strings to Date objects
             allData.forEach(row => {
                 row.TIMESTAMP = new Date(row.TIMESTAMP);
             });
@@ -350,6 +356,12 @@
             return;
         }
 
+        if (typeof Plot === 'undefined') {
+            console.error('Plot object not available - library issue');
+            document.getElementById('graph').innerHTML = 'Plotting library not loaded';
+            return;
+        }
+
         const selectedPlots = Array.from(document.querySelectorAll('#plot-menu input:checked')).map(input => parseInt(input.value));
         const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || 'Temp_target';
         const dependent = Array.from(document.querySelectorAll('#dependent-menu input:checked'))[0]?.value || 'TS_0__A1';
@@ -367,6 +379,7 @@
         });
 
         console.log(`Plotting ${workingData.length} rows with ${independent} vs ${dependent}`);
+        console.log('Sample working data (first row):', workingData[0]);
 
         const plot = Plot.plot({
             width: document.getElementById('graph').clientWidth,
@@ -451,6 +464,21 @@
         onChange: (selectedDates) => {
             startDate = selectedDates[0];
             document.getElementById('time-range-toggle').textContent = 
+                `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+        }
+    });
+
+    flatpickr('#end-date', {
+        dateFormat: 'Y-m-d',
+        onChange: (selectedDates) => {
+            endDate = selectedDates[0];
+            document.getElementById('time-range-toggle').textContent = 
+                `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+        }
+    });
+
+    populatePlotDropdown();
+</script>            document.getElementById('time-range-toggle').textContent = 
                 `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
         }
     });
