@@ -12,8 +12,8 @@
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; background-color: #000000; font-family: 'Lato', sans-serif; overflow: hidden; display: flex; flex-direction: column; }
         h1 { color: #00FFFF; text-align: center; padding: 3vh; font-family: 'Orbitron', sans-serif; font-size: calc(18px + 2vw); margin: 0; animation: glowPulse 2s infinite alternate; }
         @keyframes glowPulse { 
-            0% { text-shadow: 0 0 3px #00CC66; } 
-            100% { text-shadow: 0 0 10px #00FFFF, 0 0 20px #00FFFF; } 
+            0% { text-shadow: 0 0 2px #00CC66; } 
+            100% { text-shadow: 0 0 5px #00FFFF; } 
         }
         .container { display: flex; flex-grow: 1; overflow: hidden; }
         .sidebar { width: 250px; background: rgba(26, 26, 26, 0.8); border-right: 2px solid #00FFFF; padding: 15px; display: flex; flex-direction: column; gap: 20px; position: fixed; top: 15vh; height: 85%; transition: transform 0.3s ease; }
@@ -95,35 +95,75 @@
                 <div class="dropdown-toggle" id="condition-toggle">Select Conditions</div>
                 <div class="dropdown-menu" id="condition-menu">
                     <div class="dropdown-item">
-                        <input type="checkbox" id="WS_10_cond" value="WS_10"><label for="WS_10_cond">Wind Speed (m/s)</label>
+                        <input type="checkbox" id="WS_10_cond" value="WS_10">
+                        <label for="WS_10_cond">Wind Speed (m/s)</label>
                         <div class="range-options">
-                            <div class="dropdown-item"><input type="checkbox" id="WS_10_0_2" value="0-2"><label for="WS_10_0_2">0-2</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="WS_10_2_5" value="2-5"><label for="WS_10_2_5">2-5</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="WS_10_5_plus" value="5+"><label for="WS_10_5_plus">5+</label></div>
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="WS_10_0_2" value="0-2">
+                                <label for="WS_10_0_2">0-2</label>
+                            </div>
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="WS_10_2_5" value="2-5">
+                                <label for="WS_10_2_5">2-5</label>
+                            </div>
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="WS_10_5_plus" value="5+">
+                                <label for="WS_10_5_plus">5+</label>
+                            </div>
                         </div>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="WD_10_cond" value="WD_10"><label for="WD_10_cond">Wind Direction (°)</label>
+                        <input type="checkbox" id="WD_10_cond" value="WD_10">
+                        <label for="WD_10_cond">Wind Direction (°)</label>
                         <div class="range-options">
-                            <div class="dropdown-item"><input type="checkbox" id="WD_10_0_90" value="0-90"><label for="WD_10_0_90">0-90</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="WD_10_90_180" value="90-180"><label for="WD_10_90_180">90-180</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="WD_10_180_360" value="180-360"><label for="WD_10_180_360">180-360</label></div>
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="WD_10_0_90" value="0-90">
+                                <label for="WD_10_0_90">0-90</label>
+                            </div>
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="WD_10_90_180" value="90-180">
+                                <label for="WD_10_90_180">90-180</label>
+                            </div>
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="WD_10_180_360" value="180-360">
+                                <label for="WD_10_180_360">180-360</label>
+                            </div>
                         </div>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="PAR_2_cond" value="PAR_2"><label for="PAR_2_cond">PAR (µmol/m²s)</label>
+                        <input type="checkbox" id="PAR_2_cond" value="PAR_2">
+                        <label for="PAR_2_cond">PAR (µmol/m²s)</label>
                         <div class="range-options">
-                            <div class="dropdown-item"><input type="checkbox" id="PAR_2_0_50" value="0-50"><label for="PAR_2_0_50">0-50</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="PAR_2_50_100" value="50-100"><label for="PAR_2_50_100">50-100</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="PAR_2_100_plus" value="100+"><label for="PAR_2_100_plus">100+</label></div>
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="PAR_2_0_50" value="0-50">
+                                <label for="PAR_2_0_50">0-50</label>
+                            </div>
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="PAR_2_50_100" value="50-100">
+                                <label for="PAR_2_50_100">50-100</label>
+                            </div>
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="PAR_2_100_plus" value="100+">
+                                <label for="PAR_2_100_plus">100+</label>
+                            </div>
                         </div>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="PREC_6_cond" value="PREC_6"><label for="PREC_6_cond">Precipitation (mm)</label>
+                        <input type="checkbox" id="PREC_6_cond" value="PREC_6">
+                        <label for="PREC_6_cond">Precipitation (mm)</label>
                         <div class="range-options">
-                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_0_1" value="0-1"><label for="PREC_6_0_1">0-1</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_1_5" value="1-5"><label for="PREC_6_1_5">1-5</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_5_plus" value="5+"><label for="PREC_6_5_plus">5+</label></div>
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="PREC_6_0_1" value="0-1">
+                                <label for="PREC_6_0_1">0-1</label>
+                            </div>
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="PREC_6_1_5" value="1-5">
+                                <label for="PREC_6_1_5">1-5</label>
+                            </div>
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="PREC_6_5_plus" value="5+">
+                                <label for="PREC_6_5_plus">5+</label>
+                            </div>
                         </div>
                     </div>
                 </div>
