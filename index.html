@@ -115,6 +115,7 @@
         .dropdown-item { display: flex; align-items: center; margin-bottom: 3px; }
         #dependent-menu .dropdown-item label, #independent-menu .dropdown-item label { margin-left: 5px; }
         #condition-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 8px; }
+        #condition-menu .dropdown-item label { color: inherit; }
         #stats-menu #stats-content { color: #00FF00; font-family: 'VT323', monospace; font-size: 12px; }
         #time-range-menu { padding: 10px; }
         #time-range-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 10px; }
@@ -144,6 +145,22 @@
             min-width: 320px; 
             min-height: 240px; 
         }
+        .welcome-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00FF00;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            text-align: center;
+            text-shadow: 0 0 10px #00FF00;
+        }
+        .welcome-message hr {
+            border: 1px solid #00FFFF;
+            width: 80%;
+            margin: 10px auto;
+        }
         .legend-tab { 
             position: absolute; 
             top: 50px; 
@@ -169,34 +186,34 @@
                 <div class="dropdown-toggle" id="condition-toggle">Select Conditions</div>
                 <div class="dropdown-menu" id="condition-menu">
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_ambient_ambient" value="ambient_ambient" checked><label for="cond_ambient_ambient">Ambient (0°C), Ambient CO₂, Plot 7</label>
+                        <input type="checkbox" id="cond_ambient_ambient" value="ambient_ambient" checked><label for="cond_ambient_ambient" style="color: #0000FF;">Ambient, 0°C, Plot 7</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_ambient_elevated" value="ambient_elevated" checked><label for="cond_ambient_elevated">Ambient (0°C), 900 ppm CO₂, Plot 21</label>
+                        <input type="checkbox" id="cond_ambient_elevated" value="ambient_elevated" checked><label for="cond_ambient_elevated" style="color: #0000FF;">High CO2, 0°C, Plot 21</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_2.25_ambient" value="2.25_ambient" checked><label for="cond_2.25_ambient">+2.25°C, Ambient CO₂, Plot 6</label>
+                        <input type="checkbox" id="cond_2.25_ambient" value="2.25_ambient" checked><label for="cond_2.25_ambient" style="color: #4682B4;">Ambient, +2.25°C, Plot 6</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_2.25_elevated" value="2.25_elevated" checked><label for="cond_2.25_elevated">+2.25°C, 900 ppm CO₂, Plot 19</label>
+                        <input type="checkbox" id="cond_2.25_elevated" value="2.25_elevated" checked><label for="cond_2.25_elevated" style="color: #4682B4;">High CO2, +2.25°C, Plot 19</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_4.5_ambient" value="4.5_ambient" checked><label for="cond_4.5_ambient">+4.5°C, Ambient CO₂, Plot 11</label>
+                        <input type="checkbox" id="cond_4.5_ambient" value="4.5_ambient" checked><label for="cond_4.5_ambient" style="color: #FFA500;">Ambient, +4.5°C, Plot 11</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_4.5_elevated" value="4.5_elevated" checked><label for="cond_4.5_elevated">+4.5°C, 900 ppm CO₂, Plot 20</label>
+                        <input type="checkbox" id="cond_4.5_elevated" value="4.5_elevated" checked><label for="cond_4.5_elevated" style="color: #FFA500;">High CO2, +4.5°C, Plot 20</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_6.75_ambient" value="6.75_ambient" checked><label for="cond_6.75_ambient">+6.75°C, Ambient CO₂, Plot 4</label>
+                        <input type="checkbox" id="cond_6.75_ambient" value="6.75_ambient" checked><label for="cond_6.75_ambient" style="color: #FF4500;">Ambient, +6.75°C, Plot 4</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_6.75_elevated" value="6.75_elevated" checked><label for="cond_6.75_elevated">+6.75°C, 900 ppm CO₂, Plot 13</label>
+                        <input type="checkbox" id="cond_6.75_elevated" value="6.75_elevated" checked><label for="cond_6.75_elevated" style="color: #FF4500;">High CO2, +6.75°C, Plot 13</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_9_ambient" value="9_ambient" checked><label for="cond_9_ambient">+9°C, Ambient CO₂, Plot 8</label>
+                        <input type="checkbox" id="cond_9_ambient" value="9_ambient" checked><label for="cond_9_ambient" style="color: #FF0000;">Ambient, +9°C, Plot 8</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_9_elevated" value="9_elevated" checked><label for="cond_9_elevated">+9°C, ~900 ppm CO₂, Plot 16</label>
+                        <input type="checkbox" id="cond_9_elevated" value="9_elevated" checked><label for="cond_9_elevated" style="color: #FF0000;">High CO2, +9°C, Plot 16</label>
                     </div>
                 </div>
             </div>
@@ -238,9 +255,9 @@
             </div>
             <div class="button-container">
                 <span class="button-label">Time Range:</span>
-                <div class="dropdown-toggle" id="time-range-toggle">2016-01-01 - 2025-04-05</div>
+                <div class="dropdown-toggle" id="time-range-toggle">2015-08-01 - 2025-04-05</div>
                 <div class="dropdown-menu" id="time-range-menu">
-                    <div class="dropdown-item"><label for="start-date">Start Date:</label><input type="text" id="start-date" value="2016-01-01"></div>
+                    <div class="dropdown-item"><label for="start-date">Start Date:</label><input type="text" id="start-date" value="2015-08-01"></div>
                     <div class="dropdown-item"><label for="end-date">End Date:</label><input type="text" id="end-date" value="2025-04-05"></div>
                 </div>
             </div>
@@ -279,7 +296,7 @@
     <script>
         let allData = [];
         const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily.json';
-        let startDate = new Date('2016-01-01');
+        let startDate = new Date('2015-08-01');
         let endDate = new Date('2025-04-05');
         let dataLoaded = false;
         const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#FFD700', '#6A5ACD', '#20B2AA', '#DAA520'];
@@ -317,11 +334,17 @@
                 updateGraph();
             } catch (error) {
                 console.error('Error loading data:', error);
-                document.getElementById('graph').innerHTML = 'Error loading data';
+                document.getElementById('graph').innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
             }
         }
 
         function toggleDropdown(id) {
+            const menus = document.querySelectorAll('.dropdown-menu');
+            menus.forEach(menu => {
+                if (menu.id !== id && menu.classList.contains('open')) {
+                    menu.classList.remove('open');
+                }
+            });
             const menu = document.getElementById(id);
             if (menu) menu.classList.toggle('open');
         }
@@ -349,34 +372,30 @@
             if (!conditions.length) return data;
             const selectedConditions = conditions.map(c => conditionMap[c]);
             return data.filter(row => {
+                const co2Value = parseFloat(row.CO2_trmt);
                 return selectedConditions.some(cond => 
                     row.Plot === cond.plot && 
-                    (cond.co2 === 'Ambient' ? row.CO2_trmt < 600 : row.CO2_trmt >= 600) &&
-                    Math.abs(row.Temp_target - cond.temp) < 0.1
+                    (cond.co2 === 'Ambient' ? co2Value < 600 : co2Value >= 600) &&
+                    Math.abs(parseFloat(row.Temp_target) - cond.temp) < 0.1
                 );
             });
         }
 
         function updateConditionsBasedOnVariables(independent, dependents) {
             const conditionCheckboxes = document.querySelectorAll('#condition-menu input[type="checkbox"]');
-            const tempVars = dependents.some(dep => dep.startsWith('TS_') || dep === 'TA_2_0');
-            const co2Vars = independent === 'CO2_trmt';
+            const isSoilTemp = dependents.some(dep => dep.startsWith('TS_'));
+            const isCO2 = independent === 'CO2_trmt';
 
             conditionCheckboxes.forEach(checkbox => {
                 const cond = conditionMap[checkbox.value];
-                if (co2Vars) {
-                    // Prioritize CO2 variation, select one Ambient and one Elevated per temp level
-                    if (cond.co2 === 'Ambient') {
-                        checkbox.checked = ['ambient_ambient', '2.25_ambient', '4.5_ambient', '6.75_ambient', '9_ambient'].includes(checkbox.value);
-                    } else {
-                        checkbox.checked = ['ambient_elevated', '2.25_elevated', '4.5_elevated', '6.75_elevated', '9_elevated'].includes(checkbox.value);
-                    }
+                if (isCO2 && isSoilTemp) {
+                    checkbox.checked = true; // Keep all for CO2 vs. soil temp
                 } else if (independent === 'Temp_target') {
-                    checkbox.checked = true; // All conditions for temp variation
-                } else if (tempVars) {
-                    checkbox.checked = cond.temp > 0 || cond.co2 === 'Ambient'; // Vary temp, keep ambient CO2
+                    checkbox.checked = true; // All for temp variation
+                } else if (isSoilTemp) {
+                    checkbox.checked = cond.temp > 0 || cond.co2 === 'Ambient';
                 } else {
-                    checkbox.checked = true; // Default to all
+                    checkbox.checked = true;
                 }
             });
 
@@ -388,7 +407,7 @@
         }
 
         function calculateRegression(x, y) {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => d.y !== null && !isNaN(d.y));
+            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
             if (pairedData.length < 2) return { slope: NaN, intercept: NaN, rSquared: NaN };
             const yValues = pairedData.map(d => d.y).sort((a, b) => a - b);
             const q1 = yValues[Math.floor(yValues.length * 0.25)];
@@ -422,15 +441,15 @@
                 const newRow = { ...row };
                 depths.forEach(depth => {
                     const keys = zones.map(zone => `TS_${depth}_${zone}${depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 : depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9}`);
-                    const values = keys.map(k => row[k]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
-                    newRow[`TS_${depth}`] = values.length > 0 ? values.reduce((sum, v) => sum + parseFloat(v), 0) / values.length : null;
+                    const values = keys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
+                    newRow[`TS_${depth}`] = values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
                 });
                 const taKeys = ['TA_2_0_1', 'TA_2_0_2'];
-                const taValues = taKeys.map(k => row[k]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
-                newRow['TA_2_0'] = taValues.length > 0 ? taValues.reduce((sum, v) => sum + parseFloat(v), 0) / taValues.length : null;
+                const taValues = taKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
+                newRow['TA_2_0'] = taValues.length > 0 ? taValues.reduce((sum, v) => sum + v, 0) / taValues.length : null;
                 const rhKeys = ['RH_2_0_1', 'RH_2_0_2'];
-                const rhValues = rhKeys.map(k => row[k]).filter(v => v !== undefined && v !== null && !isNaN(parseFloat(v)));
-                newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + parseFloat(v), 0) / rhValues.length : null;
+                const rhValues = rhKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
+                newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + v, 0) / rhValues.length : null;
                 return newRow;
             });
         }
@@ -448,7 +467,8 @@
                     Object.keys(row).forEach(k => {
                         if (k !== 'TIMESTAMP') {
                             weeklyData[key].values[k] = weeklyData[key].values[k] || [];
-                            if (row[k] !== null && !isNaN(parseFloat(row[k]))) weeklyData[key].values[k].push(parseFloat(row[k]));
+                            const value = parseFloat(row[k]);
+                            if (!isNaN(value)) weeklyData[key].values[k].push(value);
                         }
                     });
                 }
@@ -474,14 +494,28 @@
             Plotly.relayout('graph', { showlegend: !Plotly.getPlot('graph')?.layout?.showlegend });
         }
 
+        function filterOutliers(x, y) {
+            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
+            if (pairedData.length < 2) return { x: x, y: y };
+            const yValues = pairedData.map(d => d.y).sort((a, b) => a - b);
+            const q1 = yValues[Math.floor(yValues.length * 0.25)];
+            const q3 = yValues[Math.floor(yValues.length * 0.75)];
+            const iqr = q3 - q1;
+            const lowerBound = q1 - 1.5 * iqr;
+            const upperBound = q3 + 1.5 * iqr;
+            const filtered = pairedData.filter(d => d.y >= lowerBound && d.y <= upperBound);
+            return { x: filtered.map(d => d.x), y: filtered.map(d => d.y) };
+        }
+
         function updateGraph() {
-            document.getElementById('graph').innerHTML = '';
+            const graphDiv = document.getElementById('graph');
+            graphDiv.innerHTML = '';
             if (!dataLoaded) {
-                document.getElementById('graph').innerHTML = 'Please click Analyze to load data';
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
                 return;
             }
             if (typeof Plotly === 'undefined') {
-                document.getElementById('graph').innerHTML = 'Plotly library not loaded';
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -492,7 +526,7 @@
             const showFit = document.getElementById('show-fit').checked;
 
             if (!allDependents.length) {
-                document.getElementById('graph').innerHTML = 'Please select at least one dependent variable.';
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -500,7 +534,7 @@
             const updatedConditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
             let workingData = filterByConditions(allData, updatedConditions);
             if (!workingData.length) {
-                document.getElementById('graph').innerHTML = 'No data matches the selected conditions.';
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -522,20 +556,24 @@
             const commonUnit = units[0];
             const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
             if (!dependents.length) {
-                document.getElementById('graph').innerHTML = 'Selected dependent variables have different units.';
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
                 return;
             }
 
             const traces = [];
             const fitTraces = [];
             dependents.forEach((dep, i) => {
-                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent]) || 0).filter(v => v !== undefined && v !== null);
-                const yValues = workingData.map(row => parseFloat(row[dep])).filter(v => v !== undefined && v !== null && !isNaN(v));
+                let xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent])).filter(v => !isNaN(v));
+                let yValues = workingData.map(row => parseFloat(row[dep])).filter(v => !isNaN(v));
 
                 if (xValues.length === 0 || yValues.length === 0) {
-                    console.log(`No valid data for ${dep} vs ${independent}`);
+                    console.log(`No valid data for ${dep} vs ${independent}: xValues=${xValues.length}, yValues=${yValues.length}`);
                     return;
                 }
+
+                const filtered = filterOutliers(xValues, yValues);
+                xValues = filtered.x;
+                yValues = filtered.y;
 
                 traces.push({
                     x: xValues,
@@ -567,13 +605,13 @@
             });
 
             if (!traces.length) {
-                document.getElementById('graph').innerHTML = 'No plottable data for selected variables.';
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
                 return;
             }
 
             const statsText = dependents.map(dep => {
-                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : parseFloat(row[independent]) || 0).filter(v => v !== undefined && v !== null);
-                const yValues = workingData.map(row => parseFloat(row[dep])).filter(v => v !== undefined && v !== null && !isNaN(v));
+                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : parseFloat(row[independent])).filter(v => !isNaN(v));
+                const yValues = workingData.map(row => parseFloat(row[dep])).filter(v => !isNaN(v));
                 if (yValues.length > 0) {
                     const { slope, rSquared } = calculateRegression(xValues, yValues);
                     return `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Slope: ${slope.toFixed(4)}, R²: ${rSquared.toFixed(4)}`;
@@ -591,8 +629,8 @@
                                `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit})`;
 
             const annotations = showFit ? dependents.map((dep, i) => {
-                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : parseFloat(row[independent]) || 0).filter(v => v !== undefined && v !== null);
-                const yValues = workingData.map(row => parseFloat(row[dep])).filter(v => v !== undefined && v !== null && !isNaN(v));
+                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : parseFloat(row[independent])).filter(v => !isNaN(v));
+                const yValues = workingData.map(row => parseFloat(row[dep])).filter(v => !isNaN(v));
                 if (yValues.length > 0) {
                     const { slope, rSquared } = calculateRegression(xValues, yValues);
                     return {
@@ -602,7 +640,7 @@
                         yref: 'paper',
                         text: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Slope: ${slope.toFixed(4)}, R²: ${rSquared.toFixed(4)}`,
                         showarrow: false,
-                        font: { color: '#00FF00', family: 'VT323, monospace', size: 12 }
+                        font: { color: '#00FF00', family: 'VT323', monospace: true, size: 12 }
                     };
                 }
                 return null;
@@ -627,7 +665,9 @@
                     gridcolor: '#444',
                     zerolinecolor: '#444',
                     type: independent === 'TIMESTAMP' ? 'date' : 'linear',
-                    dtick: independent === 'TIMESTAMP' ? 'M1' : undefined
+                    dtick: independent === 'TIMESTAMP' ? 'M1' : undefined,
+                    automargin: true,
+                    tickfont: { size: 12 }
                 },
                 yaxis: {
                     title: { text: yAxisTitle, font: { size: 14 } },
@@ -635,7 +675,7 @@
                     zerolinecolor: '#444',
                     automargin: true
                 },
-                margin: { t: 80, b: 80, l: 100, r: 40 },
+                margin: { t: 80, b: 100, l: 100, r: 40 }, // Increased bottom margin
                 showlegend: true,
                 legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.8)' },
                 annotations: annotations
@@ -646,7 +686,7 @@
 
             Plotly.newPlot('graph', showFit ? traces.concat(fitTraces) : traces, layout).catch(err => {
                 console.error('Plotly error:', err);
-                document.getElementById('graph').innerHTML = 'Error rendering plot.';
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
             });
         }
 
@@ -698,7 +738,7 @@
 
         flatpickr('#start-date', {
             dateFormat: 'Y-m-d',
-            defaultDate: '2016-01-01',
+            defaultDate: '2015-08-01',
             onChange: (selectedDates) => {
                 startDate = selectedDates[0];
                 document.getElementById('time-range-toggle').textContent = 
