@@ -71,8 +71,7 @@
                 <div class="dropdown-toggle" id="condition-toggle">Select Conditions</div>
                 <div class="dropdown-menu" id="condition-menu">
                     <div class="dropdown-item">
-                        <input type="checkbox" id="WS_10_cond" value="WS_10">
-                        <label for="WS_10_cond">Wind Speed (m/s)</label>
+                        <input type="checkbox" id="WS_10_cond" value="WS_10"><label for="WS_10_cond">Wind Speed (m/s)</label>
                         <div class="range-options">
                             <div class="dropdown-item"><input type="checkbox" id="WS_10_0_2" value="0-2"><label for="WS_10_0_2">0-2</label></div>
                             <div class="dropdown-item"><input type="checkbox" id="WS_10_2_5" value="2-5"><label for="WS_10_2_5">2-5</label></div>
@@ -80,8 +79,7 @@
                         </div>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="WD_10_cond" value="WD_10">
-                        <label for="WD_10_cond">Wind Direction (°)</label>
+                        <input type="checkbox" id="WD_10_cond" value="WD_10"><label for="WD_10_cond">Wind Direction (°)</label>
                         <div class="range-options">
                             <div class="dropdown-item"><input type="checkbox" id="WD_10_0_90" value="0-90"><label for="WD_10_0_90">0-90</label></div>
                             <div class="dropdown-item"><input type="checkbox" id="WD_10_90_180" value="90-180"><label for="WD_10_90_180">90-180</label></div>
@@ -89,8 +87,7 @@
                         </div>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="PAR_2_cond" value="PAR_2">
-                        <label for="PAR_2_cond">PAR (µmol/m²s)</label>
+                        <input type="checkbox" id="PAR_2_cond" value="PAR_2"><label for="PAR_2_cond">PAR (µmol/m²s)</label>
                         <div class="range-options">
                             <div class="dropdown-item"><input type="checkbox" id="PAR_2_0_50" value="0-50"><label for="PAR_2_0_50">0-50</label></div>
                             <div class="dropdown-item"><input type="checkbox" id="PAR_2_50_100" value="50-100"><label for="PAR_2_50_100">50-100</label></div>
@@ -98,8 +95,7 @@
                         </div>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="PREC_6_cond" value="PREC_6">
-                        <label for="PREC_6_cond">Precipitation (mm)</label>
+                        <input type="checkbox" id="PREC_6_cond" value="PREC_6"><label for="PREC_6_cond">Precipitation (mm)</label>
                         <div class="range-options">
                             <div class="dropdown-item"><input type="checkbox" id="PREC_6_0_1" value="0-1"><label for="PREC_6_0_1">0-1</label></div>
                             <div class="dropdown-item"><input type="checkbox" id="PREC_6_1_5" value="1-5"><label for="PREC_6_1_5">1-5</label></div>
@@ -112,22 +108,14 @@
                 <span class="button-label">Time Range:</span>
                 <div class="dropdown-toggle" id="time-range-toggle">Select Time Range</div>
                 <div class="dropdown-menu" id="time-range-menu">
-                    <div class="dropdown-item">
-                        <label for="start-date">Start Date:</label>
-                        <input type="text" id="start-date" placeholder="YYYY-MM-DD">
-                    </div>
-                    <div class="dropdown-item">
-                        <label for="end-date">End Date:</label>
-                        <input type="text" id="end-date" placeholder="YYYY-MM-DD">
-                    </div>
+                    <div class="dropdown-item"><label for="start-date">Start Date:</label><input type="text" id="start-date" placeholder="YYYY-MM-DD"></div>
+                    <div class="dropdown-item"><label for="end-date">End Date:</label><input type="text" id="end-date" placeholder="YYYY-MM-DD"></div>
                 </div>
             </div>
             <div class="button-container">
                 <span class="button-label">Stats:</span>
                 <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
-                <div class="stats-panel" id="stats-panel">
-                    <div id="stats-content"></div>
-                </div>
+                <div class="stats-panel" id="stats-panel"><div id="stats-content"></div></div>
             </div>
             <div class="button-container">
                 <span class="button-label">Analyze:</span>
@@ -175,7 +163,8 @@
                 if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
                 allData = await response.json();
                 console.log(`Loaded ${allData.length} rows`);
-                console.log('Sample row:', allData[0]);
+                console.log('Sample row:', JSON.stringify(allData[0], null, 2));
+                console.log('Available keys:', Object.keys(allData[0]));
                 allData = allData.filter(row => {
                     try {
                         row.TIMESTAMP = new Date(row.TIMESTAMP);
@@ -208,10 +197,7 @@
             graphContainer.classList.toggle('full-width');
             tab.textContent = sidebar.classList.contains('collapsed') ? '<' : '>';
             if (dataLoaded && typeof Plotly !== 'undefined') {
-                Plotly.relayout('graph', {
-                    width: document.getElementById('graph').clientWidth,
-                    height: document.getElementById('graph').clientHeight
-                });
+                Plotly.relayout('graph', { width: document.getElementById('graph').clientWidth, height: document.getElementById('graph').clientHeight });
             }
         }
 
@@ -277,13 +263,13 @@
                 console.log(`After ${key} filter:`, workingData.length);
             });
 
-            console.log('Sample working data (first 5):', workingData.slice(0, 5));
-            if (workingData.length === 0) {
-                console.log('No data after filters');
-                document.getElementById('graph').innerHTML = 'No data matches the selected filters.';
-                return;
-            }
-
+            console.log('Sample working data (first 5):', workingData.slice(0, 5).map(row => ({
+                TIMESTAMP: row.TIMESTAMP,
+                Plot: row.Plot,
+                [independent]: row[independent],
+                ...dependents.reduce((acc, dep) => ({ ...acc, [dep]: row[dep] }), {})
+            })));
+            
             const traces = dependents.map(dep => {
                 const xValues = workingData.map(row => row[independent]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
                 const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
