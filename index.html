@@ -96,7 +96,7 @@
                         <div class="range-options">
                             <div class="dropdown-item"><input type="checkbox" id="WS_10_0_2" value="0-2"><label for="WS_10_0_2">0-2</label></div>
                             <div class="dropdown-item"><input type="checkbox" id="WS_10_2_5" value="2-5"><label for="WS_10_2_5">2-5</label></div>
-                            <div class="dropdown-item"><input type="checkbox" id="WS_10_5_plus" value="5+"><label for="WS_10_5_plus">5+</label></多元>
+                            <div class="dropdown-item"><input type="checkbox" id="WS_10_5_plus" value="5+"><label for="WS_10_5_plus">5+</label></div>
                         </div>
                     </div>
                     <div class="dropdown-item">
@@ -321,7 +321,6 @@
                 return;
             }
 
-            // Log sample values for independent and dependent variables
             console.log(`${independent} sample (first 5):`, workingData.slice(0, 5).map(row => row[independent]));
             dependents.forEach(dep => {
                 console.log(`${dep} sample (first 5):`, workingData.slice(0, 5).map(row => row[dep]));
@@ -356,7 +355,6 @@
                 };
             });
 
-            // Check if any trace has valid data
             const hasValidData = traces.some(trace => trace.x.length > 0 && trace.y.length > 0);
             if (!hasValidData) {
                 document.getElementById('graph').innerHTML = 'No plottable data for selected variables. Check variable availability.';
