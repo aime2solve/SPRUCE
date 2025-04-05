@@ -180,8 +180,7 @@
             margin: 0.5% auto;
         }
     </style>
-    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.11/dist/plot.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
@@ -265,29 +264,19 @@
     </div>
 
     <script>
-        const baseUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/';
         let allData = [];
         const plots = Array.from({ length: 21 }, (_, i) => i + 1);
-        const knownFiles = [
-            'WEW PLOT_04_Complete_Environ_20160826.csv',
-            'WEW PLOT_06_Complete_Environ_20160826.csv',
-            'WEW PLOT_08_Complete_Environ_20160826.csv',
-            'WEW PLOT_10_Complete_Environ_20160826.csv',
-            'WEW PLOT_21_Complete_Environ_20160826.csv'
-        ];
+        const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily.json';
         let startDate = null;
         let endDate = null;
         let dataLoaded = false;
 
         // Initial welcome message
-        Plotly.newPlot('graph', [], {
-            title: 'Welcome to SPRUCE!\nChoose variables and conditions to analyze',
-            plot_bgcolor: '#1A1A1A',
-            paper_bgcolor: '#1A1A1A',
-            font: { color: '#FFFFFF', family: 'Orbitron, sans-serif', size: 16 },
-            xaxis: { gridcolor: '#333333', visible: false },
-            yaxis: { gridcolor: '#333333', visible: false }
-        }, { responsive: true });
+        document.getElementById('graph').innerHTML = '';
+        const welcome = document.createElement('div');
+        welcome.textContent = 'Welcome to SPRUCE!\nChoose variables and conditions to analyze';
+        welcome.style.cssText = 'color: #FFFFFF; font-family: Orbitron, sans-serif; font-size: 16px; text-align: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-shadow: 0 0 10px #00CC66';
+        document.getElementById('graph').appendChild(welcome);
 
         function populatePlotDropdown() {
             const plotMenu = document.getElementById('plot-menu');
@@ -310,38 +299,19 @@
             });
         }
 
-        async function fetchFileData(filename) {
-            const url = `${baseUrl}${filename}`;
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                const csvText = await response.text();
-                const result = Papa.parse(csvText, { header: true, dynamicTyping: true });
-                const plot = parseInt(filename.match(/PLOT_(\d+)/)[1]);
-                console.log(`Loaded ${filename}: ${result.data.length} rows`);
-                return result.data.map(row => ({ ...row, Plot: plot, TIMESTAMP: row.TIMESTAMP }));
-            } catch (error) {
-                console.error(`Error fetching ${filename}:`, error);
-                return [];
-            }
-        }
-
         async function loadData() {
             if (dataLoaded) return;
-            const promises = knownFiles.map(file => fetchFileData(file));
-            const results = await Promise.all(promises);
-            allData = results.flat();
-            console.log(`Total rows loaded: ${allData.length}`);
-            allData = allData.reduce((acc, row) => {
-                const plot = row.Plot;
-                if (!acc[plot]) acc[plot] = [];
-                if (acc[plot].length < 1000) acc[plot].push(row);
-                return acc;
-            }, {});
-            allData = Object.values(allData).flat();
-            console.log(`Sampled rows: ${allData.length}`);
-            dataLoaded = true;
-            updateGraph();
+            try {
+                const response = await fetch(dataUrl);
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                allData = await response.json();
+                console.log(`Loaded ${allData.length} rows`);
+                dataLoaded = true;
+                updateGraph();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('graph').innerHTML = 'Error loading data';
+            }
         }
 
         function toggleDropdown(id) {
@@ -360,19 +330,8 @@
             const tab = document.getElementById('sidebar-tab');
             sidebar.classList.toggle('collapsed');
             graphContainer.classList.toggle('full-width');
-            tab.textContent = sidebar.classList.contains('collapsed') ? '<' : '>';
-            Plotly.Plots.resize('graph');
+            if (dataLoaded) Plot.resize(document.getElementById('graph').firstChild);
         }
-
-        function debounce(func, wait) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), wait);
-            };
-        }
-
-        const debounceUpdateGraph = debounce(updateGraph, 300);
 
         function enforceSingleSelection(groupId, changedId) {
             const checkboxes = document.querySelectorAll(`#${groupId} input[type="checkbox"]`);
@@ -384,15 +343,9 @@
         }
 
         function updateGraph() {
+            document.getElementById('graph').innerHTML = '';
             if (!dataLoaded) {
-                Plotly.newPlot('graph', [], {
-                    title: 'Please click Analyze to load data',
-                    plot_bgcolor: '#1A1A1A',
-                    paper_bgcolor: '#1A1A1A',
-                    font: { color: '#FFFFFF', family: 'Orbitron, sans-serif', size: 16 },
-                    xaxis: { gridcolor: '#333333', visible: false },
-                    yaxis: { gridcolor: '#333333', visible: false }
-                }, { responsive: true });
+                document.getElementById('graph').innerHTML = 'Please click Analyze to load data';
                 return;
             }
 
@@ -412,26 +365,23 @@
                 workingData = workingData.filter(row => row[cond] !== undefined && row[cond] !== null && row[cond] !== 0);
             });
 
-            const traces = [];
-            const noDataPlots = [];
-            selectedPlots.forEach(plot => {
-                const plotData = workingData.filter(row => row.Plot === plot);
-                if (plotData.length === 0) {
-                    noDataPlots.push(`No data for Plot ${plot}`);
-                    return;
-                }
-                const x = plotData.map(row => row[independent]).filter(v => v !== undefined && v !== null);
-                const y = plotData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
-                if (x.length > 0 && y.length > 0) {
-                    traces.push({
-                        x: x,
-                        y: y,
-                        mode: 'markers',
-                        name: `Plot ${plot}`,
-                        marker: { size: 12, color: `#${Math.floor(Math.random()*16777215).toString(16)}` }
-                    });
-                }
+            const plot = Plot.plot({
+                width: document.getElementById('graph').clientWidth,
+                height: document.getElementById('graph').clientHeight,
+                style: { background: '#1A1A1A', color: '#FFFFFF', fontFamily: 'Lato, sans-serif' },
+                x: { label: document.querySelector(`label[for="${independent}"]`)?.textContent || independent, grid: true },
+                y: { label: document.querySelector(`label[for="${dependent}"]`)?.textContent || dependent, grid: true },
+                marks: [
+                    Plot.dot(workingData, {
+                        x: independent,
+                        y: dependent,
+                        fill: d => `#${Math.floor(Math.random()*16777215).toString(16)}`,
+                        r: 6,
+                        title: d => `Plot ${d.Plot}\n${independent}: ${d[independent]}\n${dependent}: ${d[dependent]}`
+                    })
+                ]
             });
+            document.getElementById('graph').appendChild(plot);
 
             const allY = workingData.map(row => row[dependent]).filter(v => v !== undefined && v !== null);
             const statsText = allY.length > 0 ? 
@@ -439,22 +389,6 @@
                 `Min: ${Math.min(...allY).toFixed(2)}, Max: ${Math.max(...allY).toFixed(2)}, Points: ${allY.length}` :
                 'No data points';
             document.getElementById('stats-content').innerHTML = statsText;
-
-            const layout = {
-                title: `${dependent.replace(/_/g, ' ')} vs ${independent.replace(/_/g, ' ')}` + 
-                       (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : ''),
-                plot_bgcolor: '#1A1A1A',
-                paper_bgcolor: '#1A1A1A',
-                font: { color: '#FFFFFF' },
-                xaxis: { title: document.querySelector(`label[for="${independent}"]`)?.textContent || independent, gridcolor: '#333333' },
-                yaxis: { title: document.querySelector(`label[for="${dependent}"]`)?.textContent || dependent, gridcolor: '#333333' },
-                showlegend: true
-            };
-
-            if (traces.length === 0) {
-                layout.title = 'No Data to Plot' + (noDataPlots.length ? '<br>' + noDataPlots.join('<br>') : '');
-            }
-            Plotly.newPlot('graph', traces, layout, { responsive: true }).catch(err => console.error('Plotly error:', err));
         }
 
         document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
@@ -494,7 +428,7 @@
                 enforceSingleSelection('independent-menu', input.id);
                 document.getElementById('independent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
             });
-            if (input.id === 'Temp_target') input.checked = true; // Default
+            if (input.id === 'Temp_target') input.checked = true;
         });
 
         document.querySelectorAll('#dependent-menu input').forEach(input => {
@@ -502,7 +436,7 @@
                 enforceSingleSelection('dependent-menu', input.id);
                 document.getElementById('dependent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
             });
-            if (input.id === 'TS_0__A1') input.checked = true; // Default
+            if (input.id === 'TS_0__A1') input.checked = true;
         });
 
         document.querySelectorAll('#condition-menu input').forEach(input => {
