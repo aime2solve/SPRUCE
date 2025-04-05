@@ -310,29 +310,51 @@
             document.getElementById('stats-content').innerHTML = statsText;
 
             const addStatsToChart = document.getElementById('add-stats-to-chart')?.checked;
-            const title = `Comparative Biospheromics: ${independent === 'CO2_trmt' ? 'CO₂' : 'Temperature'} vs. Soil Temperature` +
-                          (addStatsToChart ? `<br><small style="color: #00FF00">${statsText.replace(/<br>/g, '; ')}</small>` : '');
-
-            console.log('Plotting with Plotly');
-            Plotly.newPlot('graph', traces, {
+            const layout = {
                 width: document.getElementById('graph').clientWidth,
                 height: document.getElementById('graph').clientHeight,
                 plot_bgcolor: '#1A1A1A',
                 paper_bgcolor: '#1A1A1A',
-                font: { color: '#FFFFFF' },
-                title: title,
-                xaxis: { 
-                    title: independent === 'CO2_trmt' ? 'CO₂ Treatment (ppm)' : 'Target Temperature (°C)',
+                font: { color: '#FFFFFF', size: 12 },
+                title: {
+                    text: `Comparative Biospheromics: ${independent === 'CO2_trmt' ? 'CO₂' : 'Temperature'} vs. Soil Temperature`,
+                    font: { size: 16 },
+                    x: 0.5,
+                    xanchor: 'center',
+                    y: 0.95,
+                    yanchor: 'top'
+                },
+                xaxis: {
+                    title: { 
+                        text: independent === 'CO2_trmt' ? 'CO₂ Treatment (ppm)' : 'Target Temperature (°C)',
+                        font: { size: 14 }
+                    },
                     gridcolor: '#444',
                     zerolinecolor: '#444'
                 },
-                yaxis: { 
-                    title: 'Soil Temperature (°C)',
+                yaxis: {
+                    title: { 
+                        text: 'Soil Temperature (°C)',
+                        font: { size: 14 }
+                    },
                     gridcolor: '#444',
                     zerolinecolor: '#444'
                 },
-                margin: { t: addStatsToChart ? 100 : 60, b: 60, l: 60, r: 20 }
-            }).catch(err => console.error('Plotly error:', err));
+                margin: { t: 80, b: 60, l: 60, r: 20 },
+                annotations: addStatsToChart ? [{
+                    x: 0.5,
+                    y: 1,
+                    xref: 'paper',
+                    yref: 'paper',
+                    text: statsText.replace(/<br>/g, '; '),
+                    showarrow: false,
+                    font: { size: 10, color: '#00FF00' },
+                    yshift: -40
+                }] : []
+            };
+            console.log('Plotly layout:', JSON.stringify(layout, null, 2));
+            console.log('Plotting with Plotly');
+            Plotly.newPlot('graph', traces, layout).catch(err => console.error('Plotly error:', err));
         }
 
         document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
