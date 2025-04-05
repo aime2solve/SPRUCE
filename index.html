@@ -6,6 +6,8 @@
     <title>SPRUCE Soil Temperature Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://unpkg.com/@observablehq/plot@0.6.12/dist/plot.umd.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
         body, html {
             margin: 0;
@@ -197,7 +199,6 @@
             margin: 0.5% auto;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
     <h1>SPRUCE Soil Temperature Dashboard</h1>
@@ -405,6 +406,7 @@
                 return;
             }
 
+            console.log('Checking Plot availability:', window.Plot);
             if (typeof window.Plot === 'undefined' || !window.Plot.plot) {
                 console.error('Plot object not available - library issue');
                 document.getElementById('graph').innerHTML = 'Plotting library not loaded';
@@ -529,6 +531,5 @@
 
         populatePlotDropdown();
     </script>
-    <script src="https://unpkg.com/@observablehq/plot@0.6.12/dist/plot.umd.min.js"></script>
 </body>
 </html>
