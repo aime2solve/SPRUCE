@@ -61,9 +61,9 @@
                 <span class="button-label">Dependent:</span>
                 <div class="dropdown-toggle" id="dependent-toggle">Soil Temp 0 cm (A1, °C)</div>
                 <div class="dropdown-menu" id="dependent-menu">
-                    <div class="dropdown-item"><input type="checkbox" id="TS_0__A1" value="TS_0__A1"><label for="TS_0__A1">Soil Temp 0 cm (A1, °C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_-10__A3" value="TS_-10__A3"><label for="TS_-10__A3">Soil Temp -10 cm (A3, °C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_-100__A8" value="TS_-100__A8"><label for="TS_-100__A8">Soil Temp -100 cm (A8, °C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_0_A1" value="TS_0_A1"><label for="TS_0_A1">Soil Temp 0 cm (A1, °C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_10_A3" value="TS_10_A3"><label for="TS_10_A3">Soil Temp 10 cm (A3, °C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_100_A8" value="TS_100_A8"><label for="TS_100_A8">Soil Temp 100 cm (A8, °C)</label></div>
                 </div>
             </div>
             <div class="button-container">
@@ -249,13 +249,16 @@
             console.log('Selected plots:', selectedPlots);
             console.log('Independent:', independent);
             console.log('Dependents:', dependents);
-            console.log('Conditions:', conditions);
+            console.log('Conditions:', conditions.map(c => ({ [c.key]: c.ranges })));
 
             let workingData = allData.filter(row => selectedPlots.includes(row.Plot));
             console.log('After plot filter:', workingData.length);
             if (startDate || endDate) {
-                console.log('Filtering by time:', startDate, endDate);
-                workingData = workingData.filter(row => (!startDate || row.TIMESTAMP >= startDate) && (!endDate || row.TIMESTAMP <= endDate));
+                console.log('Filtering by time:', startDate?.toISOString().split('T')[0], endDate?.toISOString().split('T')[0]);
+                workingData = workingData.filter(row => {
+                    const rowDate = row.TIMESTAMP;
+                    return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1));
+                });
                 console.log('After time filter:', workingData.length);
             }
             conditions.forEach(({ key, ranges }) => {
@@ -264,7 +267,7 @@
             });
 
             console.log('Sample working data (first 5):', workingData.slice(0, 5).map(row => ({
-                TIMESTAMP: row.TIMESTAMP,
+                TIMESTAMP: row.TIMESTAMP.toISOString().split('T')[0],
                 Plot: row.Plot,
                 [independent]: row[independent],
                 ...dependents.reduce((acc, dep) => ({ ...acc, [dep]: row[dep] }), {})
@@ -334,7 +337,7 @@
                         .map(input => document.querySelector(`label[for="${input.id}"]`).textContent)
                         .join(', ') || 'Select Dependent';
             });
-            if (input.id === 'TS_0__A1') input.checked = true;
+            if (input.id === 'TS_0_A1') input.checked = true;
         });
 
         document.querySelectorAll('#condition-menu input').forEach(input => {
