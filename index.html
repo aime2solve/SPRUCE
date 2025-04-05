@@ -173,6 +173,45 @@
             cursor: pointer; 
             z-index: 5; 
         }
+        .controls-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(26, 26, 26, 0.9);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            padding: 15px;
+            color: #00FFFF;
+            font-size: 12px;
+            z-index: 20;
+            display: none;
+            width: 300px;
+        }
+        .controls-popup h3 {
+            margin: 0 0 10px;
+            color: #DAA520;
+            text-align: center;
+        }
+        .controls-popup .dropdown-item { margin-bottom: 5px; }
+        .slider-container {
+            margin: 10px 0;
+        }
+        .slider-container input[type="range"] {
+            width: 100%;
+            background: linear-gradient(to right, #0000FF, #FF0000);
+            -webkit-appearance: none;
+            height: 5px;
+            border-radius: 5px;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            background: #00FFFF;
+            border-radius: 50%;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -183,37 +222,37 @@
             <div class="sidebar-title">SPRUCE<br><span>Data Explorer</span></div>
             <div class="button-container">
                 <span class="button-label">Conditions:</span>
-                <div class="dropdown-toggle" id="condition-toggle">Select Conditions</div>
+                <div class="dropdown-toggle" id="condition-toggle">All</div>
                 <div class="dropdown-menu" id="condition-menu">
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_ambient_ambient" value="ambient_ambient" checked><label for="cond_ambient_ambient" style="color: #0000FF;">Ambient, 0°C, Plot 7</label>
+                        <input type="checkbox" id="cond_ambient_ambient" value="ambient_ambient" checked><label for="cond_ambient_ambient" style="color: #0000FF;">Ambient, 0°C</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_ambient_elevated" value="ambient_elevated" checked><label for="cond_ambient_elevated" style="color: #0000FF;">High CO2, 0°C, Plot 21</label>
+                        <input type="checkbox" id="cond_ambient_elevated" value="ambient_elevated" checked><label for="cond_ambient_elevated" style="color: #0000FF;">High CO2, 0°C</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_2.25_ambient" value="2.25_ambient" checked><label for="cond_2.25_ambient" style="color: #4682B4;">Ambient, +2.25°C, Plot 6</label>
+                        <input type="checkbox" id="cond_2.25_ambient" value="2.25_ambient" checked><label for="cond_2.25_ambient" style="color: #4682B4;">Ambient, +2.25°C</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_2.25_elevated" value="2.25_elevated" checked><label for="cond_2.25_elevated" style="color: #4682B4;">High CO2, +2.25°C, Plot 19</label>
+                        <input type="checkbox" id="cond_2.25_elevated" value="2.25_elevated" checked><label for="cond_2.25_elevated" style="color: #4682B4;">High CO2, +2.25°C</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_4.5_ambient" value="4.5_ambient" checked><label for="cond_4.5_ambient" style="color: #FFA500;">Ambient, +4.5°C, Plot 11</label>
+                        <input type="checkbox" id="cond_4.5_ambient" value="4.5_ambient" checked><label for="cond_4.5_ambient" style="color: #FFA500;">Ambient, +4.5°C</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_4.5_elevated" value="4.5_elevated" checked><label for="cond_4.5_elevated" style="color: #FFA500;">High CO2, +4.5°C, Plot 20</label>
+                        <input type="checkbox" id="cond_4.5_elevated" value="4.5_elevated" checked><label for="cond_4.5_elevated" style="color: #FFA500;">High CO2, +4.5°C</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_6.75_ambient" value="6.75_ambient" checked><label for="cond_6.75_ambient" style="color: #FF4500;">Ambient, +6.75°C, Plot 4</label>
+                        <input type="checkbox" id="cond_6.75_ambient" value="6.75_ambient" checked><label for="cond_6.75_ambient" style="color: #FF4500;">Ambient, +6.75°C</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_6.75_elevated" value="6.75_elevated" checked><label for="cond_6.75_elevated" style="color: #FF4500;">High CO2, +6.75°C, Plot 13</label>
+                        <input type="checkbox" id="cond_6.75_elevated" value="6.75_elevated" checked><label for="cond_6.75_elevated" style="color: #FF4500;">High CO2, +6.75°C</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_9_ambient" value="9_ambient" checked><label for="cond_9_ambient" style="color: #FF0000;">Ambient, +9°C, Plot 8</label>
+                        <input type="checkbox" id="cond_9_ambient" value="9_ambient" checked><label for="cond_9_ambient" style="color: #FF0000;">Ambient, +9°C</label>
                     </div>
                     <div class="dropdown-item">
-                        <input type="checkbox" id="cond_9_elevated" value="9_elevated" checked><label for="cond_9_elevated" style="color: #FF0000;">High CO2, +9°C, Plot 16</label>
+                        <input type="checkbox" id="cond_9_elevated" value="9_elevated" checked><label for="cond_9_elevated" style="color: #FF0000;">High CO2, +9°C</label>
                     </div>
                 </div>
             </div>
@@ -292,6 +331,10 @@
             <div class="legend-tab" id="legend-tab">Legend</div>
         </div>
     </div>
+    <div class="controls-popup" id="controls-popup">
+        <h3 id="controls-title">Controls</h3>
+        <div id="controls-content"></div>
+    </div>
 
     <script>
         let allData = [];
@@ -300,6 +343,7 @@
         let endDate = new Date('2025-04-05');
         let dataLoaded = false;
         const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#FFD700', '#6A5ACD', '#20B2AA', '#DAA520'];
+        let tempRange = [0, 9]; // Default min/max temp range
 
         const conditionMap = {
             'ambient_ambient': { temp: 0, co2: 'Ambient', plot: 7 },
@@ -373,37 +417,91 @@
             const selectedConditions = conditions.map(c => conditionMap[c]);
             return data.filter(row => {
                 const co2Value = parseFloat(row.CO2_trmt);
+                const tempValue = parseFloat(row.Temp_target);
                 return selectedConditions.some(cond => 
                     row.Plot === cond.plot && 
                     (cond.co2 === 'Ambient' ? co2Value < 600 : co2Value >= 600) &&
-                    Math.abs(parseFloat(row.Temp_target) - cond.temp) < 0.1
+                    Math.abs(tempValue - cond.temp) < 0.1
                 );
             });
+        }
+
+        function filterByTempRange(data) {
+            return data.filter(row => {
+                const tempValue = parseFloat(row.Temp_target);
+                return tempValue >= tempRange[0] && tempValue <= tempRange[1];
+            });
+        }
+
+        function showControlsPopup(independent) {
+            const popup = document.getElementById('controls-popup');
+            const content = document.getElementById('controls-content');
+            const title = document.getElementById('controls-title');
+            popup.style.display = 'block';
+
+            if (independent === 'CO2_trmt') {
+                title.textContent = 'CO₂ Controls';
+                content.innerHTML = `
+                    <div class="dropdown-item"><input type="checkbox" id="co2_ambient" checked><label for="co2_ambient">Ambient CO₂</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="co2_elevated" checked><label for="co2_elevated">High CO₂</label></div>
+                `;
+                document.getElementById('co2_ambient').addEventListener('change', updateGraph);
+                document.getElementById('co2_elevated').addEventListener('change', updateGraph);
+            } else if (independent === 'Temp_target') {
+                title.textContent = 'Temperature Controls';
+                content.innerHTML = `
+                    <div class="slider-container">
+                        <label>Min Temp (°C): <span id="min-temp-value">0</span></label>
+                        <input type="range" id="min-temp" min="0" max="9" value="0" step="0.01">
+                    </div>
+                    <div class="slider-container">
+                        <label>Max Temp (°C): <span id="max-temp-value">9</span></label>
+                        <input type="range" id="max-temp" min="0" max="9" value="9" step="0.01">
+                    </div>
+                `;
+                const minTemp = document.getElementById('min-temp');
+                const maxTemp = document.getElementById('max-temp');
+                const minValue = document.getElementById('min-temp-value');
+                const maxValue = document.getElementById('max-temp-value');
+
+                minTemp.addEventListener('input', () => {
+                    minValue.textContent = minTemp.value;
+                    if (parseFloat(minTemp.value) > parseFloat(maxTemp.value)) maxTemp.value = minTemp.value;
+                    tempRange = [parseFloat(minTemp.value), parseFloat(maxTemp.value)];
+                    updateGraph();
+                });
+                maxTemp.addEventListener('input', () => {
+                    maxValue.textContent = maxTemp.value;
+                    if (parseFloat(maxTemp.value) < parseFloat(minTemp.value)) minTemp.value = maxTemp.value;
+                    tempRange = [parseFloat(minTemp.value), parseFloat(maxTemp.value)];
+                    updateGraph();
+                });
+            } else {
+                popup.style.display = 'none';
+            }
         }
 
         function updateConditionsBasedOnVariables(independent, dependents) {
             const conditionCheckboxes = document.querySelectorAll('#condition-menu input[type="checkbox"]');
             const isSoilTemp = dependents.some(dep => dep.startsWith('TS_'));
             const isCO2 = independent === 'CO2_trmt';
+            const isTemp = independent === 'Temp_target';
 
             conditionCheckboxes.forEach(checkbox => {
                 const cond = conditionMap[checkbox.value];
                 if (isCO2 && isSoilTemp) {
-                    checkbox.checked = true; // Keep all for CO2 vs. soil temp
-                } else if (independent === 'Temp_target') {
-                    checkbox.checked = true; // All for temp variation
-                } else if (isSoilTemp) {
-                    checkbox.checked = cond.temp > 0 || cond.co2 === 'Ambient';
+                    const co2Ambient = document.getElementById('co2_ambient')?.checked ?? true;
+                    const co2Elevated = document.getElementById('co2_elevated')?.checked ?? true;
+                    checkbox.checked = (cond.co2 === 'Ambient' && co2Ambient) || (cond.co2 === 900 && co2Elevated);
+                } else if (isTemp) {
+                    checkbox.checked = cond.temp >= tempRange[0] && cond.temp <= tempRange[1];
                 } else {
                     checkbox.checked = true;
                 }
             });
 
-            document.getElementById('condition-toggle').textContent = 
-                Array.from(conditionCheckboxes)
-                    .filter(cb => cb.checked)
-                    .map(cb => document.querySelector(`label[for="${cb.id}"]`).textContent)
-                    .join(', ') || 'Select Conditions';
+            const selectedCount = Array.from(conditionCheckboxes).filter(cb => cb.checked).length;
+            document.getElementById('condition-toggle').textContent = selectedCount === 10 ? 'All' : `${selectedCount} Selected`;
         }
 
         function calculateRegression(x, y) {
@@ -521,7 +619,7 @@
 
             const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || 'Temp_target';
             const allDependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
-            const conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
+            let conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
             const chartType = document.querySelector('#chart-type-menu input:checked').value;
             const showFit = document.getElementById('show-fit').checked;
 
@@ -531,8 +629,9 @@
             }
 
             updateConditionsBasedOnVariables(independent, allDependents);
-            const updatedConditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
-            let workingData = filterByConditions(allData, updatedConditions);
+            conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
+            let workingData = filterByConditions(allData, conditions);
+            if (independent === 'Temp_target') workingData = filterByTempRange(workingData);
             if (!workingData.length) {
                 graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
                 return;
@@ -590,7 +689,7 @@
                     const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
                     const { slope, intercept, rSquared } = calculateRegression(xNum, yValues);
                     if (!isNaN(slope) && !isNaN(intercept)) {
-                        const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Math.max(...xNum)];
+                        const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Max(...xNum)];
                         const yFit = xFit.map(x => slope * (independent === 'TIMESTAMP' ? x.getTime() : x) + intercept);
                         fitTraces.push({
                             x: xFit,
@@ -675,7 +774,7 @@
                     zerolinecolor: '#444',
                     automargin: true
                 },
-                margin: { t: 80, b: 100, l: 100, r: 40 }, // Increased bottom margin
+                margin: { t: 80, b: 100, l: 100, r: 40 },
                 showlegend: true,
                 legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.8)' },
                 annotations: annotations
@@ -705,6 +804,7 @@
             input.addEventListener('change', () => {
                 enforceSingleSelection('independent-menu', input.id);
                 document.getElementById('independent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+                showControlsPopup(input.value);
                 updateGraph();
             });
         });
@@ -721,10 +821,6 @@
 
         document.querySelectorAll('#condition-menu input').forEach(input => {
             input.addEventListener('change', () => {
-                document.getElementById('condition-toggle').textContent = 
-                    Array.from(document.querySelectorAll('#condition-menu input:checked'))
-                        .map(input => document.querySelector(`label[for="${input.id}"]`).textContent)
-                        .join(', ') || 'Select Conditions';
                 updateGraph();
             });
         });
