@@ -6,7 +6,7 @@
     <title>SPRUCE Soil Temperature Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.12/dist/plot.umd.min.js" defer></script>
+    <script src="https://unpkg.com/@observablehq/plot@0.6.13/dist/plot.umd.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
         body, html {
@@ -144,7 +144,7 @@
             margin-top: 5px;
         }
         #condition-menu .range-options .dropdown-item {
-            margin-bottom: 3px; /* Each range on its own line */
+            margin-bottom: 3px;
         }
         #time-range-menu {
             padding: 10px;
@@ -220,7 +220,7 @@
                     <div class="dropdown-item"><input type="checkbox" id="WS_10" value="WS_10"><label for="WS_10">Wind Speed (m/s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction (°)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PRErC_6"><label for="PREC_6">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
                 </div>
             </div>
             <div class="button-container">
@@ -271,7 +271,7 @@
                         <input type="checkbox" id="PREC_6_cond" value="PREC_6"><label for="PREC_6_cond">Precipitation (mm)</label>
                         <div class="range-options">
                             <div class="dropdown-item"><input type="checkbox" id="PREC_6_0_1" value="0-1"><label for="PREC_6_0_1">0-1</label></div>
-                            <div class="dropdownmage-item"><input type="checkbox" id="PREC_6_1_5" value="1-5"><label for="PREC_6_1_5">1-5</label></div>
+                            <div class="dropdown-item"><input type="checkbox" id="PREC_6_1_5" value="1-5"><label for="PREC_6_1_5">1-5</label></div>
                             <div class="dropdown-item"><input type="checkbox" id="PREC_6_5_plus" value="5+"><label for="PREC_6_5_plus">5+</label></div>
                         </div>
                     </div>
@@ -414,11 +414,10 @@
             if (!window.Plot || typeof window.Plot.plot !== 'function') {
                 console.error('Plot object not available - library issue');
                 document.getElementById('graph').innerHTML = 'Plotting library not loaded';
-                // Fallback: Try loading again
                 const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.12/dist/plot.umd.min.js';
+                script.src = 'https://unpkg.com/@observablehq/plot@0.6.13/dist/plot.umd.min.js';
                 script.onload = () => {
-                    console.log('Plot library reloaded:', window.Plot);
+                    console.log('Plot library reloaded:', window.Plot, 'plot method:', window.Plot ? window.Plot.plot : 'undefined');
                     if (window.Plot && typeof window.Plot.plot === 'function') updateGraph();
                 };
                 document.head.appendChild(script);
