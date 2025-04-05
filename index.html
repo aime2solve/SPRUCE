@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPRUCE Soil Temperature Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Merriweather:wght@700&family=Exo+2:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/dist/plot.umd.min.js" defer></script>
+    <script src="./plot.umd.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
         body, html {
@@ -28,6 +28,11 @@
             font-family: 'Orbitron', sans-serif;
             font-size: calc(18px + 2vw);
             margin: 0;
+            animation: pulse 1.5s infinite alternate; /* Stronger pulse */
+        }
+        @keyframes pulse {
+            0% { text-shadow: 0 0 10px #00CC66, 0 0 20px #00CC66; }
+            100% { text-shadow: 0 0 20px #00FFFF, 0 0 40px #00FFFF, 0 0 60px #00CC66; }
         }
         .container {
             display: flex;
@@ -68,7 +73,7 @@
             box-shadow: 0 0 8px #00FFFF;
         }
         .sidebar-title {
-            font-family: 'Merriweather', serif;
+            font-family: 'Exo 2', sans-serif; /* Futuristic font */
             font-size: 24px;
             color: #DAA520;
             text-align: center;
@@ -115,7 +120,7 @@
             width: calc(100% - 120px);
             max-height: 0;
             overflow-y: auto;
-            background: rgba(26, 26, 26, 0.9); /* Less transparent */
+            background: rgba(26, 26, 26, 0.9);
             border: 2px solid #00FFFF;
             border-radius: 10px;
             color: #00FFFF;
@@ -198,6 +203,17 @@
             height: 99%;
             margin: 0.5% auto;
         }
+        /* Color-coded dependent variables */
+        #dependent-menu label[for="TS_0__A1"] { color: #FF5555; } /* Red */
+        #dependent-menu label[for="TS_-5__A2"] { color: #55FF55; } /* Green */
+        #dependent-menu label[for="TS_-10__A3"] { color: #5555FF; } /* Blue */
+        #dependent-menu label[for="TS_-20__A4"] { color: #FFFF55; } /* Yellow */
+        #dependent-menu label[for="TS_-100__A8"] { color: #FF55FF; } /* Magenta */
+        #dependent-menu label[for="TS_Hummock_A1"] { color: #55FFFF; } /* Cyan */
+        #dependent-menu label[for="CO2_amb"] { color: #FFAA55; } /* Orange */
+        #dependent-menu label[for="TA_2_0_2"] { color: #AA55FF; } /* Purple */
+        #dependent-menu label[for="SM_-10__A3"] { color: #55AAFF; } /* Light Blue */
+        #dependent-menu label[for="RH_2_0_1"] { color: #FF55AA; } /* Pink */
     </style>
 </head>
 <body>
@@ -218,7 +234,7 @@
                     <div class="dropdown-item"><input type="checkbox" id="Temp_target" value="Temp_target"><label for="Temp_target">Target Temperature (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="CO2_trmt" value="CO2_trmt"><label for="CO2_trmt">CO₂ Treatment (ppm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WS_10" value="WS_10"><label for="WS_10">Wind Speed (m/s)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WS_10"><label for="WD_10">Wind Direction (°)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction (°)</label></div> <!-- Fixed value -->
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
                 </div>
@@ -413,14 +429,7 @@
             console.log('Checking Plot availability:', window.Plot, 'plot method:', window.Plot ? window.Plot.plot : 'undefined');
             if (!window.Plot || typeof window.Plot.plot !== 'function') {
                 console.error('Plot object not available - library issue');
-                document.getElementById('graph').innerHTML = 'Plotting library not loaded';
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/dist/plot.umd.min.js';
-                script.onload = () => {
-                    console.log('Plot library reloaded:', window.Plot, 'plot method:', window.Plot ? window.Plot.plot : 'undefined');
-                    if (window.Plot && typeof window.Plot.plot === 'function') updateGraph();
-                };
-                document.head.appendChild(script);
+                document.getElementById('graph').innerHTML = 'Plotting library not loaded - ensure plot.umd.min.js is in the root directory';
                 return;
             }
 
@@ -452,11 +461,24 @@
                 return;
             }
 
+            const colorMap = {
+                'TS_0__A1': '#FF5555',     // Red
+                'TS_-5__A2': '#55FF55',    // Green
+                'TS_-10__A3': '#5555FF',   // Blue
+                'TS_-20__A4': '#FFFF55',   // Yellow
+                'TS_-100__A8': '#FF55FF',  // Magenta
+                'TS_Hummock_A1': '#55FFFF', // Cyan
+                'CO2_amb': '#FFAA55',      // Orange
+                'TA_2_0_2': '#AA55FF',     // Purple
+                'SM_-10__A3': '#55AAFF',   // Light Blue
+                'RH_2_0_1': '#FF55AA'      // Pink
+            };
+
             const marks = dependents.map(dep => 
                 window.Plot.dot(workingData, {
                     x: independent,
                     y: dep,
-                    fill: d => `#${Math.floor(Math.random()*16777215).toString(16)}`,
+                    fill: colorMap[dep], // Match dropdown colors
                     r: 6,
                     title: d => `Plot ${d.Plot}\n${independent}: ${d[independent]}\n${dep}: ${d[dep]}`
                 })
@@ -475,7 +497,7 @@
             const statsText = dependents.map(dep => {
                 const allY = workingData.map(row => row[dep]).filter(v => v !== undefined && v !== null);
                 return allY.length > 0 ? 
-                    `${document.querySelector(`label[for="${dep}"]`)?.textContent || dep}: ` +
+                    `<span style="color: ${colorMap[dep]}">${document.querySelector(`label[for="${dep}"]`)?.textContent || dep}</span>: ` +
                     `Mean: ${(allY.reduce((sum, val) => sum + val, 0) / allY.length).toFixed(2)}, ` +
                     `Min: ${Math.min(...allY).toFixed(2)}, Max: ${Math.max(...allY).toFixed(2)}, Points: ${allY.length}` :
                     `${dep}: No data points`;
