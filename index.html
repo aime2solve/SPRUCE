@@ -33,7 +33,7 @@
             overflow: hidden;
         }
         .sidebar {
-            width: 250px; /* Tightened from 300px */
+            width: 250px;
             background: rgba(26, 26, 26, 0.8);
             border-right: 2px solid #00FFFF;
             padding: 15px;
@@ -84,7 +84,7 @@
             margin-right: 10px;
             width: 100px;
             text-align: right;
-            padding-left: 10px; /* Shifted left */
+            padding-left: 10px;
         }
         .dropdown-toggle, #analyze-button {
             background: rgba(26, 26, 26, 0.8);
@@ -108,7 +108,7 @@
             width: calc(100% - 120px);
             max-height: 0;
             overflow-y: auto;
-            background: rgba(26, 26, 26, 0.7); /* Semitransparent */
+            background: rgba(26, 26, 26, 0.85); /* Less transparent */
             border: 2px solid #00FFFF;
             border-radius: 10px;
             color: #00FFFF;
@@ -116,7 +116,7 @@
             padding: 8px;
             transition: max-height 0.5s ease;
             visibility: hidden;
-            z-index: 10; /* Bring to front */
+            z-index: 10;
         }
         .dropdown-menu.open {
             max-height: 400px;
@@ -151,7 +151,7 @@
         .stats-panel {
             position: absolute;
             top: 100%;
-            left: 110px; /* Aligned with buttons */
+            left: 110px;
             width: calc(100% - 120px);
             max-height: 0;
             background: rgba(26, 26, 26, 0.95);
@@ -162,7 +162,7 @@
             padding: 8px;
             overflow: hidden;
             transition: max-height 0.5s ease;
-            visibility: hidden; /* Hidden until selected */
+            visibility: hidden;
         }
         .stats-panel.open {
             max-height: 200px;
@@ -170,7 +170,7 @@
         }
         .graph-container {
             flex-grow: 1;
-            margin-left: 250px; /* Adjusted for tighter sidebar */
+            margin-left: 250px;
             background-color: #1A1A1A;
             height: 98%;
             transition: margin-left 0.3s ease;
@@ -184,7 +184,7 @@
             margin: 0.5% auto;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.12/dist/plot.umd.min.js"></script>
+    <script src="https://unpkg.com/@observablehq/plot@0.6.12/dist/plot.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
@@ -264,12 +264,6 @@
     </div>
 
     <script>
-        if (typeof Plot === 'undefined') {
-            console.error('Observable Plot library not loaded!');
-        } else {
-            console.log('Observable Plot loaded successfully');
-        }
-
         let allData = [];
         const plots = Array.from({ length: 21 }, (_, i) => i + 1);
         const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily.json';
@@ -338,7 +332,7 @@
             sidebar.classList.toggle('collapsed');
             graphContainer.classList.toggle('full-width');
             tab.textContent = sidebar.classList.contains('collapsed') ? '<' : '>';
-            if (dataLoaded && Plot && Plot.resize) Plot.resize(document.getElementById('graph').firstChild);
+            if (dataLoaded && window.Plot && window.Plot.resize) window.Plot.resize(document.getElementById('graph').firstChild);
         }
 
         function enforceSingleSelection(groupId, changedId) {
@@ -355,7 +349,7 @@
                 return;
             }
 
-            if (typeof Plot === 'undefined' || !Plot.plot) {
+            if (typeof window.Plot === 'undefined' || !window.Plot.plot) {
                 console.error('Plot object not available - library issue');
                 document.getElementById('graph').innerHTML = 'Plotting library not loaded';
                 return;
@@ -373,7 +367,6 @@
                     return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= endDate);
                 });
             }
-            // Relaxed condition filtering - only apply if data exists
             if (conditions.length > 0) {
                 workingData = workingData.filter(row => 
                     conditions.every(cond => row[cond] !== undefined && row[cond] !== null)
@@ -388,14 +381,14 @@
                 return;
             }
 
-            const plot = Plot.plot({
+            const plot = window.Plot.plot({
                 width: document.getElementById('graph').clientWidth,
                 height: document.getElementById('graph').clientHeight,
-                style: { background: '#1A1A1A', color: '#FFFFFF', fontFamily: 'Lato, sans-serif' },
+                style: { background: '#1A1A1A', color: '#FFFFFF', fontFamily: 'Lato', sans-serif },
                 x: { label: document.querySelector(`label[for="${independent}"]`)?.textContent || independent, grid: true, type: 'linear' },
                 y: { label: document.querySelector(`label[for="${dependent}"]`)?.textContent || dependent, grid: true, type: 'linear' },
                 marks: [
-                    Plot.dot(workingData, {
+                    window.Plot.dot(workingData, {
                         x: independent,
                         y: dependent,
                         fill: d => `#${Math.floor(Math.random()*16777215).toString(16)}`,
