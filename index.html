@@ -126,7 +126,7 @@
             z-index: 10;
         }
         .dropdown-menu.open {
-            max-height: 400px;
+            max-height: 600px; /* Increased for longer lists */
             visibility: visible;
         }
         .dropdown-item {
@@ -140,7 +140,7 @@
         }
         #condition-menu .dropdown-item {
             flex-direction: column;
-            align-items: flex-start;
+            align-items: flex-start; /* Justify left */
         }
         #condition-menu .range-options {
             margin-left: 20px;
@@ -233,6 +233,10 @@
                     <div class="dropdown-item"><input type="checkbox" id="TS_-20__A4" value="TS_-20__A4"><label for="TS_-20__A4">Soil Temp -20 cm (A4, °C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_-100__A8" value="TS_-100__A8"><label for="TS_-100__A8">Soil Temp -100 cm (A8, °C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_Hummock_A1" value="TS_Hummock_A1"><label for="TS_Hummock_A1">Hummock Temp (A1, °C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="CO2_amb" value="CO2_amb"><label for="CO2_amb">Ambient CO₂ (ppm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0_2" value="TA_2_0_2"><label for="TA_2_0_2">Air Temp 2m (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="SM_-10__A3" value="SM_-10__A3"><label for="SM_-10__A3">Soil Moisture -10 cm (%)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0_1" value="RH_2_0_1"><label for="RH_2_0_1">Relative Humidity 2m (%)</label></div>
                 </div>
             </div>
             <div class="button-container">
@@ -407,7 +411,7 @@
             }
 
             console.log('Checking Plot availability:', window.Plot);
-            if (typeof window.Plot === 'undefined' || !window.Plot.plot) {
+            if (!window.Plot || typeof window.Plot.plot !== 'function') { // Simplified check
                 console.error('Plot object not available - library issue');
                 document.getElementById('graph').innerHTML = 'Plotting library not loaded';
                 return;
