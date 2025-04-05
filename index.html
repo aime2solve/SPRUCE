@@ -115,7 +115,12 @@
             <div class="button-container">
                 <span class="button-label">Stats:</span>
                 <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
-                <div class="stats-panel" id="stats-panel"><div id="stats-content"></div></div>
+                <div class="stats-panel" id="stats-panel">
+                    <div id="stats-content"></div>
+                    <div class="dropdown-item">
+                        <input type="checkbox" id="add-stats-to-chart" value="add-stats"><label for="add-stats-to-chart">Add to Chart</label>
+                    </div>
+                </div>
             </div>
             <div class="button-container">
                 <span class="button-label">Analyze:</span>
@@ -294,6 +299,20 @@
                 return;
             }
 
+            const statsText = dependents.map(dep => {
+                const yValues = workingData.map(row => row[dep]).filter(v => v !== undefined && !isNaN(parseFloat(v)));
+                return yValues.length > 0 ? 
+                    `${document.querySelector(`label[for="${dep}"]`)?.textContent || dep}: ` +
+                    `Mean: ${(yValues.reduce((sum, val) => sum + val, 0) / yValues.length).toFixed(2)}, ` +
+                    `Min: ${Math.min(...yValues).toFixed(2)}, Max: ${Math.max(...yValues).toFixed(2)}, Points: ${yValues.length}` :
+                    `${dep}: No valid data points`;
+            }).join('<br>');
+            document.getElementById('stats-content').innerHTML = statsText;
+
+            const addStatsToChart = document.getElementById('add-stats-to-chart')?.checked;
+            const title = `Comparative Biospheromics: ${independent === 'CO2_trmt' ? 'CO₂' : 'Temperature'} vs. Soil Temperature` +
+                          (addStatsToChart ? `<br><small style="color: #00FF00">${statsText.replace(/<br>/g, '; ')}</small>` : '');
+
             console.log('Plotting with Plotly');
             Plotly.newPlot('graph', traces, {
                 width: document.getElementById('graph').clientWidth,
@@ -301,8 +320,18 @@
                 plot_bgcolor: '#1A1A1A',
                 paper_bgcolor: '#1A1A1A',
                 font: { color: '#FFFFFF' },
-                xaxis: { title: document.querySelector(`label[for="${independent}"]`)?.textContent || independent },
-                yaxis: { title: 'Dependent Variables' }
+                title: title,
+                xaxis: { 
+                    title: independent === 'CO2_trmt' ? 'CO₂ Treatment (ppm)' : 'Target Temperature (°C)',
+                    gridcolor: '#444',
+                    zerolinecolor: '#444'
+                },
+                yaxis: { 
+                    title: 'Soil Temperature (°C)',
+                    gridcolor: '#444',
+                    zerolinecolor: '#444'
+                },
+                margin: { t: addStatsToChart ? 100 : 60, b: 60, l: 60, r: 20 }
             }).catch(err => console.error('Plotly error:', err));
         }
 
@@ -316,10 +345,15 @@
             const statsPanel = document.getElementById('stats-panel');
             statsPanel.classList.toggle('open');
             document.getElementById('stats-toggle').textContent = statsPanel.classList.contains('open') ? 'Hide Stats' : 'Show Stats';
+            if (statsPanel.classList.contains('open') && dataLoaded) updateGraph();
         });
         document.getElementById('analyze-button').addEventListener('click', () => {
             console.log('Analyze button clicked');
             loadData();
+        });
+
+        document.getElementById('add-stats-to-chart')?.addEventListener('change', () => {
+            if (dataLoaded) updateGraph();
         });
 
         document.querySelectorAll('#independent-menu input').forEach(input => {
