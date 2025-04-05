@@ -34,7 +34,7 @@
             display: flex; 
             flex-grow: 1; 
             overflow: hidden; 
-            height: calc(100vh - 2vh - 2vh); /* Adjust for h1 padding */
+            height: calc(100vh - 4vh); 
         }
         .sidebar { 
             width: 250px; 
@@ -45,15 +45,15 @@
             flex-direction: column; 
             gap: 15px; 
             position: fixed; 
-            top: calc(2vh + 2vh); /* h1 height + padding */
-            height: calc(100vh - 4vh); 
+            top: 0; /* Start at top */
+            height: calc(100vh - 2vh); /* Slightly shorter than full height */
             transition: transform 0.3s ease; 
             z-index: 10; 
         }
         .sidebar.collapsed { transform: translateX(-230px); }
         .sidebar-tab { 
             position: absolute; 
-            top: 0; 
+            top: 2vh; /* Align with title height */
             right: -40px; 
             width: 40px; 
             height: 40px; 
@@ -68,7 +68,7 @@
             cursor: pointer; 
             box-shadow: 0 0 8px #00FFFF; 
         }
-        .sidebar-title { font-family: 'Exo 2', sans-serif; font-size: 20px; color: #DAA520; text-align: center; text-shadow: 0 0 10px #DAA520; line-height: 1.2; }
+        .sidebar-title { font-family: 'Exo 2', sans-serif; font-size: 20px; color: #DAA520; text-align: center; text-shadow: 0 0 10px #DAA520; line-height: 1.2; margin-top: 4vh; }
         .sidebar-title span { display: block; font-size: 14px; }
         .button-container { display: flex; align-items: center; width: 100%; position: relative; }
         .button-label { color: #FFFF00; font-size: 12px; margin-right: 10px; width: 100px; text-align: right; padding-left: 10px; }
@@ -116,7 +116,7 @@
             flex-grow: 1; 
             margin-left: 250px; 
             background-color: #1A1A1A; 
-            height: calc(100vh - 4vh); 
+            height: calc(100vh - 6vh); /* Tighten bottom */
             transition: margin-left 0.3s ease; 
             position: relative; 
             z-index: 1; 
@@ -131,7 +131,7 @@
         }
         .legend-tab { 
             position: absolute; 
-            top: 10px; 
+            top: 50px; /* Below Plotly toolbar (~40px) */
             right: 10px; 
             background: rgba(26, 26, 26, 0.8); 
             border: 2px solid #00FFFF; 
@@ -362,17 +362,29 @@
         }
 
         function calculateRegression(x, y) {
-            const n = x.length;
-            if (n === 0) return { slope: NaN, intercept: NaN, rSquared: NaN };
-            const sumX = x.reduce((a, b) => a + b, 0);
-            const sumY = y.reduce((a, b) => a + b, 0);
-            const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
-            const sumXX = x.reduce((sum, xi) => sum + xi * xi, 0);
+            // Filter outliers using IQR method
+            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] }));
+            const yValues = y.slice().sort((a, b) => a - b);
+            const q1 = yValues[Math.floor(yValues.length * 0.25)];
+            const q3 = yValues[Math.floor(yValues.length * 0.75)];
+            const iqr = q3 - q1;
+            const lowerBound = q1 - 1.5 * iqr;
+            const upperBound = q3 + 1.5 * iqr;
+            const filteredData = pairedData.filter(d => d.y >= lowerBound && d.y <= upperBound);
+            const filteredX = filteredData.map(d => d.x);
+            const filteredY = filteredData.map(d => d.y);
+
+            const n = filteredX.length;
+            if (n < 2) return { slope: NaN, intercept: NaN, rSquared: NaN };
+            const sumX = filteredX.reduce((a, b) => a + b, 0);
+            const sumY = filteredY.reduce((a, b) => a + b, 0);
+            const sumXY = filteredX.reduce((sum, xi, i) => sum + xi * filteredY[i], 0);
+            const sumXX = filteredX.reduce((sum, xi) => sum + xi * xi, 0);
             const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
             const intercept = (sumY - slope * sumX) / n;
-            const yPred = x.map(xi => slope * xi + intercept);
-            const ssTot = y.reduce((sum, yi, i) => sum + Math.pow(yi - sumY / n, 2), 0);
-            const ssRes = y.reduce((sum, yi, i) => sum + Math.pow(yi - yPred[i], 2), 0);
+            const yPred = filteredX.map(xi => slope * xi + intercept);
+            const ssTot = filteredY.reduce((sum, yi, i) => sum + Math.pow(yi - sumY / n, 2), 0);
+            const ssRes = filteredY.reduce((sum, yi, i) => sum + Math.pow(yi - yPred[i], 2), 0);
             const rSquared = ssTot === 0 ? NaN : 1 - (ssRes / ssTot);
             return { slope, intercept, rSquared };
         }
@@ -442,7 +454,7 @@
             legendVisible = !legendVisible;
             Plotly.relayout('graph', { 
                 showlegend: legendVisible,
-                'legend.x': legendVisible ? 1 : -9999 // Off-screen when hidden
+                'legend.x': legendVisible ? 1 : -9999
             });
             document.getElementById('legend-tab').textContent = legendVisible ? 'Legend' : 'Legend';
         }
@@ -614,9 +626,9 @@
                     title: { text: yAxisTitle, font: { size: 14 } },
                     gridcolor: '#444',
                     zerolinecolor: '#444',
-                    automargin: true // Prevent y-axis spill
+                    automargin: true
                 },
-                margin: { t: 80, b: 60, l: 80, r: 40 }, // Increased left margin
+                margin: { t: 80, b: 40, l: 100, r: 40 }, // Increased l, reduced b
                 showlegend: legendVisible,
                 legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.8)' },
                 annotations: annotations
