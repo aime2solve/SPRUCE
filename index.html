@@ -82,7 +82,7 @@
         }
         .sidebar-title { 
             font-family: 'Exo 2', sans-serif; 
-            font-size: 28px; /* Increased from 26px */
+            font-size: 28px; 
             color: #DAA520; 
             text-align: center; 
             text-shadow: 0 0 10px #DAA520; 
@@ -91,12 +91,12 @@
         }
         .sidebar-title span { 
             display: block; 
-            font-size: 20px; /* Increased from 18px */
+            font-size: 20px; 
         }
         .button-container { display: flex; align-items: center; width: 100%; position: relative; }
         .button-label { 
             color: #FFFF00; 
-            font-size: 15px; /* Increased from 13px */
+            font-size: 15px; 
             margin-right: 10px; 
             width: 100px; 
             text-align: right; 
@@ -107,24 +107,24 @@
             border: 2px solid #00FFFF; 
             border-radius: 10px; 
             color: #00FFFF; 
-            font-size: 13px; /* Increased from 11px */
-            padding: 6px 8px; /* Adjusted padding */
+            font-size: 13px; 
+            padding: 6px 8px; 
             width: calc(100% - 120px); 
             text-align: center; 
             cursor: pointer; 
             box-shadow: 0 0 8px #00FFFF; 
-            white-space: pre-wrap; /* Allows line breaks */
+            white-space: pre-wrap; 
         }
         .dropdown-menu { 
             position: absolute; 
             top: 100%; 
-            left: 0; /* Adjusted for stats menu */
-            width: 100%; /* Full sidebar width */
+            left: 0; 
+            width: 100%; 
             background: rgba(26, 26, 26, 0.9); 
             border: 2px solid #00FFFF; 
             border-radius: 10px; 
             color: #00FFFF; 
-            font-size: 13px; /* Increased from 11px */
+            font-size: 13px; 
             padding: 8px; 
             transition: max-height 0.5s ease; 
             visibility: hidden; 
@@ -132,11 +132,11 @@
         }
         #stats-menu { 
             top: auto; 
-            bottom: 100%; /* Opens upward for stats */
-            max-height: 400px; /* Increased for equations */
+            bottom: 100%; 
+            max-height: 400px; 
             color: #00FF00; 
             font-family: 'VT323', monospace; 
-            font-size: 17px; /* Increased from 15px */
+            font-size: 17px; 
         }
         .dropdown-menu.open { visibility: visible; }
         .dropdown-item { display: flex; align-items: center; margin-bottom: 5px; }
@@ -150,7 +150,7 @@
             color: #00FFFF; 
             padding: 4px; 
             margin-top: 5px; 
-            font-size: 13px; /* Increased from 11px */
+            font-size: 13px; 
         }
         .graph-container { 
             position: absolute; 
@@ -221,7 +221,7 @@
             font-size: 13px;
             z-index: 20;
             display: none;
-            width: 500px; /* Wider for equations */
+            width: 500px;
             max-height: 80vh;
             overflow-y: auto;
         }
@@ -356,7 +356,7 @@
             </div>
             <div class="button-container">
                 <span class="button-label">Time Range:</span>
-                <div class="dropdown-toggle" id="time-range-toggle">2015-08-01\n2025-04-05</div>
+                <div class="dropdown-toggle" id="time-range-toggle">2015-08-01<br>2025-04-05</div>
                 <div class="dropdown-menu" id="time-range-menu">
                     <div class="dropdown-item"><label for="start-date">Start Date:</label><input type="text" id="start-date" value="2015-08-01"></div>
                     <div class="dropdown-item"><label for="end-date">End Date:</label><input type="text" id="end-date" value="2025-04-05"></div>
@@ -614,27 +614,24 @@
             const ssRes = filteredY.reduce((sum, yi, i) => sum + Math.pow(yi - yPred[i], 2), 0);
             const ssReg = ssTot - ssRes;
             const rSquared = ssTot === 0 ? NaN : 1 - (ssRes / ssTot);
-            const adjustedRSquared = 1 - (1 - rSquared) * (n - 1) / (n - 2); // Adjusted R² for one predictor
-            const rse = Math.sqrt(ssRes / (n - 2)); // Residual Standard Error
-            const seSlope = rse / Math.sqrt(filteredX.reduce((sum, xi) => sum + Math.pow(xi - meanX, 2), 0)); // Standard Error of Slope
-            const tStat = slope / seSlope; // T-statistic for slope
-            const fStat = (ssReg / 1) / (ssRes / (n - 2)); // F-statistic for overall model (1 predictor)
+            const adjustedRSquared = 1 - (1 - rSquared) * (n - 1) / (n - 2);
+            const rse = Math.sqrt(ssRes / (n - 2));
+            const seSlope = rse / Math.sqrt(filteredX.reduce((sum, xi) => sum + Math.pow(xi - meanX, 2), 0));
+            const tStat = slope / seSlope;
+            const fStat = (ssReg / 1) / (ssRes / (n - 2));
 
-            // Approximate p-values using t-distribution (two-tailed)
             const tDistPValue = (t) => {
                 const df = n - 2;
                 const tAbs = Math.abs(t);
-                // Simplified approximation for p-value (for large df, t approximates normal)
                 if (df > 100) return 2 * (1 - gaussianCDF(tAbs));
-                return 2 * (1 - tDistCDF(tAbs, df)); // Placeholder; real implementation needs a t-table or library
+                return 2 * (1 - tDistCDF(tAbs, df));
             };
             const pValueSlope = tDistPValue(tStat);
-            const pValueF = tDistPValue(Math.sqrt(fStat)); // Simplified F-to-t conversion for 1 predictor
+            const pValueF = tDistPValue(Math.sqrt(fStat));
 
             return { slope, intercept, rSquared, adjustedRSquared, pValueSlope, tStat, fStat, pValueF, seSlope, rse };
         }
 
-        // Gaussian CDF approximation for large df
         function gaussianCDF(z) {
             return 0.5 * (1 + erf(z / Math.sqrt(2)));
         }
@@ -648,9 +645,8 @@
             return sign * (1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x));
         }
 
-        // Placeholder t-distribution CDF (approximation)
         function tDistCDF(t, df) {
-            return gaussianCDF(t); // Simplified; ideally use a proper t-distribution library
+            return gaussianCDF(t);
         }
 
         function calculateSpearman(x, y) {
@@ -784,7 +780,7 @@
 
             const units = allDependents.map(dep => unitMap[dep]);
             const commonUnit = units[0];
-            const dependents = allDependents.filter(dep => unitMap[dep] ===(commonUnit);
+            const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
             if (!dependents.length) {
                 graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
@@ -844,7 +840,6 @@
                     }
                 });
             } else {
-                // Placeholder for ANOVA (to be expanded later)
                 graphDiv.innerHTML = '<div class="warning-message">ANOVA not fully implemented yet.</div>';
                 return;
             }
@@ -855,7 +850,6 @@
                 return;
             }
 
-            // Update stats content
             const statsText = statsData.map(({ dep, reg, spearman }) => {
                 const label = document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep;
                 return `${label}:\n` +
@@ -866,7 +860,6 @@
             }).join('\n\n');
             document.getElementById('stats-content').innerHTML = statsText.replace(/\n/g, '<br>');
 
-            // Stats popup
             const popup = document.getElementById('stats-popup');
             popup.style.display = showStatsPopup ? 'block' : 'none';
             document.getElementById('stats-popup-content').innerHTML = statsText.replace(/\n/g, '<br>');
@@ -953,7 +946,6 @@
                                       ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
             });
 
-            // Update dependent toggle with colors
             const dependentToggle = document.getElementById('dependent-toggle');
             const selectedLabels = Array.from(document.querySelectorAll('#dependent-menu input:checked'))
                 .map(input => {
@@ -1002,8 +994,8 @@
             defaultDate: '2015-08-01',
             onChange: (selectedDates) => {
                 startDate = selectedDates[0];
-                document.getElementById('time-range-toggle').textContent = 
-                    `${startDate.toISOString().split('T')[0]}\n${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+                document.getElementById('time-range-toggle').innerHTML = 
+                    `${startDate.toISOString().split('T')[0]}<br>${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
                 updateGraph();
             }
         });
@@ -1013,8 +1005,8 @@
             defaultDate: '2025-04-05',
             onChange: (selectedDates) => {
                 endDate = selectedDates[0];
-                document.getElementById('time-range-toggle').textContent = 
-                    `${startDate ? startDate.toISOString().split('T')[0] : 'Start'}\n${endDate.toISOString().split('T')[0]}`;
+                document.getElementById('time-range-toggle').innerHTML = 
+                    `${startDate ? startDate.toISOString().split('T')[0] : 'Start'}<br>${endDate.toISOString().split('T')[0]}`;
                 updateGraph();
             }
         });
