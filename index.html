@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparative Biospheromics Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&family=Nasalization&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -24,7 +24,7 @@
             color: #00FFFF; 
             text-align: center; 
             padding: 1vh; 
-            font-family: 'Nasalization', 'Orbitron', 'Exo 2', sans-serif; 
+            font-family: 'Rajdhani', 'Orbitron', 'Exo 2', sans-serif; /* Changed to Rajdhani */
             font-size: calc(16px + 1.5vw); 
             margin: 0; 
             text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; 
@@ -73,7 +73,7 @@
             border-left: none; 
             border-radius: 0 10px 10px 0; 
             color: #00FFFF; 
-            font-size: 18px; 
+            font-size: 19px; /* Increased by 1pt from 18px */
             line-height: 36px; 
             text-align: center; 
             cursor: pointer; 
@@ -81,22 +81,32 @@
         }
         .sidebar-title { 
             font-family: 'Exo 2', sans-serif; 
-            font-size: 24px; 
+            font-size: 26px; /* Increased by 2pt from 24px */
             color: #DAA520; 
             text-align: center; 
             text-shadow: 0 0 10px #DAA520; 
             line-height: 1.2; 
             margin-top: 0; 
         }
-        .sidebar-title span { display: block; font-size: 16px; }
+        .sidebar-title span { 
+            display: block; 
+            font-size: 18px; /* Increased by 2pt from 16px */
+        }
         .button-container { display: flex; align-items: center; width: 100%; position: relative; }
-        .button-label { color: #FFFF00; font-size: 12px; margin-right: 10px; width: 100px; text-align: right; padding-left: 10px; }
+        .button-label { 
+            color: #FFFF00; 
+            font-size: 13px; /* Increased by 1pt from 12px */
+            margin-right: 10px; 
+            width: 100px; 
+            text-align: right; 
+            padding-left: 10px; 
+        }
         .dropdown-toggle, #control-panel-button { 
             background: rgba(26, 26, 26, 0.8); 
             border: 2px solid #00FFFF; 
             border-radius: 10px; 
             color: #00FFFF; 
-            font-size: 10px; 
+            font-size: 11px; /* Increased by 1pt from 10px */
             padding: 4px 8px; 
             width: calc(100% - 120px); 
             text-align: center; 
@@ -114,7 +124,7 @@
             border: 2px solid #00FFFF; 
             border-radius: 10px; 
             color: #00FFFF; 
-            font-size: 10px; 
+            font-size: 11px; /* Increased by 1pt from 10px */
             padding: 8px; 
             transition: max-height 0.5s ease; 
             visibility: hidden; 
@@ -132,9 +142,9 @@
             color: #00FFFF; 
             padding: 4px; 
             margin-top: 5px; 
-            font-size: 10px; 
+            font-size: 11px; /* Increased by 1pt from 10px */
         }
-        #stats-menu { color: #00FF00; font-family: 'VT323', monospace; font-size: 14px; }
+        #stats-menu { color: #00FF00; font-family: 'VT323', monospace; font-size: 15px; } /* Increased by 1pt from 14px */
         .graph-container { 
             position: absolute; 
             right: 0; 
@@ -153,9 +163,7 @@
             width: 100%; 
             height: 100%; 
             min-width: 320px; 
-            min-height
-
-: 240px; 
+            min-height: 240px; 
         }
         .welcome-message {
             position: absolute;
@@ -201,7 +209,7 @@
             border-radius: 10px;
             padding: 15px;
             color: #00FFFF;
-            font-size: 12px;
+            font-size: 13px; /* Increased by 1pt from 12px */
             z-index: 20;
             display: none;
             width: 400px;
@@ -253,7 +261,7 @@
         .slider-values {
             display: flex;
             justify-content: space-between;
-            font-size: 10px;
+            font-size: 11px; /* Increased by 1pt from 10px */
             color: #00FF00;
             margin-top: 5px;
         }
@@ -264,7 +272,7 @@
             transform: translate(-50%, -50%);
             color: #FF4500;
             font-family: 'VT323', monospace;
-            font-size: 16px;
+            font-size: 17px; /* Increased by 1pt from 16px */
             text-align: center;
             text-shadow: 0 0 5px #FF4500;
             z-index: 5;
@@ -272,7 +280,7 @@
     </style>
 </head>
 <body>
-    <h1>COMPARATIVE BIOSPHEROMICS DASHBOARD</h1> <!-- Updated to all caps -->
+    <h1>COMPARATIVE BIOSPHEROMICS DASHBOARD</h1>
     <div class="container">
         <div class="sidebar" id="sidebar">
             <div class="sidebar-tab" id="sidebar-tab"><</div>
@@ -290,7 +298,6 @@
                     <div class="dropdown-item"><input type="checkbox" id="TIMESTAMP" value="TIMESTAMP"><label for="TIMESTAMP">Time</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TA_2_0" value="TA_2_0"><label for="TA_2_0">Ambient Temp 2m (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0">Relative Humidity 2m (%)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="WS_10" value="WS_10"><label for="WS_10">Wind Speed 10m (m/s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction 10m (°)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
@@ -313,7 +320,6 @@
                     <div class="dropdown-item"><input type="checkbox" id="TS_200" value="TS_200"><label for="TS_200" style="color: #008080;">Soil Temp 200 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TA_2_0_dep" value="TA_2_0"><label for="TA_2_0_dep" style="color: #FF6347;">Ambient Temp 2m (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="RH_2_0_dep" value="RH_2_0"><label for="RH_2_0_dep" style="color: #4682B4;">Relative Humidity 2m (%)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="WS_10_dep" value="WS_10"><label for="WS_10_dep" style="color: #FFD700;">Wind Speed 10m (m/s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WD_10_dep" value="WD_10"><label for="WD_10_dep" style="color: #6A5ACD;">Wind Direction 10m (°)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2_dep" value="PAR_2"><label for="PAR_2_dep" style="color: #20B2AA;">PAR (µmol/m²s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PREC_6"><label for="PREC_6_dep" style="color: #DAA520;">Precipitation (mm)</label></div>
@@ -354,11 +360,11 @@
         <div class="graph-container" id="graph-container">
             <div id="graph">
                 <div class="welcome-message">
-                    <img src="./SPRUCE_logo.png" alt="SPRUCE Logo">
+                    <a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a>
                     <hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015
                 </div>
             </div>
-            <div class="legend-tab" id="legend-tab">Hide Legend</div>
+            <div class="legend-tab" id="legend-tab">Show Legend</div> <!-- Changed to Show Legend -->
         </div>
     </div>
     <div class="controls-popup" id="controls-popup">
@@ -382,23 +388,22 @@
         let legendVisible = true;
 
         const controlRanges = {
-            'TS_200': { min: -10, max: 30, defaultMin: -10, defaultMax: 30, label: 'Soil Temp 200 cm (°C)' },
+            'TS_200': { min: -10, max: 30, defaultMin: -10, defaultMax: 30, label: 'Soil Temp (°C)' },
+            'Soil_Depth': { min: 0, max: 200, defaultMin: 0, defaultMax: 200, label: 'Soil Depth (cm)' },
             'TA_2_0': { min: -20, max: 40, defaultMin: -20, defaultMax: 40, label: 'Ambient Temp 2m (°C)' },
             'CO2_measured': { min: 300, max: 1000, defaultMin: 300, defaultMax: 1000, label: 'Measured CO₂ (ppm)' },
             'H2O_measured': { min: 0, max: 30, defaultMin: 0, defaultMax: 30, label: 'Measured H₂O (mmol/mol)' },
             'RH_2_0': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Relative Humidity 2m (%)' },
-            'WS_10': { min: 0, max: 20, defaultMin: 0, defaultMax: 20, label: 'Wind Speed 10m (m/s)' },
             'WD_10': { min: 0, max: 360, defaultMin: 0, defaultMax: 360, label: 'Wind Direction 10m (°)' },
             'PAR_2': { min: 0, max: 2000, defaultMin: 0, defaultMax: 2000, label: 'PAR (µmol/m²s)' },
-            'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' },
-            'Soil_Depth': { min: 0, max: 200, defaultMin: 0, defaultMax: 200, label: 'Soil Depth Range (cm)' }
+            'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' }
         };
         let currentRanges = { ...controlRanges };
 
         const unitMap = {
             'TS_0': '°C', 'TS_5': '°C', 'TS_10': '°C', 'TS_20': '°C', 'TS_30': '°C', 
             'TS_40': '°C', 'TS_50': '°C', 'TS_100': '°C', 'TS_200': '°C', 'TA_2_0': '°C',
-            'RH_2_0': '%', 'WS_10': 'm/s', 'WD_10': '°', 'PAR_2': 'µmol/m²s', 'PREC_6': 'mm',
+            'RH_2_0': '%', 'WD_10': '°', 'PAR_2': 'µmol/m²s', 'PREC_6': 'mm',
             'CO2_measured': 'ppm', 'H2O_measured': 'mmol/mol'
         };
 
@@ -416,7 +421,7 @@
                 updateGraph();
             } catch (error) {
                 console.error('Error loading data:', error);
-                document.getElementById('graph').innerHTML = '<div class="welcome-message"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                document.getElementById('graph').innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
             }
         }
 
@@ -655,7 +660,7 @@
         function updateGraph() {
             const graphDiv = document.getElementById('graph');
             if (!dataLoaded || typeof Plotly === 'undefined') {
-                graphDiv.innerHTML = '<div class="welcome-message"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -665,7 +670,7 @@
             const showFit = document.getElementById('show-fit').checked;
 
             if (!allDependents.length || !independent) {
-                graphDiv.innerHTML = '<div class="welcome-message"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -673,7 +678,7 @@
             if (independent === 'Temp_target') workingData = filterByTempRange(workingData);
             workingData = filterByDepthRange(workingData);
             if (!workingData.length) {
-                graphDiv.innerHTML = '<div class="welcome-message"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -695,7 +700,7 @@
             const commonUnit = units[0];
             const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
             if (!dependents.length) {
-                graphDiv.innerHTML = '<div class="welcome-message"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -746,7 +751,7 @@
             });
 
             if (!traces.length) {
-                graphDiv.innerHTML = `<div class="welcome-message"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
+                graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
                                       ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
                 return;
             }
@@ -786,7 +791,7 @@
                         text: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Slope: ${slope.toFixed(4)}, R²: ${rSquared.toFixed(4)}`,
                         showarrow: false,
                         font: { color: '#00FF00', family: 'Lato', size: 14 },
-                        bgcolor: 'rgba(26, 26, 26, 0.7)', /* Consistent semi-transparent background */
+                        bgcolor: 'rgba(26, 26, 26, 0.7)',
                         bordercolor: 'transparent',
                         borderwidth: 0,
                         borderpad: 4,
@@ -837,7 +842,7 @@
                     y: 1, 
                     xanchor: 'right', 
                     yanchor: 'top', 
-                    bgcolor: 'rgba(26, 26, 26, 0.7)', /* Consistent semi-transparent background */
+                    bgcolor: 'rgba(26, 26, 26, 0.7)',
                     bordercolor: 'transparent',
                     borderwidth: 0,
                     font: { color: '#FFFFFF', size: 12 },
@@ -847,7 +852,7 @@
                     shadow: '0 0 8px #00FFFF'
                 },
                 annotations: annotations,
-                hovermode: 'closest' /* Ensures hover info works through panels */
+                hovermode: 'closest'
             };
 
             console.log('Traces:', traces);
@@ -856,7 +861,7 @@
             graphDiv.innerHTML = '';
             Plotly.newPlot('graph', showFit ? traces.concat(fitTraces) : traces, layout).catch(err => {
                 console.error('Plotly error:', err);
-                graphDiv.innerHTML = `<div class="welcome-message"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
+                graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
                                       ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
             });
         }
