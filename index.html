@@ -10,322 +10,46 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js"></script>
     <style>
-        body, html { 
-            margin: 0; 
-            padding: 0; 
-            height: 100vh; 
-            width: 100vw; 
-            background-color: #000000; 
-            font-family: 'Lato', sans-serif; 
-            overflow: hidden; 
-            display: flex; 
-            flex-direction: column; 
-        }
-        h1 { 
-            color: #00FFFF; 
-            text-align: center; 
-            padding: 2vh; 
-            font-family: 'Comfortaa', 'Orbitron', 'Exo 2', sans-serif; 
-            font-size: calc(16px + 1.5vw); 
-            margin: 0; 
-            text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; 
-            animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; 
-            flex-shrink: 0; 
-            z-index: 11; 
-            line-height: 1.2; 
-        }
-        @keyframes glowBreathe {
-            0% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; }
-            25% { text-shadow: 2px 2px 5px #00CC66, -2px -2px 5px #00CC66, 0 0 12px #00FFFF; }
-            50% { text-shadow: 2px 2px 4.5px #00CC66, -2px -2px 4.5px #00CC66, 0 0 11px #00FFFF; }
-            75% { text-shadow: 2px 2px 5px #00CC66, -2px -2px 5px #00CC66, 0 0 12px #00FFFF; }
-            100% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; }
-        }
-        .container { 
-            display: flex; 
-            flex-grow: 1; 
-            overflow: hidden; 
-            height: calc(100vh - 4vh); 
-            position: relative;
-        }
-        .sidebar { 
-            width: 250px; 
-            background: rgba(26, 26, 26, 0.8); 
-            border-right: 2px solid #00FFFF; 
-            padding: 10px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 8px; 
-            position: absolute; 
-            top: 0; 
-            left: 0;
-            height: 100%; 
-            transition: transform 0.3s ease; 
-            z-index: 10; 
-        }
+        body, html { margin: 0; padding: 0; height: 100vh; width: 100vw; background-color: #000000; font-family: 'Lato', sans-serif; overflow: hidden; display: flex; flex-direction: column; }
+        h1 { color: #00FFFF; text-align: center; padding: 2vh; font-family: 'Comfortaa', 'Orbitron', 'Exo 2', sans-serif; font-size: calc(16px + 1.5vw); margin: 0; text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; flex-shrink: 0; z-index: 11; line-height: 1.2; }
+        @keyframes glowBreathe { 0%, 100% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; } 25%, 75% { text-shadow: 2px 2px 5px #00CC66, -2px -2px 5px #00CC66, 0 0 12px #00FFFF; } 50% { text-shadow: 2px 2px 4.5px #00CC66, -2px -2px 4.5px #00CC66, 0 0 11px #00FFFF; } }
+        .container { display: flex; flex-grow: 1; overflow: hidden; height: calc(100vh - 4vh); position: relative; }
+        .sidebar { width: 250px; background: rgba(26, 26, 26, 0.8); border-right: 2px solid #00FFFF; padding: 10px; display: flex; flex-direction: column; gap: 8px; position: absolute; top: 0; left: 0; height: 100%; transition: transform 0.3s ease; z-index: 10; }
         .sidebar.collapsed { transform: translateX(-250px); }
-        .sidebar-tab { 
-            position: absolute; 
-            top: 0; 
-            right: -40px; 
-            width: 40px; 
-            height: 40px; 
-            background: rgba(26, 26, 26, 0.8); 
-            border: 2px solid #00FFFF; 
-            border-left: none; 
-            border-radius: 0 10px 10px 0; 
-            color: #00FFFF; 
-            font-size: 19px; 
-            line-height: 36px; 
-            text-align: center; 
-            cursor: pointer; 
-            box-shadow: 0 0 8px #00FFFF; 
-        }
-        .sidebar-title { 
-            font-family: 'Exo 2', sans-serif; 
-            font-size: 28px; 
-            color: #DAA520; 
-            text-align: center; 
-            text-shadow: 0 0 10px #DAA520; 
-            line-height: 1.1; 
-            margin: 0 0 8px; 
-        }
-        .sidebar-title span { 
-            display: block; 
-            font-size: 20px; 
-        }
-        .button-container { 
-            display: flex; 
-            align-items: center; 
-            width: 100%; 
-            position: relative; 
-            margin: 0; 
-        }
-        .button-label { 
-            color: #FFFF00; 
-            font-size: 15px; 
-            margin-right: 8px; 
-            width: 100px; 
-            text-align: right; 
-            padding-left: 10px; 
-        }
-        .dropdown-toggle, #control-panel-button { 
-            background: rgba(26, 26, 26, 0.8); 
-            border: 2px solid #00FFFF; 
-            border-radius: 10px; 
-            color: #00FFFF; 
-            font-size: 13px; 
-            padding: 4px 6px; 
-            width: calc(100% - 118px); 
-            text-align: center; 
-            cursor: pointer; 
-            box-shadow: 0 0 8px #00FFFF; 
-            line-height: 1.2; 
-            white-space: pre-wrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-        }
-        .dropdown-menu { 
-            position: absolute; 
-            top: 100%; 
-            left: 0; 
-            width: 100%; 
-            background: rgba(26, 26, 26, 0.9); 
-            border: 2px solid #00FFFF; 
-            border-radius: 10px; 
-            color: #00FFFF; 
-            font-size: 13px; 
-            padding: 8px; 
-            transition: max-height 0.5s ease; 
-            visibility: hidden; 
-            z-index: 10; 
-        }
-        #stats-menu { 
-            top: auto; 
-            bottom: 100%; 
-            max-height: 400px; 
-            color: #00FF00; 
-            font-family: 'VT323', monospace; 
-            font-size: 17px; 
-        }
+        .sidebar-tab { position: absolute; top: 0; right: -40px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-left: none; border-radius: 0 10px 10px 0; color: #00FFFF; font-size: 19px; line-height: 36px; text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; }
+        .sidebar-title { font-family: 'Exo 2', sans-serif; font-size: 28px; color: #DAA520; text-align: center; text-shadow: 0 0 10px #DAA520; line-height: 1.1; margin: 0 0 8px; }
+        .sidebar-title span { display: block; font-size: 20px; }
+        .button-container { display: flex; align-items: center; width: 100%; position: relative; margin: 0; }
+        .button-label { color: #FFFF00; font-size: 15px; margin-right: 8px; width: 100px; text-align: right; padding-left: 10px; }
+        .dropdown-toggle, #control-panel-button { background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 13px; padding: 4px 6px; width: calc(100% - 118px); text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; line-height: 1.2; white-space: pre-wrap; overflow: hidden; text-overflow: ellipsis; }
+        .dropdown-menu { position: absolute; top: 100%; left: 0; width: 100%; background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 13px; padding: 8px; transition: max-height 0.5s ease; visibility: hidden; z-index: 10; }
+        #stats-menu { top: auto; bottom: 100%; max-height: 400px; color: #00FF00; font-family: 'VT323', monospace; font-size: 17px; }
         .dropdown-menu.open { visibility: visible; }
         .dropdown-item { display: flex; align-items: center; margin-bottom: 5px; }
         #dependent-menu .dropdown-item label, #independent-menu .dropdown-item label { margin-left: 5px; }
         #time-range-menu { padding: 10px; }
         #time-range-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 10px; }
-        #time-range-menu input[type="text"] { 
-            width: 100%; 
-            background: rgba(26, 26, 26, 0.8); 
-            border: 1px solid #00FFFF; 
-            color: #00FFFF; 
-            padding: 4px; 
-            margin-top: 5px; 
-            font-size: 13px; 
-        }
-        .graph-container { 
-            position: absolute; 
-            right: 0; 
-            width: calc(100vw - 250px); 
-            background-color: #1A1A1A; 
-            height: calc(100vh - 4vh); 
-            transition: width 0.3s ease, left 0.3s ease; 
-            z-index: 1; 
-            overflow: hidden; 
-        }
-        .graph-container.full-width { 
-            width: 100vw; 
-            left: 0; 
-        }
-        #graph { 
-            width: 100%; 
-            height: 100%; 
-            min-width: 320px; 
-            min-height: 240px; 
-        }
-        .welcome-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #00FF00;
-            font-family: 'VT323', monospace;
-            font-size: 20px;
-            text-align: center;
-            text-shadow: 0 0 10px #00FF00;
-        }
-        .welcome-message img {
-            display: block;
-            margin: 0 auto;
-            max-width: 300px;
-            height: auto;
-        }
-        .welcome-message hr {
-            border: 1px solid #00FFFF;
-            width: 80%;
-            margin: 10px auto;
-        }
-        .legend-tab { 
-            position: absolute; 
-            top: 50px; 
-            right: -40px; 
-            width: 40px; 
-            height: 40px; 
-            background: rgba(26, 26, 26, 0.8); 
-            border: 2px solid #00FFFF; 
-            border-left: none; 
-            border-radius: 0 10px 10px 0; 
-            color: #00FFFF; 
-            font-size: 19px; 
-            line-height: 36px; 
-            text-align: center; 
-            cursor: pointer; 
-            box-shadow: 0 0 8px #00FFFF; 
-            z-index: 5; 
-        }
-        .controls-popup, .stats-popup, .warning-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(26, 26, 26, 0.9);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            padding: 15px;
-            color: #00FFFF;
-            font-size: 13px;
-            z-index: 20;
-            display: none;
-            width: 300px;
-            max-height: 80vh;
-            overflow-y: auto;
-            text-align: center;
-        }
-        .warning-popup {
-            color: #FF4500;
-            font-family: 'VT323', monospace;
-            font-size: 17px;
-            width: 250px;
-        }
-        .controls-popup h3, .stats-popup h3, .warning-popup h3 {
-            margin: 0 0 10px;
-            color: #DAA520;
-            text-align: center;
-            font-family: 'Exo 2', sans-serif;
-            font-size: 18px;
-        }
-        .slider-container {
-            margin: 10px 0;
-            position: relative;
-        }
-        .slider-container label {
-            display: block;
-            margin-bottom: 5px;
-            color: #00FFFF;
-        }
-        .range-slider {
-            position: relative;
-            width: 100%;
-            height: 5px;
-            background: #444;
-            border-radius: 5px;
-        }
-        .range-slider input[type="range"] {
-            position: absolute;
-            width: 100%;
-            height: 5px;
-            top: -5px;
-            background: none;
-            -webkit-appearance: none;
-            pointer-events: none;
-        }
-        .range-slider input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 15px;
-            height: 15px;
-            background: #00FFFF;
-            border-radius: 50%;
-            cursor: pointer;
-            pointer-events: auto;
-            box-shadow: 0 0 5px #00FFFF;
-        }
-        .range-slider input[type="range"]::-webkit-slider-runnable-track {
-            background: transparent;
-        }
-        .slider-values {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: #00FF00;
-            margin-top: 5px;
-        }
-        .warning-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #FF4500;
-            font-family: 'VT323', monospace;
-            font-size: 17px;
-            text-align: center;
-            text-shadow: 0 0 5px #FF4500;
-            z-index: 5;
-        }
-        @media (max-width: 768px) {
-            .sidebar { width: 200px; }
-            .graph-container { width: calc(100vw - 200px); }
-            .graph-container.full-width { width: 100vw; }
-            .legend-tab { top: 50px; right: -40px; }
-        }
-        @media (max-width: 480px) {
-            .sidebar { width: 150px; }
-            .graph-container { width: calc(100vw - 150px); }
-            .graph-container.full-width { width: 100vw; }
-            .legend-tab { top: 50px; right: -40px; }
-            .button-label { font-size: 13px; width: 80px; }
-            .dropdown-toggle, #control-panel-button { width: calc(100% - 88px); }
-            .dropdown-menu { width: calc(100% - 10px); left: 0; }
-            .controls-popup, .stats-popup, .warning-popup { width: 90%; }
-        }
+        #time-range-menu input[type="text"] { width: 100%; background: rgba(26, 26, 26, 0.8); border: 1px solid #00FFFF; color: #00FFFF; padding: 4px; margin-top: 5px; font-size: 13px; }
+        .graph-container { position: absolute; right: 0; width: calc(100vw - 250px); background-color: #1A1A1A; height: calc(100vh - 4vh); transition: width 0.3s ease, left 0.3s ease; z-index: 1; overflow: hidden; }
+        .graph-container.full-width { width: 100vw; left: 0; }
+        #graph { width: 100%; height: 100%; min-width: 320px; min-height: 240px; }
+        .welcome-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00FF00; font-family: 'VT323', monospace; font-size: 20px; text-align: center; text-shadow: 0 0 10px #00FF00; }
+        .welcome-message img { display: block; margin: 0 auto; max-width: 300px; height: auto; }
+        .welcome-message hr { border: 1px solid #00FFFF; width: 80%; margin: 10px auto; }
+        .legend-tab { position: absolute; top: 50px; right: -40px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-left: none; border-radius: 0 10px 10px 0; color: #00FFFF; font-size: 19px; line-height: 36px; text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; z-index: 5; }
+        .controls-popup, .stats-popup, .warning-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; padding: 15px; color: #00FFFF; font-size: 13px; z-index: 20; display: none; width: 300px; max-height: 80vh; overflow-y: auto; text-align: center; }
+        .warning-popup { color: #FF4500; font-family: 'VT323', monospace; font-size: 17px; width: 250px; }
+        .controls-popup h3, .stats-popup h3, .warning-popup h3 { margin: 0 0 10px; color: #DAA520; text-align: center; font-family: 'Exo 2', sans-serif; font-size: 18px; }
+        .slider-container { margin: 10px 0; position: relative; }
+        .slider-container label { display: block; margin-bottom: 5px; color: #00FFFF; }
+        .range-slider { position: relative; width: 100%; height: 5px; background: #444; border-radius: 5px; }
+        .range-slider input[type="range"] { position: absolute; width: 100%; height: 5px; top: -5px; background: none; -webkit-appearance: none; pointer-events: none; }
+        .range-slider input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; background: #00FFFF; border-radius: 50%; cursor: pointer; pointer-events: auto; box-shadow: 0 0 5px #00FFFF; }
+        .range-slider input[type="range"]::-webkit-slider-runnable-track { background: transparent; }
+        .slider-values { display: flex; justify-content: space-between; font-size: 11px; color: #00FF00; margin-top: 5px; }
+        .warning-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #FF4500; font-family: 'VT323', monospace; font-size: 17px; text-align: center; text-shadow: 0 0 5px #FF4500; z-index: 5; }
+        @media (max-width: 768px) { .sidebar { width: 200px; } .graph-container { width: calc(100vw - 200px); } .graph-container.full-width { width: 100vw; } .legend-tab { top: 50px; right: -40px; } }
+        @media (max-width: 480px) { .sidebar { width: 150px; } .graph-container { width: calc(100vw - 150px); } .graph-container.full-width { width: 100vw; } .legend-tab { top: 50px; right: -40px; } .button-label { font-size: 13px; width: 80px; } .dropdown-toggle, #control-panel-button { width: calc(100% - 88px); } .dropdown-menu { width: calc(100% - 10px); left: 0; } .controls-popup, .stats-popup, .warning-popup { width: 90%; } }
     </style>
 </head>
 <body>
@@ -408,12 +132,7 @@
             </div>
         </div>
         <div class="graph-container" id="graph-container">
-            <div id="graph">
-                <div class="welcome-message">
-                    <a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a>
-                    <hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015
-                </div>
-            </div>
+            <div id="graph"></div>
             <div class="legend-tab" id="legend-tab">L</div>
         </div>
     </div>
@@ -480,8 +199,15 @@
                 if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
                 allData = await response.json();
                 allData = allData.filter(row => {
-                    row.TIMESTAMP = new Date(row.TIMESTAMP);
-                    return !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date;
+                    const year = parseInt(row.Year, 10);
+                    const dfoy = parseFloat(row.DFOY);
+                    const day = Math.floor(dfoy);
+                    const fractionalDay = dfoy - day;
+                    const date = new Date(year, 0);
+                    date.setDate(day);
+                    date.setHours(Math.floor(fractionalDay * 24), Math.floor((fractionalDay * 24 % 1) * 60), 0, 0);
+                    row.TIMESTAMP = date;
+                    return !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date && row.TIMESTAMP.getFullYear() >= 2015 && row.TIMESTAMP.getFullYear() <= 2025;
                 });
                 console.log('Loaded data sample:', allData.slice(0, 5));
                 dataLoaded = true;
@@ -533,13 +259,6 @@
             });
         }
 
-        function filterByTempRange(data) {
-            return data.filter(row => {
-                const tempValue = parseFloat(row.Temp_target);
-                return isNaN(tempValue) || (tempValue >= tempRange[0] && tempValue <= tempRange[1]);
-            });
-        }
-
         function filterByDepthRange(data) {
             const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
             return data.map(row => {
@@ -583,22 +302,28 @@
                     const maxValue = document.getElementById(`${key}-max-value`);
 
                     minSlider.addEventListener('input', () => {
-                        const value = parseFloat(minSlider.value);
-                        minValue.textContent = value;
-                        if (value > parseFloat(maxSlider.value)) maxSlider.value = value;
+                        let value = parseFloat(minSlider.value);
+                        if (value > parseFloat(maxSlider.value)) {
+                            value = parseFloat(maxSlider.value);
+                            minSlider.value = value;
+                        }
                         currentRanges[key].defaultMin = value;
+                        minValue.textContent = value;
                         if (key === 'Soil_Depth') depthRange[0] = value;
-                        else if (key === 'Temp_target') tempRange[0] = value;
+                        if (key === 'Temp_target') tempRange[0] = value;
                         updateGraph();
                     });
 
                     maxSlider.addEventListener('input', () => {
-                        const value = parseFloat(maxSlider.value);
-                        maxValue.textContent = value;
-                        if (value < parseFloat(minSlider.value)) minSlider.value = value;
+                        let value = parseFloat(maxSlider.value);
+                        if (value < parseFloat(minSlider.value)) {
+                            value = parseFloat(minSlider.value);
+                            maxSlider.value = value;
+                        }
                         currentRanges[key].defaultMax = value;
+                        maxValue.textContent = value;
                         if (key === 'Soil_Depth') depthRange[1] = value;
-                        else if (key === 'Temp_target') tempRange[1] = value;
+                        if (key === 'Temp_target') tempRange[1] = value;
                         updateGraph();
                     });
                 });
@@ -620,7 +345,7 @@
 
         function tDistPValue(t, df) {
             const tAbs = Math.abs(t);
-            return 2 * (1 - gaussianCDF(tAbs)); // Simplified approximation
+            return 2 * (1 - gaussianCDF(tAbs));
         }
 
         function calculateRegression(x, y) {
@@ -789,7 +514,6 @@
             }
 
             let workingData = filterByRanges(allData);
-            if (independents.includes('Temp_target')) workingData = filterByTempRange(workingData);
             workingData = filterByDepthRange(workingData);
             if (!workingData.length) {
                 graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
@@ -821,7 +545,7 @@
             let invalidTraces = [];
             const statsData = [];
 
-            if (chartType === 'anova' && independents.length > 1 && dependents.length === 1) {
+            if (chartType === 'anova' && independents.length > 0 && dependents.length === 1) {
                 const anovaResults = calculateANOVA(workingData, independents[0], dependents[0]);
                 if (isNaN(anovaResults.fScore)) {
                     graphDiv.innerHTML = '<div class="warning-message">Insufficient data for ANOVA</div>';
