@@ -132,6 +132,7 @@
             margin-top: 5px; 
             font-size: 10px; 
         }
+        #stats-menu { color: #00FF00; } /* Green text for stats box */
         .graph-container { 
             flex-grow: 1; 
             margin-left: 250px; 
@@ -276,7 +277,7 @@
                     <div class="dropdown-item"><input type="checkbox" id="TIMESTAMP" value="TIMESTAMP"><label for="TIMESTAMP">Time</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TA_2_0" value="TA_2_0"><label for="TA_2_0">Ambient Temp 2m (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0">Relative Humidity 2m (%)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="WS_10" value="WS_10"><label for="WS_10">Wind Speed 10m (m/s)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WS_10" value="WS_10"><label for="TA_2_0">Wind Speed 10m (m/s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction 10m (°)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
@@ -342,7 +343,9 @@
             </div>
         </div>
         <div class="graph-container" id="graph-container">
-            <div id="graph"></div>
+            <div id="graph">
+                <div class="welcome-message">Welcome to SPRUCE<hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
+            </div>
             <div class="legend-tab" id="legend-tab">Hide Legend</div>
         </div>
     </div>
@@ -399,7 +402,7 @@
                 updateGraph();
             } catch (error) {
                 console.error('Error loading data:', error);
-                document.getElementById('graph').innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
+                document.getElementById('graph').innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
             }
         }
 
@@ -615,13 +618,8 @@
 
         function updateGraph() {
             const graphDiv = document.getElementById('graph');
-            graphDiv.innerHTML = '';
-            if (!dataLoaded) {
-                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
-                return;
-            }
-            if (typeof Plotly === 'undefined') {
-                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
+            if (!dataLoaded || typeof Plotly === 'undefined') {
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -631,14 +629,14 @@
             const showFit = document.getElementById('show-fit').checked;
 
             if (!allDependents.length) {
-                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
             let workingData = filterByRanges(allData);
             if (independent === 'Temp_target') workingData = filterByTempRange(workingData);
             if (!workingData.length) {
-                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -660,7 +658,7 @@
             const commonUnit = units[0];
             const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
             if (!dependents.length) {
-                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -711,7 +709,7 @@
             });
 
             if (!traces.length) {
-                graphDiv.innerHTML = `<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>
+                graphDiv.innerHTML = `<div class="welcome-message">Welcome to SPRUCE<hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
                                       ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
                 return;
             }
@@ -784,7 +782,7 @@
                     zerolinecolor: '#444',
                     automargin: true
                 },
-                margin: { t: 80, b: 100, l: 100, r: 40 },
+                margin: { t: 80, b: 120, l: 100, r: 40 }, /* Increased bottom margin from 100 to 120 */
                 showlegend: legendVisible,
                 legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.8)' },
                 annotations: annotations
@@ -793,9 +791,10 @@
             console.log('Traces:', traces);
             console.log('Layout:', layout);
 
+            graphDiv.innerHTML = ''; // Clear welcome message only when plotting
             Plotly.newPlot('graph', showFit ? traces.concat(fitTraces) : traces, layout).catch(err => {
                 console.error('Plotly error:', err);
-                graphDiv.innerHTML = `<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>
+                graphDiv.innerHTML = `<div class="welcome-message">Welcome to SPRUCE<hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
                                       ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
             });
         }
