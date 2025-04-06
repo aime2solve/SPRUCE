@@ -102,7 +102,7 @@
             </div>
             <div class="button-container">
                 <span class="button-label">Time Range:</span>
-                <div class="dropdown-toggle" id="time-range-toggle">2015-08-01\n2025-04-05</div>
+                <div class="dropdown-toggle" id="time-range-toggle">2015-08-01<br>2025-04-05</div>
                 <div class="dropdown-menu" id="time-range-menu">
                     <div class="dropdown-item"><label for="start-date">Start Date:</label><input type="text" id="start-date" value="2015-08-01"></div>
                     <div class="dropdown-item"><label for="end-date">End Date:</label><input type="text" id="end-date" value="2025-04-05"></div>
@@ -165,7 +165,7 @@
             'TS_0': '#00FFFF', 'TS_5': '#FFFF00', 'TS_10': '#FF00FF', 'TS_20': '#00FF00', 'TS_30': '#FF0000',
             'TS_40': '#0000FF', 'TS_50': '#FFA500', 'TS_100': '#800080', 'TS_200': '#008080',
             'TA_2_0': '#FF6347', 'RH_2_0': '#4682B4', 'WD_10': '#6A5ACD', 'PAR_2': '#20B2AA',
-            'PREC_6': '#DAA520', 'CO2_measured': '#FF69B4', 'H2O_measured': '#7FFF00'
+            'PREC_6': '#DAA520', 'CO2ifiant_measured': '#FF69B4', 'H2O_measured': '#7FFF00'
         };
 
         const controlRanges = {
@@ -719,8 +719,8 @@
                                           ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
                 });
 
-            document.getElementById('independent-toggle').innerHTML = independents.map(ind => document.querySelector(`label[for="${ind}"]`).textContent).join('\n') || 'Select Independent';
-            document.getElementById('dependent-toggle').innerHTML = dependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`).textContent}</span>`).join('\n') || 'Select Dependent';
+            document.getElementById('independent-toggle').innerHTML = independents.map(ind => document.querySelector(`label[for="${ind}"]`).textContent).join('<br>') || 'Select Independent';
+            document.getElementById('dependent-toggle').innerHTML = dependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`).textContent}</span>`).join('<br>') || 'Select Dependent';
         }
 
         document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
@@ -769,7 +769,7 @@
             defaultDate: '2015-08-01',
             onChange: (selectedDates) => {
                 startDate = selectedDates[0];
-                document.getElementById('time-range-toggle').innerHTML = `${startDate.toISOString().split('T')[0]}\n${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+                document.getElementById('time-range-toggle').innerHTML = `${startDate.toISOString().split('T')[0]}<br>${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
                 updateGraph();
             }
         });
@@ -779,7 +779,7 @@
             defaultDate: '2025-04-05',
             onChange: (selectedDates) => {
                 endDate = selectedDates[0];
-                document.getElementById('time-range-toggle').innerHTML = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'}\n${endDate.toISOString().split('T')[0]}`;
+                document.getElementById('time-range-toggle').innerHTML = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'}<br>${endDate.toISOString().split('T')[0]}`;
                 updateGraph();
             }
         });
