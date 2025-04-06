@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparative Biospheromics Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&family=Nasalization&display=swap" rel="stylesheet">    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
@@ -21,17 +20,17 @@
             flex-direction: column; 
         }
         h1 { 
-            color: #00FFFF; 
-            text-align: center; 
-            padding: 1vh; 
-            font-family: 'Share Tech Mono', 'Orbitron', 'Exo 2', sans-serif; /* Updated font stack */
-            font-size: calc(16px + 1.5vw); 
-            margin: 0; 
-            text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; 
-            animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; 
-            flex-shrink: 0; 
-            z-index: 11; 
-        }
+    color: #00FFFF; 
+    text-align: center; 
+    padding: 1vh; 
+    font-family: 'Nasalization', 'Orbitron', 'Exo 2', sans-serif;
+    font-size: calc(16px + 1.5vw); 
+    margin: 0; 
+    text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; 
+    animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; 
+    flex-shrink: 0; 
+    z-index: 11; 
+}
         @keyframes glowBreathe {
             0% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; }
             25% { text-shadow: 2px 2px 5px #00CC66, -2px -2px 5px #00CC66, 0 0 12px #00FFFF; }
