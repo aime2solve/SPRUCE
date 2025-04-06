@@ -114,6 +114,8 @@
             cursor: pointer; 
             box-shadow: 0 0 8px #00FFFF; 
             white-space: pre-wrap; 
+            line-height: 1.5; 
+            min-height: 40px; 
         }
         .dropdown-menu { 
             position: absolute; 
@@ -208,7 +210,7 @@
             font-size: calc(10px + 0.5vw); 
             white-space: nowrap; 
         }
-        .controls-popup, .stats-popup {
+        .controls-popup, .stats-popup, .warning-popup {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -221,11 +223,18 @@
             font-size: 13px;
             z-index: 20;
             display: none;
-            width: 500px;
+            width: 300px;
             max-height: 80vh;
             overflow-y: auto;
+            text-align: center;
         }
-        .controls-popup h3, .stats-popup h3 {
+        .warning-popup {
+            color: #FF4500;
+            font-family: 'VT323', monospace;
+            font-size: 17px;
+            width: 250px;
+        }
+        .controls-popup h3, .stats-popup h3, .warning-popup h3 {
             margin: 0 0 10px;
             color: #DAA520;
             text-align: center;
@@ -302,7 +311,7 @@
             .button-label { font-size: 13px; width: 80px; }
             .dropdown-toggle, #control-panel-button { width: calc(100% - 90px); }
             .dropdown-menu { width: calc(100% - 10px); left: 0; }
-            .controls-popup, .stats-popup { width: 90%; }
+            .controls-popup, .stats-popup, .warning-popup { width: 90%; }
         }
     </style>
 </head>
@@ -407,6 +416,10 @@
         <h3>Statistics</h3>
         <div id="stats-popup-content"></div>
     </div>
+    <div class="warning-popup" id="warning-popup">
+        <h3>Warning</h3>
+        <div id="warning-content"></div>
+    </div>
 
     <script>
         let allData = [];
@@ -445,6 +458,9 @@
             'CO2_measured': 'ppm', 'H2O_measured': 'mmol/mol'
         };
 
+        // Analysis types that support multiple independent variables
+        const multiVarAnalysisTypes = ['anova'];
+
         async function loadData() {
             try {
                 const response = await fetch(dataUrl);
@@ -472,6 +488,13 @@
             });
             const menu = document.getElementById(id);
             if (menu) menu.classList.toggle('open');
+        }
+
+        function showWarningPopup(message) {
+            const popup = document.getElementById('warning-popup');
+            document.getElementById('warning-content').textContent = message;
+            popup.style.display = 'block';
+            setTimeout(() => popup.style.display = 'none', 2000); // Hide after 2 seconds
         }
 
         function toggleSidebar() {
@@ -794,11 +817,11 @@
             if (chartType !== 'anova' || independents.length === 1) {
                 const independent = independents[0];
                 dependents.forEach(dep => {
-                    let xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent])).filter(v => !isNaN(v));
-                    let yValues = workingData.map(row => parseFloat(row[dep])).filter(v => !isNaN(v));
+                    let xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent])).filter(v => v !== null && !isNaN(v));
+                    let yValues = workingData.map(row => parseFloat(row[dep])).filter(v => v !== null && !isNaN(v));
 
-                    if (xValues.length === 0 || yValues.length === 0) {
-                        console.log(`No valid data for ${dep} vs ${independent}: xValues=${xValues.length}, yValues=${yValues.length}`);
+                    if (xValues.length === 0 || yValues.length === 0 || xValues.length !== yValues.length) {
+                        console.log(`Invalid data for ${dep} vs ${independent}: xValues=${xValues.length}, yValues=${yValues.length}`);
                         invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has no valid data`);
                         return;
                     }
@@ -808,7 +831,7 @@
                     yValues = filtered.y;
 
                     const color = dependentColors[dep] || '#FFFFFF';
-                    traces.push({
+                    const trace = {
                         x: xValues,
                         y: yValues,
                         mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
@@ -817,7 +840,8 @@
                         marker: { color: color, size: 8 },
                         line: (chartType === 'line' || chartType === 'area') ? { color: color, width: 2 } : undefined,
                         fill: chartType === 'area' ? 'tozeroy' : undefined
-                    });
+                    };
+                    traces.push(trace);
 
                     if (xValues.length > 1) {
                         const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
@@ -846,7 +870,7 @@
 
             if (!traces.length) {
                 graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
-                                      ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
+                              ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
                 return;
             }
 
@@ -866,11 +890,11 @@
 
             const independent = independents[0];
             const xAxisTitle = independent === 'CO2_trmt' ? 'CO₂ Treatment (ppm)' : 
-                              independent === 'TIMESTAMP' ? 'Time' : 
-                              independent === 'Temp_target' ? 'Target Temperature (°C)' :
-                              independent === 'CO2_measured' ? 'Measured CO₂ (ppm)' :
-                              independent === 'H2O_measured' ? 'Measured H₂O (mmol/mol)' :
-                              document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
+                               independent === 'TIMESTAMP' ? 'Time' : 
+                               independent === 'Temp_target' ? 'Target Temperature (°C)' :
+                               independent === 'CO2_measured' ? 'Measured CO₂ (ppm)' :
+                               independent === 'H2O_measured' ? 'Measured H₂O (mmol/mol)' :
+                               document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
             const isAllSoilTemp = dependents.every(dep => dep.startsWith('TS_'));
             const yAxisTitle = dependents.length === 1 ? 
                                document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent :
@@ -939,12 +963,17 @@
                 hovermode: 'closest'
             };
 
-            graphDiv.innerHTML = '';
-            Plotly.newPlot('graph', showBestFit ? traces.concat(fitTraces) : traces, layout).catch(err => {
-                console.error('Plotly error:', err);
-                graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
-                                      ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
-            });
+            console.log('Traces:', traces);
+            console.log('Fit Traces:', fitTraces);
+
+            Plotly.purge('graph');
+            Plotly.newPlot('graph', showBestFit ? traces.concat(fitTraces) : traces, layout)
+                .then(() => console.log('Plot successful'))
+                .catch(err => {
+                    console.error('Plotly error:', err);
+                    graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
+                                          ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
+                });
 
             const dependentToggle = document.getElementById('dependent-toggle');
             const selectedLabels = Array.from(document.querySelectorAll('#dependent-menu input:checked'))
@@ -969,11 +998,16 @@
 
         document.querySelectorAll('#independent-menu input').forEach(input => {
             input.addEventListener('change', () => {
+                const chartType = document.querySelector('#chart-type-menu input:checked').value;
+                const checkedInputs = Array.from(document.querySelectorAll('#independent-menu input:checked'));
+                if (checkedInputs.length > 1 && !multiVarAnalysisTypes.includes(chartType)) {
+                    input.checked = false; // Uncheck the new selection
+                    showWarningPopup('Must choose ANOVA for multiple X-axis variables');
+                    return;
+                }
                 document.getElementById('independent-toggle').textContent = 
-                    Array.from(document.querySelectorAll('#independent-menu input:checked'))
-                        .map(input => document.querySelector(`label[for="${input.id}"]`).textContent)
-                        .join(', ') || 'Select Independent';
-                showControlsPopup(Array.from(document.querySelectorAll('#independent-menu input:checked')).map(input => input.value));
+                    checkedInputs.map(input => document.querySelector(`label[for="${input.id}"]`).textContent).join(', ') || 'Select Independent';
+                showControlsPopup(checkedInputs.map(input => input.value));
                 updateGraph();
             });
         });
@@ -985,6 +1019,14 @@
         document.querySelectorAll('#chart-type-menu input').forEach(input => {
             input.addEventListener('change', () => {
                 document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+                const checkedIndependents = Array.from(document.querySelectorAll('#independent-menu input:checked'));
+                if (checkedIndependents.length > 1 && !multiVarAnalysisTypes.includes(input.value)) {
+                    // Uncheck all but the first independent variable
+                    checkedIndependents.slice(1).forEach(extraInput => extraInput.checked = false);
+                    document.getElementById('independent-toggle').textContent = 
+                        document.querySelector(`label[for="${checkedIndependents[0].id}"]`).textContent || 'Select Independent';
+                    showWarningPopup('Switched to single X-axis mode');
+                }
                 updateGraph();
             });
         });
