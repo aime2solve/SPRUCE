@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -44,6 +44,7 @@
             flex-grow: 1; 
             overflow: hidden; 
             height: calc(100vh - 2vh); 
+            position: relative;
         }
         .sidebar { 
             width: 250px; 
@@ -54,8 +55,9 @@
             flex-direction: column; 
             gap: 15px; 
             position: absolute; 
-            top: 80px; 
-            height: calc(100vh - 90px); 
+            top: 0; /* Adjusted from 80px to align with container */
+            left: 0;
+            height: 100%; /* Matches container height */
             transition: transform 0.3s ease; 
             z-index: 10; 
         }
@@ -134,16 +136,18 @@
         }
         #stats-menu { color: #00FF00; }
         .graph-container { 
-            flex-grow: 1; 
-            margin-left: 250px; 
+            position: absolute; 
+            right: 0; 
+            width: calc(100vw - 250px); /* Default width with sidebar open */
             background-color: #1A1A1A; 
             height: calc(100vh - 2vh); 
-            transition: margin-left 0.3s ease; 
-            position: relative; 
+            transition: width 0.3s ease; /* Transition width instead of margin */
             z-index: 1; 
             overflow: hidden; 
         }
-        .graph-container.full-width { margin-left: 0; }
+        .graph-container.full-width { 
+            width: 100vw; /* Expands to full width when sidebar closes */
+        }
         #graph { 
             width: 100%; 
             height: 100%; 
@@ -164,7 +168,7 @@
         .welcome-message img {
             display: block;
             margin: 0 auto;
-            max-width: 300px; /* Adjust as needed */
+            max-width: 300px;
             height: auto;
         }
         .welcome-message hr {
@@ -351,7 +355,7 @@
         <div class="graph-container" id="graph-container">
             <div id="graph">
                 <div class="welcome-message">
-                    <img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo.png" alt="SPRUCE Logo">
+                    <img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo">
                     <hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015
                 </div>
             </div>
@@ -411,7 +415,7 @@
                 updateGraph();
             } catch (error) {
                 console.error('Error loading data:', error);
-                document.getElementById('graph').innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                document.getElementById('graph').innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
             }
         }
 
@@ -432,10 +436,10 @@
             const tab = document.getElementById('sidebar-tab');
             sidebar.classList.toggle('collapsed');
             graphContainer.classList.toggle('full-width');
+            tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
             if (dataLoaded && typeof Plotly !== 'undefined') {
                 Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
             }
-            tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
         }
 
         function enforceSingleSelection(groupId, changedId) {
@@ -628,7 +632,7 @@
         function updateGraph() {
             const graphDiv = document.getElementById('graph');
             if (!dataLoaded || typeof Plotly === 'undefined') {
-                graphDiv.innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -638,14 +642,14 @@
             const showFit = document.getElementById('show-fit').checked;
 
             if (!allDependents.length || !independent) {
-                graphDiv.innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
             let workingData = filterByRanges(allData);
             if (independent === 'Temp_target') workingData = filterByTempRange(workingData);
             if (!workingData.length) {
-                graphDiv.innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -667,7 +671,7 @@
             const commonUnit = units[0];
             const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
             if (!dependents.length) {
-                graphDiv.innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -718,7 +722,7 @@
             });
 
             if (!traces.length) {
-                graphDiv.innerHTML = `<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
+                graphDiv.innerHTML = `<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
                                       ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
                 return;
             }
@@ -803,7 +807,7 @@
             graphDiv.innerHTML = '';
             Plotly.newPlot('graph', showFit ? traces.concat(fitTraces) : traces, layout).catch(err => {
                 console.error('Plotly error:', err);
-                graphDiv.innerHTML = `<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
+                graphDiv.innerHTML = `<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
                                       ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
             });
         }
