@@ -31,7 +31,7 @@
             animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; 
             flex-shrink: 0; 
             z-index: 11; 
-            line-height: 1.5; 
+            line-height: 1.2; /* Reduced for tighter title */
         }
         @keyframes glowBreathe {
             0% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; }
@@ -51,10 +51,10 @@
             width: 250px; 
             background: rgba(26, 26, 26, 0.8); 
             border-right: 2px solid #00FFFF; 
-            padding: 15px; 
+            padding: 10px; /* Reduced from 15px */
             display: flex; 
             flex-direction: column; 
-            gap: 10px; /* Reduced from 15px for tighter spacing */
+            gap: 8px; /* Tighter spacing */
             position: absolute; 
             top: 0; 
             left: 0;
@@ -86,8 +86,8 @@
             color: #DAA520; 
             text-align: center; 
             text-shadow: 0 0 10px #DAA520; 
-            line-height: 1.2; 
-            margin: 0 0 10px; /* Adjusted for tighter spacing */
+            line-height: 1.1; 
+            margin: 0 0 8px; /* Tighter spacing */
         }
         .sidebar-title span { 
             display: block; 
@@ -98,12 +98,12 @@
             align-items: center; 
             width: 100%; 
             position: relative; 
-            margin-bottom: 0; /* Remove extra space below */
+            margin: 0; /* No extra margin */
         }
         .button-label { 
             color: #FFFF00; 
             font-size: 15px; 
-            margin-right: 10px; 
+            margin-right: 8px; /* Reduced from 10px */
             width: 100px; 
             text-align: right; 
             padding-left: 10px; 
@@ -114,14 +114,19 @@
             border-radius: 10px; 
             color: #00FFFF; 
             font-size: 13px; 
-            padding: 6px 8px; 
-            width: calc(100% - 120px); 
+            padding: 4px 6px; /* Reduced from 6px 8px */
+            width: calc(100% - 118px); /* Adjusted for tighter fit */
             text-align: center; 
             cursor: pointer; 
             box-shadow: 0 0 8px #00FFFF; 
-            white-space: pre-wrap; 
-            line-height: 1.5; 
-            min-height: 40px; 
+            line-height: 1.2; /* Minimized height */
+            white-space: nowrap; /* Prevent wrapping unless necessary */
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+        #time-range-toggle { 
+            white-space: pre-wrap; /* Allow line break for dates */
+            line-height: 1.2; 
         }
         .dropdown-menu { 
             position: absolute; 
@@ -204,8 +209,8 @@
         }
         .legend-tab { 
             position: absolute; 
-            top: 0; /* Aligned with sidebar-tab */
-            right: -40px; /* Matches sidebar-tab positioning */
+            top: 50px; /* Below sidebar-tab */
+            right: -40px; 
             width: 40px; 
             height: 40px; 
             background: rgba(26, 26, 26, 0.8); 
@@ -258,6 +263,7 @@
         .slider-container label {
             display: block;
             margin-bottom: 5px;
+            color: #00FFFF;
         }
         .range-slider {
             position: relative;
@@ -311,15 +317,15 @@
             .sidebar { width: 200px; }
             .graph-container { width: calc(100vw - 200px); }
             .graph-container.full-width { width: 100vw; }
-            .legend-tab { top: 0; right: -40px; }
+            .legend-tab { top: 50px; right: -40px; }
         }
         @media (max-width: 480px) {
             .sidebar { width: 150px; }
             .graph-container { width: calc(100vw - 150px); }
             .graph-container.full-width { width: 100vw; }
-            .legend-tab { top: 0; right: -40px; }
+            .legend-tab { top: 50px; right: -40px; }
             .button-label { font-size: 13px; width: 80px; }
-            .dropdown-toggle, #control-panel-button { width: calc(100% - 90px); }
+            .dropdown-toggle, #control-panel-button { width: calc(100% - 88px); }
             .dropdown-menu { width: calc(100% - 10px); left: 0; }
             .controls-popup, .stats-popup, .warning-popup { width: 90%; }
         }
@@ -346,7 +352,7 @@
                     <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0">Relative Humidity 2m (%)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction 10m (°)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PRE_6"><label for="PREC_6">Precipitation (mm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="CO2_measured" value="CO2_measured"><label for="CO2_measured">Measured CO₂ (ppm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="H2O_measured" value="H2O_measured"><label for="H2O_measured">Measured H₂O (mmol/mol)</label></div>
                 </div>
@@ -389,7 +395,7 @@
                     <div class="dropdown-item"><input type="radio" name="chart-type" id="line" value="line"><label for="line">Line</label></div>
                     <div class="dropdown-item"><input type="radio" name="chart-type" id="bar" value="bar"><label for="bar">Bar</label></div>
                     <div class="dropdown-item"><input type="radio" name="chart-type" id="area" value="area"><label for="area">Area</label></div>
-                    <div class="dropdown-item"><input type="radio" name="chart-type" id="box" value="box"><label for="bar">Box</label></div>
+                    <div class="dropdown-item"><input type="radio" name="chart-type" id="box" value="box"><label for="box">Box</label></div>
                     <div class="dropdown-item"><input type="radio" name="chart-type" id="anova" value="anova"><label for="anova">ANOVA</label></div>
                 </div>
             </div>
@@ -477,7 +483,7 @@
                 allData = await response.json();
                 allData = allData.filter(row => {
                     row.TIMESTAMP = new Date(row.TIMESTAMP);
-                    return !isNaN(row.TIMESTAMP);
+                    return !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date;
                 });
                 console.log('Loaded data sample:', allData.slice(0, 5));
                 dataLoaded = true;
@@ -552,9 +558,6 @@
         function showControlsPopup(independent) {
             const popup = document.getElementById('controls-popup');
             if (independent.length > 1 || (independent[0] !== 'CO2_trmt' && independent[0] !== 'Temp_target')) {
-                popup.style.display = 'block';
-                const content = document.getElementById('controls-content');
-                const title = document.getElementById('controls-title');
                 popup.style.display = 'none'; // Placeholder
             } else {
                 popup.style.display = 'none';
@@ -574,12 +577,12 @@
                     <div class="slider-container">
                         <label>${controlRanges[key].label}</label>
                         <div class="range-slider">
-                            <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].defaultMin}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
-                            <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].defaultMax}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
+                            <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMin}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
+                            <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMax}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
                         </div>
                         <div class="slider-values">
-                            <span id="${key}-min-value">${controlRanges[key].defaultMin}</span>
-                            <span id="${key}-max-value">${controlRanges[key].defaultMax}</span>
+                            <span id="${key}-min-value">${currentRanges[key].defaultMin}</span>
+                            <span id="${key}-max-value">${currentRanges[key].defaultMax}</span>
                         </div>
                     </div>
                 `).join('');
@@ -591,24 +594,20 @@
                     const maxValue = document.getElementById(`${key}-max-value`);
 
                     minSlider.addEventListener('input', () => {
-                        minValue.textContent = minSlider.value;
-                        if (parseFloat(minSlider.value) > parseFloat(maxSlider.value)) maxSlider.value = minSlider.value;
-                        currentRanges[key].defaultMin = parseFloat(minSlider.value);
-                        currentRanges[key].defaultMax = parseFloat(maxSlider.value);
-                        if (key === 'Soil_Depth') {
-                            depthRange = [parseFloat(minSlider.value), parseFloat(maxSlider.value)];
-                        }
+                        const value = parseFloat(minSlider.value);
+                        minValue.textContent = value;
+                        if (value > parseFloat(maxSlider.value)) maxSlider.value = value;
+                        currentRanges[key].defaultMin = value;
+                        if (key === 'Soil_Depth') depthRange[0] = value;
                         updateGraph();
                     });
 
                     maxSlider.addEventListener('input', () => {
-                        maxValue.textContent = maxSlider.value;
-                        if (parseFloat(maxSlider.value) < parseFloat(minSlider.value)) minSlider.value = maxSlider.value;
-                        currentRanges[key].defaultMin = parseFloat(minSlider.value);
-                        currentRanges[key].defaultMax = parseFloat(maxSlider.value);
-                        if (key === 'Soil_Depth') {
-                            depthRange = [parseFloat(minSlider.value), parseFloat(maxSlider.value)];
-                        }
+                        const value = parseFloat(maxSlider.value);
+                        maxValue.textContent = value;
+                        if (value < parseFloat(minSlider.value)) minSlider.value = value;
+                        currentRanges[key].defaultMax = value;
+                        if (key === 'Soil_Depth') depthRange[1] = value;
                         updateGraph();
                     });
                 });
@@ -754,7 +753,7 @@
             if (dataLoaded && typeof Plotly !== 'undefined') {
                 legendVisible = !legendVisible;
                 Plotly.relayout('graph', { showlegend: legendVisible });
-                document.getElementById('legend-tab').textContent = legendVisible ? 'L' : 'L'; // Keep as 'L' for simplicity
+                document.getElementById('legend-tab').textContent = legendVisible ? 'L' : 'L'; // Keep simple
             }
         }
 
@@ -852,7 +851,7 @@
                     };
                     traces.push(trace);
 
-                    if (xValues.length > 1 && chartType !== 'box') { // Box plots don’t need regression
+                    if (xValues.length > 1 && chartType !== 'box') {
                         const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
                         const reg = calculateRegression(xNum, yValues);
                         const spearman = calculateSpearman(xNum, yValues);
@@ -975,10 +974,8 @@
             console.log('Traces:', traces);
             console.log('Fit Traces:', fitTraces);
 
-            // Reset Plotly state completely
-            if (document.getElementById('graph')._fullLayout) {
-                Plotly.purge('graph');
-            }
+            // Ensure clean slate
+            Plotly.purge('graph');
             Plotly.newPlot('graph', showBestFit ? traces.concat(fitTraces) : traces, layout, { responsive: true })
                 .then(() => console.log('Plot successful'))
                 .catch(err => {
@@ -1048,7 +1045,7 @@
             onChange: (selectedDates) => {
                 startDate = selectedDates[0];
                 document.getElementById('time-range-toggle').innerHTML = 
-                    `${startDate.toISOString().split('T')[0]}<br>${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+                    `${startDate.toISOString().split('T')[0]}\n${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
                 updateGraph();
             }
         });
@@ -1059,7 +1056,7 @@
             onChange: (selectedDates) => {
                 endDate = selectedDates[0];
                 document.getElementById('time-range-toggle').innerHTML = 
-                    `${startDate ? startDate.toISOString().split('T')[0] : 'Start'}<br>${endDate.toISOString().split('T')[0]}`;
+                    `${startDate ? startDate.toISOString().split('T')[0] : 'Start'}\n${endDate.toISOString().split('T')[0]}`;
                 updateGraph();
             }
         });
