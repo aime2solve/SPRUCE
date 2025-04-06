@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparative Biospheromics Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&family=Rajdhani:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -23,14 +23,15 @@
         h1 { 
             color: #00FFFF; 
             text-align: center; 
-            padding: 1vh; 
-            font-family: 'Rajdhani', 'Orbitron', 'Exo 2', sans-serif; /* Changed to Rajdhani */
+            padding: 2vh; /* Increased from 1vh */
+            font-family: 'Comfortaa', 'Orbitron', 'Exo 2', sans-serif; /* Changed to Comfortaa */
             font-size: calc(16px + 1.5vw); 
             margin: 0; 
             text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; 
             animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; 
             flex-shrink: 0; 
             z-index: 11; 
+            line-height: 1.5; /* Added for breathing room */
         }
         @keyframes glowBreathe {
             0% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; }
@@ -43,7 +44,7 @@
             display: flex; 
             flex-grow: 1; 
             overflow: hidden; 
-            height: calc(100vh - 2vh); 
+            height: calc(100vh - 4vh); /* Adjusted for increased title padding */
             position: relative;
         }
         .sidebar { 
@@ -73,7 +74,7 @@
             border-left: none; 
             border-radius: 0 10px 10px 0; 
             color: #00FFFF; 
-            font-size: 19px; /* Increased by 1pt from 18px */
+            font-size: 19px; 
             line-height: 36px; 
             text-align: center; 
             cursor: pointer; 
@@ -81,7 +82,7 @@
         }
         .sidebar-title { 
             font-family: 'Exo 2', sans-serif; 
-            font-size: 26px; /* Increased by 2pt from 24px */
+            font-size: 26px; 
             color: #DAA520; 
             text-align: center; 
             text-shadow: 0 0 10px #DAA520; 
@@ -90,12 +91,12 @@
         }
         .sidebar-title span { 
             display: block; 
-            font-size: 18px; /* Increased by 2pt from 16px */
+            font-size: 18px; 
         }
         .button-container { display: flex; align-items: center; width: 100%; position: relative; }
         .button-label { 
             color: #FFFF00; 
-            font-size: 13px; /* Increased by 1pt from 12px */
+            font-size: 13px; 
             margin-right: 10px; 
             width: 100px; 
             text-align: right; 
@@ -106,7 +107,7 @@
             border: 2px solid #00FFFF; 
             border-radius: 10px; 
             color: #00FFFF; 
-            font-size: 11px; /* Increased by 1pt from 10px */
+            font-size: 11px; 
             padding: 4px 8px; 
             width: calc(100% - 120px); 
             text-align: center; 
@@ -124,7 +125,7 @@
             border: 2px solid #00FFFF; 
             border-radius: 10px; 
             color: #00FFFF; 
-            font-size: 11px; /* Increased by 1pt from 10px */
+            font-size: 11px; 
             padding: 8px; 
             transition: max-height 0.5s ease; 
             visibility: hidden; 
@@ -142,15 +143,15 @@
             color: #00FFFF; 
             padding: 4px; 
             margin-top: 5px; 
-            font-size: 11px; /* Increased by 1pt from 10px */
+            font-size: 11px; 
         }
-        #stats-menu { color: #00FF00; font-family: 'VT323', monospace; font-size: 15px; } /* Increased by 1pt from 14px */
+        #stats-menu { color: #00FF00; font-family: 'VT323', monospace; font-size: 15px; }
         .graph-container { 
             position: absolute; 
             right: 0; 
             width: calc(100vw - 250px); 
             background-color: #1A1A1A; 
-            height: calc(100vh - 2vh); 
+            height: calc(100vh - 4vh); /* Adjusted for title height */
             transition: width 0.3s ease, left 0.3s ease; 
             z-index: 1; 
             overflow: hidden; 
@@ -190,7 +191,7 @@
         .legend-tab { 
             position: absolute; 
             top: 50px; 
-            right: 10px; 
+            right: 1vw; /* Changed to relative unit */
             background: rgba(26, 26, 26, 0.8); 
             border: 2px solid #00FFFF; 
             border-radius: 5px; 
@@ -198,6 +199,8 @@
             padding: 5px 10px; 
             cursor: pointer; 
             z-index: 5; 
+            font-size: calc(10px + 0.5vw); /* Responsive font size */
+            white-space: nowrap; /* Prevents text wrapping */
         }
         .controls-popup {
             position: fixed;
@@ -209,7 +212,7 @@
             border-radius: 10px;
             padding: 15px;
             color: #00FFFF;
-            font-size: 13px; /* Increased by 1pt from 12px */
+            font-size: 13px;
             z-index: 20;
             display: none;
             width: 400px;
@@ -220,6 +223,8 @@
             margin: 0 0 10px;
             color: #DAA520;
             text-align: center;
+            font-family: 'Exo 2', sans-serif; /* Same as Data Explorer */
+            font-size: 18px; /* Same size as Data Explorer */
         }
         .slider-container {
             margin: 10px 0;
@@ -261,7 +266,7 @@
         .slider-values {
             display: flex;
             justify-content: space-between;
-            font-size: 11px; /* Increased by 1pt from 10px */
+            font-size: 11px;
             color: #00FF00;
             margin-top: 5px;
         }
@@ -272,15 +277,38 @@
             transform: translate(-50%, -50%);
             color: #FF4500;
             font-family: 'VT323', monospace;
-            font-size: 17px; /* Increased by 1pt from 16px */
+            font-size: 17px;
             text-align: center;
             text-shadow: 0 0 5px #FF4500;
             z-index: 5;
         }
+        @media (max-width: 768px) {
+            .sidebar { width: 200px; }
+            .graph-container { width: calc(100vw - 200px); }
+            .graph-container.full-width { width: 100vw; }
+            .legend-tab { 
+                top: 40px; /* Move up slightly for smaller screens */
+                right: 1vw; 
+                padding: 4px 8px; 
+            }
+        }
+        @media (max-width: 480px) {
+            .sidebar { width: 150px; }
+            .graph-container { width: calc(100vw - 150px); }
+            .graph-container.full-width { width: 100vw; }
+            .legend-tab { 
+                top: 30px; 
+                right: 1vw; 
+                padding: 3px 6px; 
+            }
+            .button-label { font-size: 11px; width: 80px; }
+            .dropdown-toggle, #control-panel-button { width: calc(100% - 90px); }
+            .dropdown-menu { left: 90px; width: calc(100% - 90px); }
+        }
     </style>
 </head>
 <body>
-    <h1>COMPARATIVE BIOSPHEROMICS DASHBOARD</h1>
+    <h1>Comparative Biospheromics Dashboard</h1>
     <div class="container">
         <div class="sidebar" id="sidebar">
             <div class="sidebar-tab" id="sidebar-tab"><</div>
@@ -364,7 +392,7 @@
                     <hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015
                 </div>
             </div>
-            <div class="legend-tab" id="legend-tab">Show Legend</div> <!-- Changed to Show Legend -->
+            <div class="legend-tab" id="legend-tab">Show Legend</div>
         </div>
     </div>
     <div class="controls-popup" id="controls-popup">
@@ -372,7 +400,7 @@
         <div id="controls-content"></div>
     </div>
     <div class="controls-popup" id="control-panel-popup">
-        <h3>Environmental Control Panel</h3>
+        <h3>Control Panel</h3> <!-- Changed to Control Panel -->
         <div id="control-panel-content"></div>
     </div>
 
@@ -382,7 +410,7 @@
         let startDate = new Date('2015-08-01');
         let endDate = new Date('2025-04-05');
         let dataLoaded = false;
-        const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#FFD700', '#6A5ACD', '#20B2AA', '#DAA520', '#FF69B4', '#7FFF00'];
+        const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#6A5ACD', '#20B2AA', '#DAA520', '#FF69B4', '#7FFF00'];
         let tempRange = [0, 9];
         let depthRange = [0, 200];
         let legendVisible = true;
@@ -727,8 +755,8 @@
                     mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
                     type: chartType === 'scatter' ? 'scattergl' : chartType === 'area' ? 'scattergl' : chartType,
                     name: document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep,
-                    marker: { color: colors[i % colors.length], size: 8 },
-                    line: (chartType === 'line' || chartType === 'area') ? { color: colors[i % colors.length], width: 2 } : undefined,
+                    marker: { color: colors[i], size: 8 }, /* Colors match dropdown */
+                    line: (chartType === 'line' || chartType === 'area') ? { color: colors[i], width: 2 } : undefined,
                     fill: chartType === 'area' ? 'tozeroy' : undefined
                 });
 
@@ -744,7 +772,7 @@
                             mode: 'lines',
                             type: 'scattergl',
                             name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (fit)`,
-                            line: { color: colors[i % colors.length], width: 2, dash: 'dash' }
+                            line: { color: colors[i], width: 2, dash: 'dash' }
                         });
                     }
                 }
