@@ -1,4 +1,4 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -55,13 +55,13 @@
             flex-direction: column; 
             gap: 15px; 
             position: absolute; 
-            top: 0; /* Adjusted from 80px to align with container */
+            top: 0; 
             left: 0;
-            height: 100%; /* Matches container height */
+            height: 100%; 
             transition: transform 0.3s ease; 
             z-index: 10; 
         }
-        .sidebar.collapsed { transform: translateX(-230px); }
+        .sidebar.collapsed { transform: translateX(-250px); } /* Full width for smoother slide */
         .sidebar-tab { 
             position: absolute; 
             top: 0; 
@@ -138,15 +138,16 @@
         .graph-container { 
             position: absolute; 
             right: 0; 
-            width: calc(100vw - 250px); /* Default width with sidebar open */
+            width: calc(100vw - 250px); 
             background-color: #1A1A1A; 
             height: calc(100vh - 2vh); 
-            transition: width 0.3s ease; /* Transition width instead of margin */
+            transition: width 0.3s ease, left 0.3s ease; /* Added left for smoothness */
             z-index: 1; 
             overflow: hidden; 
         }
         .graph-container.full-width { 
-            width: 100vw; /* Expands to full width when sidebar closes */
+            width: 100vw; 
+            left: 0; /* Ensures it expands fully left */
         }
         #graph { 
             width: 100%; 
@@ -313,7 +314,7 @@
                     <div class="dropdown-item"><input type="checkbox" id="WS_10_dep" value="WS_10"><label for="WS_10_dep" style="color: #FFD700;">Wind Speed 10m (m/s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WD_10_dep" value="WD_10"><label for="WD_10_dep" style="color: #6A5ACD;">Wind Direction 10m (°)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2_dep" value="PAR_2"><label for="PAR_2_dep" style="color: #20B2AA;">PAR (µmol/m²s)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PREC_6"><label for="PREC_6_dep" style="color: #DAA520;">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PRE_6"><label for="PREC_6_dep" style="color: #DAA520;">Precipitation (mm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="CO2_measured_dep" value="CO2_measured"><label for="CO2_measured_dep" style="color: #FF69B4;">Measured CO₂ (ppm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="H2O_measured_dep" value="H2O_measured"><label for="H2O_measured_dep" style="color: #7FFF00;">Measured H₂O (mmol/mol)</label></div>
                 </div>
@@ -355,7 +356,7 @@
         <div class="graph-container" id="graph-container">
             <div id="graph">
                 <div class="welcome-message">
-                    <img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo">
+                    <img src="./SPRUCE_logo.png" alt="SPRUCE Logo">
                     <hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015
                 </div>
             </div>
@@ -379,6 +380,7 @@
         let dataLoaded = false;
         const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#FFD700', '#6A5ACD', '#20B2AA', '#DAA520', '#FF69B4', '#7FFF00'];
         let tempRange = [0, 9];
+        let depthRange = [0, 200]; // Default soil depth range (cm)
         let legendVisible = true;
 
         const controlRanges = {
@@ -390,7 +392,8 @@
             'WS_10': { min: 0, max: 20, defaultMin: 0, defaultMax: 20, label: 'Wind Speed 10m (m/s)' },
             'WD_10': { min: 0, max: 360, defaultMin: 0, defaultMax: 360, label: 'Wind Direction 10m (°)' },
             'PAR_2': { min: 0, max: 2000, defaultMin: 0, defaultMax: 2000, label: 'PAR (µmol/m²s)' },
-            'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' }
+            'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' },
+            'Soil_Depth': { min: 0, max: 200, defaultMin: 0, defaultMax: 200, label: 'Soil Depth Range (cm)' }
         };
         let currentRanges = { ...controlRanges };
 
@@ -415,7 +418,7 @@
                 updateGraph();
             } catch (error) {
                 console.error('Error loading data:', error);
-                document.getElementById('graph').innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                document.getElementById('graph').innerHTML = '<div class="welcome-message"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
             }
         }
 
@@ -452,6 +455,7 @@
         function filterByRanges(data) {
             return data.filter(row => {
                 return Object.keys(currentRanges).every(key => {
+                    if (key === 'Soil_Depth') return true; // Handled separately in filterByDepthRange
                     const value = parseFloat(row[key]);
                     const range = currentRanges[key];
                     return isNaN(value) || (value >= range.defaultMin && value <= range.defaultMax);
@@ -463,6 +467,19 @@
             return data.filter(row => {
                 const tempValue = parseFloat(row.Temp_target);
                 return tempValue >= tempRange[0] && tempValue <= tempRange[1];
+            });
+        }
+
+        function filterByDepthRange(data) {
+            const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
+            return data.map(row => {
+                const newRow = { ...row };
+                depths.forEach(depth => {
+                    if (depth < depthRange[0] || depth > depthRange[1]) {
+                        newRow[`TS_${depth}`] = null; // Null out data outside depth range
+                    }
+                });
+                return newRow;
             });
         }
 
@@ -489,8 +506,8 @@
                     <div class="slider-container">
                         <label>${controlRanges[key].label}</label>
                         <div class="range-slider">
-                            <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].defaultMin}" step="0.1">
-                            <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].defaultMax}" step="0.1">
+                            <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].defaultMin}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
+                            <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].defaultMax}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
                         </div>
                         <div class="slider-values">
                             <span id="${key}-min-value">${controlRanges[key].defaultMin}</span>
@@ -510,6 +527,9 @@
                         if (parseFloat(minSlider.value) > parseFloat(maxSlider.value)) maxSlider.value = minSlider.value;
                         currentRanges[key].defaultMin = parseFloat(minSlider.value);
                         currentRanges[key].defaultMax = parseFloat(maxSlider.value);
+                        if (key === 'Soil_Depth') {
+                            depthRange = [parseFloat(minSlider.value), parseFloat(maxSlider.value)];
+                        }
                         updateGraph();
                     });
 
@@ -518,6 +538,9 @@
                         if (parseFloat(maxSlider.value) < parseFloat(minSlider.value)) minSlider.value = maxSlider.value;
                         currentRanges[key].defaultMin = parseFloat(minSlider.value);
                         currentRanges[key].defaultMax = parseFloat(maxSlider.value);
+                        if (key === 'Soil_Depth') {
+                            depthRange = [parseFloat(minSlider.value), parseFloat(maxSlider.value)];
+                        }
                         updateGraph();
                     });
                 });
@@ -632,7 +655,7 @@
         function updateGraph() {
             const graphDiv = document.getElementById('graph');
             if (!dataLoaded || typeof Plotly === 'undefined') {
-                graphDiv.innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -642,14 +665,15 @@
             const showFit = document.getElementById('show-fit').checked;
 
             if (!allDependents.length || !independent) {
-                graphDiv.innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
             let workingData = filterByRanges(allData);
             if (independent === 'Temp_target') workingData = filterByTempRange(workingData);
+            workingData = filterByDepthRange(workingData);
             if (!workingData.length) {
-                graphDiv.innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -671,7 +695,7 @@
             const commonUnit = units[0];
             const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
             if (!dependents.length) {
-                graphDiv.innerHTML = '<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = '<div class="welcome-message"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
                 return;
             }
 
@@ -722,7 +746,7 @@
             });
 
             if (!traces.length) {
-                graphDiv.innerHTML = `<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
+                graphDiv.innerHTML = `<div class="welcome-message"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
                                       ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
                 return;
             }
@@ -785,9 +809,11 @@
                     gridcolor: '#444',
                     zerolinecolor: '#444',
                     type: independent === 'TIMESTAMP' ? 'date' : 'linear',
-                    dtick: independent === 'TIMESTAMP' ? 'M1' : undefined,
                     automargin: true,
-                    tickfont: { size: 12 }
+                    tickfont: { size: 12 },
+                    autorange: independent === 'TIMESTAMP' ? true : undefined, // Auto-scale for time
+                    tickmode: independent === 'TIMESTAMP' ? 'auto' : undefined, // Minimal ticks
+                    nticks: independent === 'TIMESTAMP' ? 5 : undefined // Suggest fewer ticks
                 },
                 yaxis: {
                     title: { text: yAxisTitle, font: { size: 14 } },
@@ -807,7 +833,7 @@
             graphDiv.innerHTML = '';
             Plotly.newPlot('graph', showFit ? traces.concat(fitTraces) : traces, layout).catch(err => {
                 console.error('Plotly error:', err);
-                graphDiv.innerHTML = `<div class="welcome-message"><img src="https://raw.githubusercontent.com/aime2solve/SPRUCE/main/SPRUCE_logo_transparent.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
+                graphDiv.innerHTML = `<div class="welcome-message"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
                                       ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
             });
         }
