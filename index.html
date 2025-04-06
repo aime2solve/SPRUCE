@@ -22,6 +22,7 @@
         .button-container { display: flex; align-items: center; width: 100%; position: relative; }
         .button-label { color: #FFFF00; font-size: 13px; margin-right: 10px; width: 100px; text-align: right; padding-left: 10px; }
         .dropdown-toggle, #control-panel-button { background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 11px; padding: 4px 8px; width: calc(100% - 120px); text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; }
+        #time-range-toggle { font-size: 10px; white-space: nowrap; }
         .dropdown-menu { position: absolute; top: 100%; left: 110px; width: calc(100% - 120px); max-height: 200px; overflow-y: auto; background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 11px; padding: 8px; visibility: hidden; z-index: 10; }
         .dropdown-menu.open { visibility: visible; }
         .dropdown-item { display: flex; align-items: center; margin-bottom: 3px; }
@@ -497,13 +498,21 @@
                 statsText.push(`${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]}: F=${anovaResults.fScore.toFixed(2)}, p=${anovaResults.pValue.toFixed(4)}`);
             } else {
                 dependents.forEach(dep => {
-                    let xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent])).filter(v => v !== null && !isNaN(v));
-                    let yValues = workingData.map(row => parseFloat(row[dep])).filter(v => v !== null && !isNaN(v));
-                    if (xValues.length === 0 || yValues.length === 0 || xValues.length !== yValues.length) {
-                        console.warn(`No valid data for ${dep} vs ${independent}: xValues=${xValues.length}, yValues=${yValues.length}`);
+                    const pairedData = workingData
+                        .map(row => ({
+                            x: independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent]),
+                            y: parseFloat(row[dep])
+                        }))
+                        .filter(d => d.x !== null && !isNaN(d.x) && d.y !== null && !isNaN(d.y));
+                    
+                    if (pairedData.length === 0) {
+                        console.warn(`No valid data for ${dep} vs ${independent}: pairedData length=${pairedData.length}`);
                         invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has no valid data`);
                         return;
                     }
+
+                    let xValues = pairedData.map(d => d.x);
+                    let yValues = pairedData.map(d => d.y);
 
                     const filtered = filterOutliers(xValues, yValues);
                     xValues = filtered.x;
