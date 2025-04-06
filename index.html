@@ -147,6 +147,7 @@
         let dataLoaded = false;
         let legendVisible = true;
         let cachedData = null;
+        let graphInitialized = false;
 
         const dependentColors = {
             'TS_0': '#00FFFF', 'TS_5': '#FFFF00', 'TS_10': '#FF00FF', 'TS_20': '#00FF00', 'TS_30': '#FF0000',
@@ -182,7 +183,7 @@
                 const response = await fetch(dataUrl);
                 if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
                 allData = await response.json();
-                allData = allData.filter(row => {
+                allData = allData.map(row => {
                     const year = parseInt(row.Year, 10);
                     const dfoy = parseFloat(row.DFOY);
                     const day = Math.floor(dfoy);
@@ -191,11 +192,12 @@
                     date.setDate(day);
                     date.setHours(Math.floor(fractionalDay * 24), Math.floor((fractionalDay * 24 % 1) * 60), 0, 0);
                     row.TIMESTAMP = date;
-                    return !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date;
-                });
+                    return row;
+                }).filter(row => !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date);
                 console.log('Loaded data sample:', allData.slice(0, 5));
                 dataLoaded = true;
                 cachedData = aggregateVariables(allData);
+                console.log('Aggregated data sample:', cachedData.slice(0, 5));
                 updateGraph();
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -219,7 +221,7 @@
             sidebar.classList.toggle('collapsed');
             graphContainer.classList.toggle('full-width');
             tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
-            if (dataLoaded && typeof Plotly !== 'undefined') Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
+            if (dataLoaded && graphInitialized) Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
         }
 
         function enforceSingleSelection(groupId, changedId) {
@@ -265,12 +267,12 @@
                         <label>${controlRanges[key].label}</label>
                         <div class="range-slider">
                             <div class="range-track" id="${key}-track"></div>
-                            <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].defaultMin}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
-                            <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].defaultMax}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
+                            <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMin}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
+                            <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMax}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
                         </div>
                         <div class="slider-values">
-                            <span id="${key}-min-value">${controlRanges[key].defaultMin}</span>
-                            <span id="${key}-max-value">${controlRanges[key].defaultMax}</span>
+                            <span id="${key}-min-value">${currentRanges[key].defaultMin}</span>
+                            <span id="${key}-max-value">${currentRanges[key].defaultMax}</span>
                         </div>
                     </div>
                 `).join('');
@@ -367,6 +369,9 @@
                 const rhKeys = ['RH_2_0_1', 'RH_2_0_2'];
                 const rhValues = rhKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
                 newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + v, 0) / rhValues.length : null;
+                ['CO2_measured', 'H2O_measured', 'WD_10', 'PAR_2', 'PREC_6', 'Temp_target', 'CO2_trmt'].forEach(key => {
+                    newRow[key] = parseFloat(row[key]) || null;
+                });
                 return newRow;
             });
         }
@@ -403,7 +408,7 @@
         function calculateGraphHeight() { return document.getElementById('graph-container').clientHeight; }
 
         function toggleLegend() {
-            if (dataLoaded && typeof Plotly !== 'undefined') {
+            if (dataLoaded && graphInitialized) {
                 legendVisible = !legendVisible;
                 Plotly.relayout('graph', { showlegend: legendVisible });
                 document.getElementById('legend-tab').textContent = legendVisible ? 'Hide Legend' : 'Show Legend';
@@ -433,6 +438,7 @@
             const graphDiv = document.getElementById('graph');
             if (!dataLoaded || typeof Plotly === 'undefined') {
                 graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphInitialized = false;
                 return;
             }
 
@@ -442,10 +448,11 @@
             const showFit = document.getElementById('show-fit').checked;
 
             document.getElementById('independent-toggle').textContent = independent ? document.querySelector(`label[for="${independent}"]`)?.textContent || 'Select Independent' : 'Select Independent';
-            document.getElementById('dependent-toggle').textContent = allDependents.length ? allDependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent}</span>`).join('<br>') : 'Select Dependent';
+            document.getElementById('dependent-toggle').innerHTML = allDependents.length ? allDependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent}</span>`).join('<br>') : 'Select Dependent';
 
             if (!allDependents.length || !independent) {
                 graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphInitialized = false;
                 return;
             }
 
@@ -457,11 +464,14 @@
             });
             if (independent === 'TIMESTAMP') workingData = getWeeklyTimestamps(workingData, startDate, endDate);
 
+            console.log('Filtered data sample:', workingData.slice(0, 5));
+
             const units = allDependents.map(dep => unitMap[dep]);
             const commonUnit = units[0];
             const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
             if (!dependents.length || !workingData.length) {
                 graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphInitialized = false;
                 return;
             }
 
@@ -474,6 +484,7 @@
                 const anovaResults = calculateANOVA(workingData, independent, dependents[0]);
                 if (isNaN(anovaResults.fScore)) {
                     graphDiv.innerHTML = '<div class="warning-message">Insufficient data for ANOVA</div>';
+                    graphInitialized = false;
                     return;
                 }
                 traces.push({
@@ -486,9 +497,10 @@
                 statsText.push(`${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]}: F=${anovaResults.fScore.toFixed(2)}, p=${anovaResults.pValue.toFixed(4)}`);
             } else {
                 dependents.forEach(dep => {
-                    let xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent])).filter(v => !isNaN(v));
-                    let yValues = workingData.map(row => parseFloat(row[dep])).filter(v => !isNaN(v));
+                    let xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent])).filter(v => v !== null && !isNaN(v));
+                    let yValues = workingData.map(row => parseFloat(row[dep])).filter(v => v !== null && !isNaN(v));
                     if (xValues.length === 0 || yValues.length === 0 || xValues.length !== yValues.length) {
+                        console.warn(`No valid data for ${dep} vs ${independent}: xValues=${xValues.length}, yValues=${yValues.length}`);
                         invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has no valid data`);
                         return;
                     }
@@ -530,8 +542,10 @@
             }
 
             if (!traces.length) {
+                console.warn('No valid traces to plot:', invalidTraces);
                 graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
                                       ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
+                graphInitialized = false;
                 return;
             }
 
@@ -587,12 +601,18 @@
                 hovermode: 'closest'
             };
 
+            console.log('Plotting traces:', traces);
             graphDiv.innerHTML = '';
-            Plotly.newPlot('graph', showFit && chartType !== 'anova' ? traces.concat(fitTraces) : traces, layout).catch(err => {
-                console.error('Plotly error:', err);
-                graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
-                                      ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
-            });
+            Plotly.newPlot('graph', showFit && chartType !== 'anova' ? traces.concat(fitTraces) : traces, layout, { responsive: true })
+                .then(() => {
+                    graphInitialized = true;
+                })
+                .catch(err => {
+                    console.error('Plotly plotting error:', err);
+                    graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
+                                          ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
+                    graphInitialized = false;
+                });
         }
 
         document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
@@ -644,7 +664,7 @@
         });
 
         window.addEventListener('resize', () => {
-            if (dataLoaded && typeof Plotly !== 'undefined') Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
+            if (dataLoaded && graphInitialized) Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
         });
 
         loadData();
