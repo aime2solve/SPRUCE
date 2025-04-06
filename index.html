@@ -28,13 +28,16 @@
             font-size: calc(16px + 1.5vw); 
             margin: 0; 
             text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; 
-            animation: glowBreathe 8s ease-in-out infinite; 
+            animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; 
             flex-shrink: 0; 
             z-index: 11; 
         }
         @keyframes glowBreathe {
-            0%, 100% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; }
-            50% { text-shadow: 2px 2px 5px #00CC66, -2px -2px 5px #00CC66, 0 0 12px #00FFFF; }
+            0% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; }
+            25% { text-shadow: 2px 2px 5px #00CC66, -2px -2px 5px #00CC66, 0 0 12px #00FFFF; }
+            50% { text-shadow: 2px 2px 4.5px #00CC66, -2px -2px 4.5px #00CC66, 0 0 11px #00FFFF; }
+            75% { text-shadow: 2px 2px 5px #00CC66, -2px -2px 5px #00CC66, 0 0 12px #00FFFF; }
+            100% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; }
         }
         .container { 
             display: flex; 
@@ -240,6 +243,18 @@
             color: #00FF00;
             margin-top: 5px;
         }
+        .warning-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #FF4500;
+            font-family: 'VT323', monospace;
+            font-size: 16px;
+            text-align: center;
+            text-shadow: 0 0 5px #FF4500;
+            z-index: 5;
+        }
     </style>
 </head>
 <body>
@@ -441,8 +456,7 @@
                 popup.style.display = 'block';
                 const content = document.getElementById('controls-content');
                 const title = document.getElementById('controls-title');
-                // Placeholder for other controls if needed later
-                popup.style.display = 'none'; // Hide unless specific controls are added
+                popup.style.display = 'none'; // Placeholder for future controls
             } else {
                 popup.style.display = 'none';
             }
@@ -652,12 +666,14 @@
 
             const traces = [];
             const fitTraces = [];
+            let invalidTraces = [];
             dependents.forEach((dep, i) => {
                 let xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent])).filter(v => !isNaN(v));
                 let yValues = workingData.map(row => parseFloat(row[dep])).filter(v => !isNaN(v));
 
                 if (xValues.length === 0 || yValues.length === 0) {
                     console.log(`No valid data for ${dep} vs ${independent}: xValues=${xValues.length}, yValues=${yValues.length}`);
+                    invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has no valid data`);
                     return;
                 }
 
@@ -695,7 +711,8 @@
             });
 
             if (!traces.length) {
-                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = `<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>
+                                      ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
                 return;
             }
 
@@ -778,7 +795,8 @@
 
             Plotly.newPlot('graph', showFit ? traces.concat(fitTraces) : traces, layout).catch(err => {
                 console.error('Plotly error:', err);
-                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
+                graphDiv.innerHTML = `<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>
+                                      ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
             });
         }
 
