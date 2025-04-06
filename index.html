@@ -33,7 +33,7 @@
         .graph-container { position: absolute; right: 0; width: calc(100vw - 250px); background-color: #1A1A1A; height: calc(100vh - 4vh); transition: width 0.3s ease, left 0.3s ease; z-index: 1; overflow: hidden; }
         .graph-container.full-width { width: 100vw; left: 0; }
         #graph { width: 100%; height: 100%; min-width: 320px; min-height: 240px; }
-        .welcome-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00FF00; font-family: 'VT323', monospace; font-size: 20px; text-align: center; text-shadow: 0 0 10px #00FF00; }
+        .welcome-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00FF00; font-family: 'VT323', monospace; font-size: 20px; text-align: center; text-shadow: 0 0 10px #00FF00; z-index: 2; }
         .welcome-message img { display: block; margin: 0 auto; max-width: 300px; height: auto; }
         .welcome-message hr { border: 1px solid #00FFFF; width: 80%; margin: 10px auto; }
         .legend-tab { position: absolute; top: 50px; right: -40px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-left: none; border-radius: 0 10px 10px 0; color: #00FFFF; font-size: 19px; line-height: 36px; text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; z-index: 5; }
@@ -160,12 +160,13 @@
         let endDate = new Date('2025-04-05');
         let dataLoaded = false;
         let legendVisible = true;
+        let graphInitialized = false;
 
         const dependentColors = {
             'TS_0': '#00FFFF', 'TS_5': '#FFFF00', 'TS_10': '#FF00FF', 'TS_20': '#00FF00', 'TS_30': '#FF0000',
             'TS_40': '#0000FF', 'TS_50': '#FFA500', 'TS_100': '#800080', 'TS_200': '#008080',
             'TA_2_0': '#FF6347', 'RH_2_0': '#4682B4', 'WD_10': '#6A5ACD', 'PAR_2': '#20B2AA',
-            'PREC_6': '#DAA520', 'CO2ifiant_measured': '#FF69B4', 'H2O_measured': '#7FFF00'
+            'PREC_6': '#DAA520', 'CO2_measured': '#FF69B4', 'H2O_measured': '#7FFF00'
         };
 
         const controlRanges = {
@@ -181,7 +182,6 @@
             'Temp_target': { min: 0, max: 9, defaultMin: 0, defaultMax: 9, label: 'Target Temp (°C)' }
         };
         let currentRanges = JSON.parse(JSON.stringify(controlRanges));
-        let tempRange = [0, 9];
         let depthRange = [0, 200];
 
         const unitMap = {
@@ -243,7 +243,7 @@
             sidebar.classList.toggle('collapsed');
             graphContainer.classList.toggle('full-width');
             tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
-            if (dataLoaded && typeof Plotly !== 'undefined') {
+            if (dataLoaded && typeof Plotly !== 'undefined' && graphInitialized) {
                 Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
             }
         }
@@ -251,7 +251,7 @@
         function filterByRanges(data) {
             return data.filter(row => {
                 return Object.keys(currentRanges).every(key => {
-                    if (key === 'Soil_Depth') return true;
+                    if (key === 'Soil_Depth') return true; // Handled separately in filterByDepthRange
                     const value = parseFloat(row[key]);
                     const range = currentRanges[key];
                     return isNaN(value) || (value >= range.defaultMin && value <= range.defaultMax);
@@ -310,7 +310,6 @@
                         currentRanges[key].defaultMin = value;
                         minValue.textContent = value;
                         if (key === 'Soil_Depth') depthRange[0] = value;
-                        if (key === 'Temp_target') tempRange[0] = value;
                         updateGraph();
                     });
 
@@ -323,7 +322,6 @@
                         currentRanges[key].defaultMax = value;
                         maxValue.textContent = value;
                         if (key === 'Soil_Depth') depthRange[1] = value;
-                        if (key === 'Temp_target') tempRange[1] = value;
                         updateGraph();
                     });
                 });
@@ -474,7 +472,7 @@
         }
 
         function toggleLegend() {
-            if (dataLoaded && typeof Plotly !== 'undefined') {
+            if (dataLoaded && typeof Plotly !== 'undefined' && graphInitialized) {
                 legendVisible = !legendVisible;
                 Plotly.relayout('graph', { showlegend: legendVisible });
                 document.getElementById('legend-tab').textContent = legendVisible ? 'L' : 'L';
@@ -498,6 +496,7 @@
             const graphDiv = document.getElementById('graph');
             if (!dataLoaded || typeof Plotly === 'undefined') {
                 graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphInitialized = false;
                 return;
             }
 
@@ -510,6 +509,7 @@
 
             if (!allDependents.length || !independents.length) {
                 graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphInitialized = false;
                 return;
             }
 
@@ -517,6 +517,7 @@
             workingData = filterByDepthRange(workingData);
             if (!workingData.length) {
                 graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphInitialized = false;
                 return;
             }
 
@@ -537,6 +538,7 @@
             const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
             if (!dependents.length) {
                 graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                graphInitialized = false;
                 return;
             }
 
@@ -549,6 +551,7 @@
                 const anovaResults = calculateANOVA(workingData, independents[0], dependents[0]);
                 if (isNaN(anovaResults.fScore)) {
                     graphDiv.innerHTML = '<div class="warning-message">Insufficient data for ANOVA</div>';
+                    graphInitialized = false;
                     return;
                 }
 
@@ -617,6 +620,7 @@
             if (!traces.length) {
                 graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
                               ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
+                graphInitialized = false;
                 return;
             }
 
@@ -663,8 +667,8 @@
                 showarrow: false,
                 font: { color: '#00FF00', family: 'Lato', size: 14 },
                 bgcolor: 'rgba(26, 26, 26, 0.7)',
-                bordercolor: '#00FFFF',
-                borderwidth: 1,
+                bordercolor: 'transparent',
+                borderwidth: 0,
                 borderpad: 6,
                 opacity: 0.9,
                 align: 'left'
@@ -711,12 +715,16 @@
                 hovermode: 'closest'
             };
 
-            Plotly.purge('graph');
+            graphDiv.innerHTML = ''; // Clear welcome message before plotting
             Plotly.newPlot('graph', showBestFit && chartType !== 'anova' ? traces.concat(fitTraces) : traces, layout, { responsive: true })
+                .then(() => {
+                    graphInitialized = true;
+                })
                 .catch(err => {
                     console.error('Plotly error:', err);
                     graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
                                           ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
+                    graphInitialized = false;
                 });
 
             document.getElementById('independent-toggle').innerHTML = independents.map(ind => document.querySelector(`label[for="${ind}"]`).textContent).join('<br>') || 'Select Independent';
@@ -785,7 +793,7 @@
         });
 
         window.addEventListener('resize', () => {
-            if (dataLoaded && typeof Plotly !== 'undefined') {
+            if (dataLoaded && typeof Plotly !== 'undefined' && graphInitialized) {
                 Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
             }
         });
