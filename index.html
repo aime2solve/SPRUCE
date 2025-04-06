@@ -54,7 +54,7 @@
             padding: 15px; 
             display: flex; 
             flex-direction: column; 
-            gap: 15px; 
+            gap: 10px; /* Reduced from 15px for tighter spacing */
             position: absolute; 
             top: 0; 
             left: 0;
@@ -87,13 +87,19 @@
             text-align: center; 
             text-shadow: 0 0 10px #DAA520; 
             line-height: 1.2; 
-            margin-top: 0; 
+            margin: 0 0 10px; /* Adjusted for tighter spacing */
         }
         .sidebar-title span { 
             display: block; 
             font-size: 20px; 
         }
-        .button-container { display: flex; align-items: center; width: 100%; position: relative; }
+        .button-container { 
+            display: flex; 
+            align-items: center; 
+            width: 100%; 
+            position: relative; 
+            margin-bottom: 0; /* Remove extra space below */
+        }
         .button-label { 
             color: #FFFF00; 
             font-size: 15px; 
@@ -198,17 +204,21 @@
         }
         .legend-tab { 
             position: absolute; 
-            top: 50px; 
-            right: 1vw; 
+            top: 0; /* Aligned with sidebar-tab */
+            right: -40px; /* Matches sidebar-tab positioning */
+            width: 40px; 
+            height: 40px; 
             background: rgba(26, 26, 26, 0.8); 
             border: 2px solid #00FFFF; 
-            border-radius: 5px; 
+            border-left: none; 
+            border-radius: 0 10px 10px 0; 
             color: #00FFFF; 
-            padding: 5px 10px; 
+            font-size: 19px; 
+            line-height: 36px; 
+            text-align: center; 
             cursor: pointer; 
+            box-shadow: 0 0 8px #00FFFF; 
             z-index: 5; 
-            font-size: calc(10px + 0.5vw); 
-            white-space: nowrap; 
         }
         .controls-popup, .stats-popup, .warning-popup {
             position: fixed;
@@ -301,13 +311,13 @@
             .sidebar { width: 200px; }
             .graph-container { width: calc(100vw - 200px); }
             .graph-container.full-width { width: 100vw; }
-            .legend-tab { top: 40px; right: 1vw; padding: 4px 8px; }
+            .legend-tab { top: 0; right: -40px; }
         }
         @media (max-width: 480px) {
             .sidebar { width: 150px; }
             .graph-container { width: calc(100vw - 150px); }
             .graph-container.full-width { width: 100vw; }
-            .legend-tab { top: 30px; right: 1vw; padding: 3px 6px; }
+            .legend-tab { top: 0; right: -40px; }
             .button-label { font-size: 13px; width: 80px; }
             .dropdown-toggle, #control-panel-button { width: calc(100% - 90px); }
             .dropdown-menu { width: calc(100% - 10px); left: 0; }
@@ -379,7 +389,7 @@
                     <div class="dropdown-item"><input type="radio" name="chart-type" id="line" value="line"><label for="line">Line</label></div>
                     <div class="dropdown-item"><input type="radio" name="chart-type" id="bar" value="bar"><label for="bar">Bar</label></div>
                     <div class="dropdown-item"><input type="radio" name="chart-type" id="area" value="area"><label for="area">Area</label></div>
-                    <div class="dropdown-item"><input type="radio" name="chart-type" id="box" value="box"><label for="box">Box</label></div>
+                    <div class="dropdown-item"><input type="radio" name="chart-type" id="box" value="box"><label for="bar">Box</label></div>
                     <div class="dropdown-item"><input type="radio" name="chart-type" id="anova" value="anova"><label for="anova">ANOVA</label></div>
                 </div>
             </div>
@@ -401,7 +411,7 @@
                     <hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015
                 </div>
             </div>
-            <div class="legend-tab" id="legend-tab">Show Legend</div>
+            <div class="legend-tab" id="legend-tab">L</div>
         </div>
     </div>
     <div class="controls-popup" id="controls-popup">
@@ -458,7 +468,6 @@
             'CO2_measured': 'ppm', 'H2O_measured': 'mmol/mol'
         };
 
-        // Analysis types that support multiple independent variables
         const multiVarAnalysisTypes = ['anova'];
 
         async function loadData() {
@@ -494,7 +503,7 @@
             const popup = document.getElementById('warning-popup');
             document.getElementById('warning-content').textContent = message;
             popup.style.display = 'block';
-            setTimeout(() => popup.style.display = 'none', 2000); // Hide after 2 seconds
+            setTimeout(() => popup.style.display = 'none', 2000);
         }
 
         function toggleSidebar() {
@@ -607,7 +616,7 @@
         }
 
         function calculateRegression(x, y) {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
+            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.x) && !isNaN(d.y));
             if (pairedData.length < 2) return { slope: NaN, intercept: NaN, rSquared: NaN, pValue: NaN, tStat: NaN, fStat: NaN, seSlope: NaN, rse: NaN };
 
             const yValues = pairedData.map(d => d.y).sort((a, b) => a - b);
@@ -673,7 +682,7 @@
         }
 
         function calculateSpearman(x, y) {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
+            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.x) && !isNaN(d.y));
             if (pairedData.length < 2) return { rho: NaN, pValue: NaN };
             const rankedX = pairedData.map(d => d.x).map((v, i, arr) => ({ v, i })).sort((a, b) => a.v - b.v).map((d, r) => ({ i: d.i, r: r + 1 }));
             const rankedY = pairedData.map(d => d.y).map((v, i, arr) => ({ v, i })).sort((a, b) => a.v - b.v).map((d, r) => ({ i: d.i, r: r + 1 }));
@@ -745,12 +754,12 @@
             if (dataLoaded && typeof Plotly !== 'undefined') {
                 legendVisible = !legendVisible;
                 Plotly.relayout('graph', { showlegend: legendVisible });
-                document.getElementById('legend-tab').textContent = legendVisible ? 'Hide Legend' : 'Show Legend';
+                document.getElementById('legend-tab').textContent = legendVisible ? 'L' : 'L'; // Keep as 'L' for simplicity
             }
         }
 
         function filterOutliers(x, y) {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
+            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.x) && !isNaN(d.y));
             if (pairedData.length < 2) return { x: x, y: y };
             const yValues = pairedData.map(d => d.y).sort((a, b) => a - b);
             const q1 = yValues[Math.floor(yValues.length * 0.25)];
@@ -843,7 +852,7 @@
                     };
                     traces.push(trace);
 
-                    if (xValues.length > 1) {
+                    if (xValues.length > 1 && chartType !== 'box') { // Box plots don’t need regression
                         const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
                         const reg = calculateRegression(xNum, yValues);
                         const spearman = calculateSpearman(xNum, yValues);
@@ -966,8 +975,11 @@
             console.log('Traces:', traces);
             console.log('Fit Traces:', fitTraces);
 
-            Plotly.purge('graph');
-            Plotly.newPlot('graph', showBestFit ? traces.concat(fitTraces) : traces, layout)
+            // Reset Plotly state completely
+            if (document.getElementById('graph')._fullLayout) {
+                Plotly.purge('graph');
+            }
+            Plotly.newPlot('graph', showBestFit ? traces.concat(fitTraces) : traces, layout, { responsive: true })
                 .then(() => console.log('Plot successful'))
                 .catch(err => {
                     console.error('Plotly error:', err);
@@ -1001,7 +1013,7 @@
                 const chartType = document.querySelector('#chart-type-menu input:checked').value;
                 const checkedInputs = Array.from(document.querySelectorAll('#independent-menu input:checked'));
                 if (checkedInputs.length > 1 && !multiVarAnalysisTypes.includes(chartType)) {
-                    input.checked = false; // Uncheck the new selection
+                    input.checked = false;
                     showWarningPopup('Must choose ANOVA for multiple X-axis variables');
                     return;
                 }
@@ -1021,7 +1033,6 @@
                 document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
                 const checkedIndependents = Array.from(document.querySelectorAll('#independent-menu input:checked'));
                 if (checkedIndependents.length > 1 && !multiVarAnalysisTypes.includes(input.value)) {
-                    // Uncheck all but the first independent variable
                     checkedIndependents.slice(1).forEach(extraInput => extraInput.checked = false);
                     document.getElementById('independent-toggle').textContent = 
                         document.querySelector(`label[for="${checkedIndependents[0].id}"]`).textContent || 'Select Independent';
