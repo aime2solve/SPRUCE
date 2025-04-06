@@ -6,52 +6,50 @@
     <title>Comparative Biospheromics Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <!-- Updated Plotly to v2.35.2 (latest as of Oct 2023) -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js"></script>
     <style>
         body, html { margin: 0; padding: 0; height: 100vh; width: 100vw; background-color: #000000; font-family: 'Lato', sans-serif; overflow: hidden; display: flex; flex-direction: column; }
-        h1 { color: #00FFFF; text-align: center; padding: 2vh; font-family: 'Comfortaa', sans-serif; font-size: calc(16px + 1.5vw); margin: 0; text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; flex-shrink: 0; z-index: 11; line-height: 1.2; }
+        h1 { color: #00FFFF; text-align: center; padding: 2vh; font-family: 'Comfortaa', sans-serif; font-size: calc(16px + 1.5vw); margin: 0; text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; flex-shrink: 0; z-index: 11; line-height: 1.5; }
         @keyframes glowBreathe { 0%, 100% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; } 25%, 75% { text-shadow: 2px 2px 5px #00CC66, -2px -2px 5px #00CC66, 0 0 12px #00FFFF; } 50% { text-shadow: 2px 2px 4.5px #00CC66, -2px -2px 4.5px #00CC66, 0 0 11px #00FFFF; } }
         .container { display: flex; flex-grow: 1; overflow: hidden; height: calc(100vh - 4vh); position: relative; }
-        .sidebar { width: 250px; background: rgba(26, 26, 26, 0.8); border-right: 2px solid #00FFFF; padding: 10px; display: flex; flex-direction: column; gap: 8px; position: absolute; top: 0; left: 0; height: 100%; transition: transform 0.3s ease; z-index: 10; }
+        .sidebar { width: 250px; background: rgba(26, 26, 26, 0.8); border-right: 2px solid #00FFFF; padding: 15px; display: flex; flex-direction: column; gap: 15px; position: absolute; top: 0; left: 0; height: 100%; transition: transform 0.3s ease; z-index: 10; }
         .sidebar.collapsed { transform: translateX(-250px); }
         .sidebar-tab { position: absolute; top: 0; right: -40px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-left: none; border-radius: 0 10px 10px 0; color: #00FFFF; font-size: 19px; line-height: 36px; text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; }
-        .sidebar-title { font-family: 'Exo 2', sans-serif; font-size: 28px; color: #DAA520; text-align: center; text-shadow: 0 0 10px #DAA520; line-height: 1.1; margin: 0 0 8px; }
-        .sidebar-title span { display: block; font-size: 20px; }
-        .button-container { display: flex; align-items: center; width: 100%; position: relative; margin: 0; }
-        .button-label { color: #FFFF00; font-size: 15px; margin-right: 8px; width: 100px; text-align: right; padding-left: 10px; }
-        .dropdown-toggle, #control-panel-button { background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 13px; padding: 4px 6px; width: calc(100% - 118px); text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; line-height: 1.2; white-space: pre-wrap; overflow: hidden; text-overflow: ellipsis; }
-        .dropdown-menu { position: absolute; top: 100%; left: 0; width: 100%; background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 13px; padding: 8px; transition: max-height 0.5s ease; visibility: hidden; z-index: 10; }
-        #stats-menu { top: auto; bottom: 100%; max-height: 400px; color: #00FF00; font-family: 'VT323', monospace; font-size: 17px; }
+        .sidebar-title { font-family: 'Exo 2', sans-serif; font-size: 26px; color: #DAA520; text-align: center; text-shadow: 0 0 10px #DAA520; line-height: 1.2; margin-top: 0; }
+        .sidebar-title span { display: block; font-size: 18px; }
+        .button-container { display: flex; align-items: center; width: 100%; position: relative; }
+        .button-label { color: #FFFF00; font-size: 13px; margin-right: 10px; width: 100px; text-align: right; padding-left: 10px; }
+        .dropdown-toggle, #control-panel-button { background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 11px; padding: 4px 8px; width: calc(100% - 120px); text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; }
+        .dropdown-menu { position: absolute; top: 100%; left: 110px; width: calc(100% - 120px); max-height: 200px; overflow-y: auto; background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 11px; padding: 8px; visibility: hidden; z-index: 10; }
         .dropdown-menu.open { visibility: visible; }
-        .dropdown-item { display: flex; align-items: center; margin-bottom: 5px; }
+        .dropdown-item { display: flex; align-items: center; margin-bottom: 3px; }
         #dependent-menu .dropdown-item label, #independent-menu .dropdown-item label { margin-left: 5px; }
         #time-range-menu { padding: 10px; }
         #time-range-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 10px; }
-        #time-range-menu input[type="text"] { width: 100%; background: rgba(26, 26, 26, 0.8); border: 1px solid #00FFFF; color: #00FFFF; padding: 4px; margin-top: 5px; font-size: 13px; }
+        #time-range-menu input[type="text"] { width: 100%; background: rgba(26, 26, 26, 0.8); border: 1px solid #00FFFF; color: #00FFFF; padding: 4px; margin-top: 5px; font-size: 11px; }
+        #stats-menu { color: #00FF00; font-family: 'VT323', monospace; font-size: 15px; }
         .graph-container { position: absolute; right: 0; width: calc(100vw - 250px); background-color: #1A1A1A; height: calc(100vh - 4vh); transition: width 0.3s ease, left 0.3s ease; z-index: 1; overflow: hidden; }
         .graph-container.full-width { width: 100vw; left: 0; }
         #graph { width: 100%; height: 100%; min-width: 320px; min-height: 240px; }
-        .welcome-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00FF00; font-family: 'VT323', monospace; font-size: 20px; text-align: center; text-shadow: 0 0 10px #00FF00; z-index: 2; }
-        .welcome-message img { display: block; margin: 0 auto; max-width: 300px; height: auto; border-radius: 10px; padding: 10px; background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, rgba(0, 255, 255, 0) 70%); }
+        .welcome-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00FF00; font-family: 'VT323', monospace; font-size: 20px; text-align: center; text-shadow: 0 0 10px #00FF00; }
+        .welcome-message img { display: block; margin: 0 auto; max-width: 300px; height: auto; }
         .welcome-message hr { border: 1px solid #00FFFF; width: 80%; margin: 10px auto; }
-        .legend-tab { position: absolute; top: 10px; right: 10px; width: 60px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 14px; line-height: 36px; text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; z-index: 15; }
-        .controls-popup, .stats-popup, .warning-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; padding: 15px; color: #00FFFF; font-size: 13px; z-index: 20; display: none; width: 300px; max-height: 80vh; overflow-y: auto; text-align: center; }
-        .warning-popup { color: #FF4500; font-family: 'VT323', monospace; font-size: 17px; width: 250px; }
-        .controls-popup h3, .stats-popup h3, .warning-popup h3 { margin: 0 0 10px; color: #DAA520; text-align: center; font-family: 'Exo 2', sans-serif; font-size: 18px; }
+        .legend-tab { position: absolute; top: 50px; right: 1vw; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 5px; color: #00FFFF; padding: 5px 10px; cursor: pointer; z-index: 5; font-size: calc(10px + 0.5vw); white-space: nowrap; }
+        .controls-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; padding: 15px; color: #00FFFF; font-size: 13px; z-index: 20; display: none; width: 400px; max-height: 80vh; overflow-y: auto; }
+        .controls-popup h3 { margin: 0 0 10px; color: #DAA520; text-align: center; font-family: 'Exo 2', sans-serif; font-size: 18px; }
         .slider-container { margin: 10px 0; position: relative; }
-        .slider-container label { display: block; margin-bottom: 5px; color: #00FFFF; }
+        .slider-container label { display: block; margin-bottom: 5px; }
         .range-slider { position: relative; width: 100%; height: 5px; background: #444; border-radius: 5px; }
         .range-track { position: absolute; height: 5px; background: #00FFFF; z-index: 1; }
-        .range-slider input[type="range"] { position: absolute; width: 100%; height: 5px; top: -5px; background: none; -webkit-appearance: none; pointer-events: none; margin: 0; }
+        .range-slider input[type="range"] { position: absolute; width: 100%; height: 5px; top: -5px; background: none; -webkit-appearance: none; pointer-events: none; }
         .range-slider input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; background: #00FFFF; border-radius: 50%; cursor: pointer; pointer-events: auto; box-shadow: 0 0 5px #00FFFF; }
         .range-slider input[type="range"]::-webkit-slider-runnable-track { background: transparent; }
         .slider-values { display: flex; justify-content: space-between; font-size: 11px; color: #00FF00; margin-top: 5px; }
         .warning-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #FF4500; font-family: 'VT323', monospace; font-size: 17px; text-align: center; text-shadow: 0 0 5px #FF4500; z-index: 5; }
-        @media (max-width: 768px) { .sidebar { width: 200px; } .graph-container { width: calc(100vw - 200px); } .graph-container.full-width { width: 100vw; } .legend-tab { top: 10px; right: 10px; } }
-        @media (max-width: 480px) { .sidebar { width: 150px; } .graph-container { width: calc(100vw - 150px); } .graph-container.full-width { width: 100vw; } .legend-tab { top: 10px; right: 10px; } .button-label { font-size: 13px; width: 80px; } .dropdown-toggle, #control-panel-button { width: calc(100% - 88px); } .dropdown-menu { width: calc(100% - 10px); left: 0; } .controls-popup, .stats-popup, .warning-popup { width: 90%; } }
+        @media (max-width: 768px) { .sidebar { width: 200px; } .graph-container { width: calc(100vw - 200px); } .graph-container.full-width { width: 100vw; } .legend-tab { top: 40px; right: 1vw; padding: 4px 8px; } }
+        @media (max-width: 480px) { .sidebar { width: 150px; } .graph-container { width: calc(100vw - 150px); } .graph-container.full-width { width: 100vw; } .legend-tab { top: 30px; right: 1vw; padding: 3px 6px; } .button-label { font-size: 11px; width: 80px; } .dropdown-toggle, #control-panel-button { width: calc(100% - 90px); } .dropdown-menu { left: 90px; width: calc(100% - 90px); } }
     </style>
 </head>
 <body>
@@ -82,9 +80,9 @@
             </div>
             <div class="button-container">
                 <span class="button-label">Y-Axis:</span>
-                <div class="dropdown-toggle" id="dependent-toggle"><span style="color: #00FFFF;">Soil Temp 0 cm (°C)</span></div>
+                <div class="dropdown-toggle" id="dependent-toggle">Select Dependent</div>
                 <div class="dropdown-menu" id="dependent-menu">
-                    <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0" checked><label for="TS_0" style="color: #00FFFF;">Soil Temp 0 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0"><label for="TS_0" style="color: #00FFFF;">Soil Temp 0 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_5" value="TS_5"><label for="TS_5" style="color: #FFFF00;">Soil Temp 5 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_10" value="TS_10"><label for="TS_10" style="color: #FF00FF;">Soil Temp 10 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_20" value="TS_20"><label for="TS_20" style="color: #00FF00;">Soil Temp 20 cm (°C)</label></div>
@@ -104,14 +102,14 @@
             </div>
             <div class="button-container">
                 <span class="button-label">Time Range:</span>
-                <div class="dropdown-toggle" id="time-range-toggle">2015-08-01<br>2025-04-05</div>
+                <div class="dropdown-toggle" id="time-range-toggle">2015-08-01 - 2025-04-05</div>
                 <div class="dropdown-menu" id="time-range-menu">
                     <div class="dropdown-item"><label for="start-date">Start Date:</label><input type="text" id="start-date" value="2015-08-01"></div>
                     <div class="dropdown-item"><label for="end-date">End Date:</label><input type="text" id="end-date" value="2025-04-05"></div>
                 </div>
             </div>
             <div class="button-container">
-                <span class="button-label">Analysis Type:</span>
+                <span class="button-label">Chart Type:</span>
                 <div class="dropdown-toggle" id="chart-type-toggle">Scatter</div>
                 <div class="dropdown-menu" id="chart-type-menu">
                     <div class="dropdown-item"><input type="radio" name="chart-type" id="scatter" value="scatter" checked><label for="scatter">Scatter</label></div>
@@ -127,32 +125,18 @@
                 <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
                 <div class="dropdown-menu" id="stats-menu">
                     <div id="stats-content"></div>
-                    <div class="dropdown-item"><input type="checkbox" id="show-best-fit" checked><label for="show-best-fit">Show Best Fit</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="show-stats" checked><label for="show-stats">Show Stats on Chart</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="show-stats-popup"><label for="show-stats-popup">Show Stats Popup</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="show-fit" checked><label for="show-fit">Show Fit & Stats on Chart</label></div>
                 </div>
             </div>
         </div>
         <div class="graph-container" id="graph-container">
-            <div id="graph"></div>
-            <div class="legend-tab" id="legend-tab">Legend</div>
+            <div id="graph"><div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div></div>
+            <div class="legend-tab" id="legend-tab">Show Legend</div>
         </div>
-    </div>
-    <div class="controls-popup" id="controls-popup">
-        <h3 id="controls-title">Controls</h3>
-        <div id="controls-content"></div>
     </div>
     <div class="controls-popup" id="control-panel-popup">
         <h3>Control Panel</h3>
         <div id="control-panel-content"></div>
-    </div>
-    <div class="stats-popup" id="stats-popup">
-        <h3>Statistics</h3>
-        <div id="stats-popup-content"></div>
-    </div>
-    <div class="warning-popup" id="warning-popup">
-        <h3>Warning</h3>
-        <div id="warning-content"></div>
     </div>
 
     <script>
@@ -162,7 +146,7 @@
         let endDate = new Date('2025-04-05');
         let dataLoaded = false;
         let legendVisible = true;
-        let graphInitialized = false;
+        let cachedData = null;
 
         const dependentColors = {
             'TS_0': '#00FFFF', 'TS_5': '#FFFF00', 'TS_10': '#FF00FF', 'TS_20': '#00FF00', 'TS_30': '#FF0000',
@@ -193,8 +177,6 @@
             'CO2_measured': 'ppm', 'H2O_measured': 'mmol/mol'
         };
 
-        const multiVarAnalysisTypes = ['anova'];
-
         async function loadData() {
             try {
                 const response = await fetch(dataUrl);
@@ -209,10 +191,11 @@
                     date.setDate(day);
                     date.setHours(Math.floor(fractionalDay * 24), Math.floor((fractionalDay * 24 % 1) * 60), 0, 0);
                     row.TIMESTAMP = date;
-                    return !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date && row.TIMESTAMP.getFullYear() >= 2015 && row.TIMESTAMP.getFullYear() <= 2025;
+                    return !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date;
                 });
                 console.log('Loaded data sample:', allData.slice(0, 5));
                 dataLoaded = true;
+                cachedData = aggregateVariables(allData);
                 updateGraph();
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -223,19 +206,10 @@
         function toggleDropdown(id) {
             const menus = document.querySelectorAll('.dropdown-menu');
             menus.forEach(menu => {
-                if (menu.id !== id && menu.classList.contains('open')) {
-                    menu.classList.remove('open');
-                }
+                if (menu.id !== id && menu.classList.contains('open')) menu.classList.remove('open');
             });
             const menu = document.getElementById(id);
             if (menu) menu.classList.toggle('open');
-        }
-
-        function showWarningPopup(message) {
-            const popup = document.getElementById('warning-popup');
-            document.getElementById('warning-content').textContent = message;
-            popup.style.display = 'block';
-            setTimeout(() => popup.style.display = 'none', 2000);
         }
 
         function toggleSidebar() {
@@ -245,9 +219,14 @@
             sidebar.classList.toggle('collapsed');
             graphContainer.classList.toggle('full-width');
             tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
-            if (dataLoaded && typeof Plotly !== 'undefined' && graphInitialized) {
-                Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
-            }
+            if (dataLoaded && typeof Plotly !== 'undefined') Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
+        }
+
+        function enforceSingleSelection(groupId, changedId) {
+            const checkboxes = document.querySelectorAll(`#${groupId} input[type="checkbox"]`);
+            checkboxes.forEach(checkbox => {
+                if (checkbox.id !== changedId && checkbox.checked) checkbox.checked = false;
+            });
         }
 
         function filterByRanges(data) {
@@ -266,9 +245,7 @@
             return data.map(row => {
                 const newRow = { ...row };
                 depths.forEach(depth => {
-                    if (depth < depthRange[0] || depth > depthRange[1]) {
-                        newRow[`TS_${depth}`] = null;
-                    }
+                    if (depth < depthRange[0] || depth > depthRange[1]) newRow[`TS_${depth}`] = null;
                 });
                 return newRow;
             });
@@ -285,7 +262,7 @@
             if (!isVisible) {
                 content.innerHTML = Object.keys(controlRanges).map(key => `
                     <div class="slider-container">
-                        <label>${controlRanges[key].label} Range</label>
+                        <label>${controlRanges[key].label}</label>
                         <div class="range-slider">
                             <div class="range-track" id="${key}-track"></div>
                             <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].defaultMin}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
@@ -316,28 +293,22 @@
 
                     minSlider.addEventListener('input', () => {
                         let value = parseFloat(minSlider.value);
-                        if (value > parseFloat(maxSlider.value)) {
-                            value = parseFloat(maxSlider.value);
-                            minSlider.value = value;
-                        }
+                        if (value > parseFloat(maxSlider.value)) value = parseFloat(maxSlider.value), minSlider.value = value;
                         currentRanges[key].defaultMin = value;
                         minValue.textContent = value.toFixed(1);
                         if (key === 'Soil_Depth') depthRange[0] = value;
                         updateTrack();
-                        updateGraph();
+                        debounceUpdateGraph();
                     });
 
                     maxSlider.addEventListener('input', () => {
                         let value = parseFloat(maxSlider.value);
-                        if (value < parseFloat(minSlider.value)) {
-                            value = parseFloat(minSlider.value);
-                            maxSlider.value = value;
-                        }
+                        if (value < parseFloat(minSlider.value)) value = parseFloat(minSlider.value), maxSlider.value = value;
                         currentRanges[key].defaultMax = value;
                         maxValue.textContent = value.toFixed(1);
                         if (key === 'Soil_Depth') depthRange[1] = value;
                         updateTrack();
-                        updateGraph();
+                        debounceUpdateGraph();
                     });
 
                     updateTrack();
@@ -345,71 +316,21 @@
             }
         }
 
-        function gaussianCDF(z) {
-            return 0.5 * (1 + erf(z / Math.sqrt(2)));
-        }
-
-        function erf(x) {
-            const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429;
-            const p = 0.3275911;
-            const sign = x < 0 ? -1 : 1;
-            x = Math.abs(x);
-            const t = 1 / (1 + p * x);
-            return sign * (1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x));
-        }
-
-        function tDistPValue(t, df) {
-            const tAbs = Math.abs(t);
-            return 2 * (1 - gaussianCDF(tAbs));
-        }
-
         function calculateRegression(x, y) {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.x) && !isNaN(d.y));
-            if (pairedData.length < 2) return { slope: NaN, intercept: NaN, rSquared: NaN, pValue: NaN, tStat: NaN, fStat: NaN, seSlope: NaN, rse: NaN };
-
-            const filteredData = pairedData.filter(d => d.y >= jStat.percentile(pairedData.map(d => d.y), 0.25) - 1.5 * (jStat.percentile(pairedData.map(d => d.y), 0.75) - jStat.percentile(pairedData.map(d => d.y), 0.25)) && d.y <= jStat.percentile(pairedData.map(d => d.y), 0.75) + 1.5 * (jStat.percentile(pairedData.map(d => d.y), 0.75) - jStat.percentile(pairedData.map(d => d.y), 0.25)));
-            const filteredX = filteredData.map(d => d.x);
-            const filteredY = filteredData.map(d => d.y);
-
-            const n = filteredX.length;
-            if (n < 2) return { slope: NaN, intercept: NaN, rSquared: NaN, pValue: NaN, tStat: NaN, fStat: NaN, seSlope: NaN, rse: NaN };
-
-            const sumX = filteredX.reduce((a, b) => a + b, 0);
-            const sumY = filteredY.reduce((a, b) => a + b, 0);
-            const sumXY = filteredX.reduce((sum, xi, i) => sum + xi * filteredY[i], 0);
-            const sumXX = filteredX.reduce((sum, xi) => sum + xi * xi, 0);
-            const meanX = sumX / n;
-            const meanY = sumY / n;
+            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
+            if (pairedData.length < 2) return { slope: NaN, intercept: NaN, rSquared: NaN };
+            const n = pairedData.length;
+            const sumX = pairedData.reduce((a, b) => a + b.x, 0);
+            const sumY = pairedData.reduce((a, b) => a + b.y, 0);
+            const sumXY = pairedData.reduce((sum, d) => sum + d.x * d.y, 0);
+            const sumXX = pairedData.reduce((sum, d) => sum + d.x * d.x, 0);
             const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
             const intercept = (sumY - slope * sumX) / n;
-
-            const yPred = filteredX.map(xi => slope * xi + intercept);
-            const ssTot = filteredY.reduce((sum, yi) => sum + Math.pow(yi - meanY, 2), 0);
-            const ssRes = filteredY.reduce((sum, yi, i) => sum + Math.pow(yi - yPred[i], 2), 0);
-            const ssReg = ssTot - ssRes;
+            const yPred = pairedData.map(d => slope * d.x + intercept);
+            const ssTot = pairedData.reduce((sum, d) => sum + Math.pow(d.y - sumY / n, 2), 0);
+            const ssRes = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPred[i], 2), 0);
             const rSquared = ssTot === 0 ? NaN : 1 - (ssRes / ssTot);
-            const adjustedRSquared = 1 - (1 - rSquared) * (n - 1) / (n - 2);
-            const rse = Math.sqrt(ssRes / (n - 2));
-            const seSlope = rse / Math.sqrt(filteredX.reduce((sum, xi) => sum + Math.pow(xi - meanX, 2), 0));
-            const tStat = slope / seSlope;
-            const fStat = (ssReg / 1) / (ssRes / (n - 2));
-            const pValueSlope = tDistPValue(tStat, n - 2);
-            const pValueF = tDistPValue(Math.sqrt(fStat), n - 2);
-
-            return { slope, intercept, rSquared, adjustedRSquared, pValueSlope, tStat, fStat, pValueF, seSlope, rse };
-        }
-
-        function calculateSpearman(x, y) {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.x) && !isNaN(d.y));
-            if (pairedData.length < 2) return { rho: NaN, pValue: NaN };
-            const rankedX = pairedData.map(d => d.x).map((v, i, arr) => ({ v, i })).sort((a, b) => a.v - b.v).map((d, r) => ({ i: d.i, r: r + 1 }));
-            const rankedY = pairedData.map(d => d.y).map((v, i, arr) => ({ v, i })).sort((a, b) => a.v - b.v).map((d, r) => ({ i: d.i, r: r + 1 }));
-            const n = pairedData.length;
-            const dSquared = rankedX.reduce((sum, rx, i) => sum + Math.pow(rx.r - rankedY[i].r, 2), 0);
-            const rho = 1 - (6 * dSquared) / (n * (n * n - 1));
-            const tStat = rho * Math.sqrt((n - 2) / (1 - rho * rho));
-            const pValue = tDistPValue(tStat, n - 2);
-            return { rho, pValue };
+            return { slope, intercept, rSquared };
         }
 
         function calculateANOVA(data, independent, dependent) {
@@ -420,15 +341,12 @@
                 const value = parseFloat(row[dependent]);
                 if (!isNaN(value)) groups[group].push(value);
             });
-
             const groupArrays = Object.values(groups).filter(arr => arr.length > 0);
             if (groupArrays.length < 2) return { fScore: NaN, pValue: NaN };
-
             const fScore = jStat.anovafscore(...groupArrays);
             const pValue = jStat.anovaftest(...groupArrays);
             const means = groupArrays.map(arr => jStat.mean(arr));
             const groupNames = Object.keys(groups).filter(key => groups[key].length > 0);
-
             return { fScore, pValue, means, groupNames };
         }
 
@@ -481,24 +399,19 @@
             }));
         }
 
-        function calculateGraphWidth() {
-            return document.getElementById('graph-container').clientWidth;
-        }
-
-        function calculateGraphHeight() {
-            return document.getElementById('graph-container').clientHeight;
-        }
+        function calculateGraphWidth() { return document.getElementById('graph-container').clientWidth; }
+        function calculateGraphHeight() { return document.getElementById('graph-container').clientHeight; }
 
         function toggleLegend() {
-            if (dataLoaded && typeof Plotly !== 'undefined' && graphInitialized) {
+            if (dataLoaded && typeof Plotly !== 'undefined') {
                 legendVisible = !legendVisible;
                 Plotly.relayout('graph', { showlegend: legendVisible });
-                document.getElementById('legend-tab').textContent = legendVisible ? 'Legend' : 'Hide';
+                document.getElementById('legend-tab').textContent = legendVisible ? 'Hide Legend' : 'Show Legend';
             }
         }
 
         function filterOutliers(x, y) {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.x) && !isNaN(d.y));
+            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
             if (pairedData.length < 2) return { x: x, y: y };
             const yValues = pairedData.map(d => d.y);
             const q1 = jStat.percentile(yValues, 0.25);
@@ -510,73 +423,59 @@
             return { x: filtered.map(d => d.x), y: filtered.map(d => d.y) };
         }
 
+        let debounceTimeout;
+        function debounceUpdateGraph() {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(updateGraph, 300);
+        }
+
         function updateGraph() {
             const graphDiv = document.getElementById('graph');
             if (!dataLoaded || typeof Plotly === 'undefined') {
                 graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
-                graphInitialized = false;
                 return;
             }
 
-            const independents = Array.from(document.querySelectorAll('#independent-menu input:checked')).map(input => input.value);
+            const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || null;
             const allDependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
             const chartType = document.querySelector('#chart-type-menu input:checked').value;
-            const showBestFit = document.getElementById('show-best-fit').checked;
-            const showStats = document.getElementById('show-stats').checked;
-            const showStatsPopup = document.getElementById('show-stats-popup').checked;
+            const showFit = document.getElementById('show-fit').checked;
 
-            // Update dropdown toggle text dynamically
-            document.getElementById('independent-toggle').innerHTML = independents.length ? independents.map(ind => document.querySelector(`label[for="${ind}"]`).textContent).join('<br>') : 'Select Independent';
-            document.getElementById('dependent-toggle').innerHTML = allDependents.length ? allDependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`).textContent}</span>`).join('<br>') : 'Select Dependent';
+            document.getElementById('independent-toggle').textContent = independent ? document.querySelector(`label[for="${independent}"]`)?.textContent || 'Select Independent' : 'Select Independent';
+            document.getElementById('dependent-toggle').textContent = allDependents.length ? allDependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent}</span>`).join('<br>') : 'Select Dependent';
 
-            if (!allDependents.length || !independents.length) {
+            if (!allDependents.length || !independent) {
                 graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
-                graphInitialized = false;
                 return;
             }
 
-            let workingData = filterByRanges(allData);
+            let workingData = filterByRanges(cachedData);
             workingData = filterByDepthRange(workingData);
-            if (!workingData.length) {
-                graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
-                graphInitialized = false;
-                return;
-            }
-
-            if (startDate || endDate) {
-                workingData = workingData.filter(row => {
-                    const rowDate = row.TIMESTAMP;
-                    return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1));
-                });
-            }
-
-            workingData = aggregateVariables(workingData);
-            if (independents.includes('TIMESTAMP')) {
-                workingData = getWeeklyTimestamps(workingData, startDate, endDate);
-            }
+            workingData = workingData.filter(row => {
+                const rowDate = row.TIMESTAMP;
+                return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1));
+            });
+            if (independent === 'TIMESTAMP') workingData = getWeeklyTimestamps(workingData, startDate, endDate);
 
             const units = allDependents.map(dep => unitMap[dep]);
             const commonUnit = units[0];
             const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
-            if (!dependents.length) {
+            if (!dependents.length || !workingData.length) {
                 graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
-                graphInitialized = false;
                 return;
             }
 
             const traces = [];
             const fitTraces = [];
             let invalidTraces = [];
-            const statsData = [];
+            const statsText = [];
 
-            if (chartType === 'anova' && independents.length > 0 && dependents.length === 1) {
-                const anovaResults = calculateANOVA(workingData, independents[0], dependents[0]);
+            if (chartType === 'anova' && dependents.length === 1) {
+                const anovaResults = calculateANOVA(workingData, independent, dependents[0]);
                 if (isNaN(anovaResults.fScore)) {
                     graphDiv.innerHTML = '<div class="warning-message">Insufficient data for ANOVA</div>';
-                    graphInitialized = false;
                     return;
                 }
-
                 traces.push({
                     x: anovaResults.groupNames,
                     y: anovaResults.means,
@@ -584,17 +483,11 @@
                     name: `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means`,
                     marker: { color: dependentColors[dependents[0]] || '#00FFFF' }
                 });
-
-                statsData.push({
-                    dep: dependents[0],
-                    anova: { fScore: anovaResults.fScore, pValue: anovaResults.pValue }
-                });
+                statsText.push(`${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]}: F=${anovaResults.fScore.toFixed(2)}, p=${anovaResults.pValue.toFixed(4)}`);
             } else {
-                const independent = independents[0];
                 dependents.forEach(dep => {
-                    let xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent])).filter(v => v !== null && !isNaN(v));
-                    let yValues = workingData.map(row => parseFloat(row[dep])).filter(v => v !== null && !isNaN(v));
-
+                    let xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent])).filter(v => !isNaN(v));
+                    let yValues = workingData.map(row => parseFloat(row[dep])).filter(v => !isNaN(v));
                     if (xValues.length === 0 || yValues.length === 0 || xValues.length !== yValues.length) {
                         invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has no valid data`);
                         return;
@@ -605,7 +498,7 @@
                     yValues = filtered.y;
 
                     const color = dependentColors[dep] || '#FFFFFF';
-                    const trace = {
+                    traces.push({
                         x: xValues,
                         y: yValues,
                         mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
@@ -614,18 +507,14 @@
                         marker: { color: color, size: 8 },
                         line: (chartType === 'line' || chartType === 'area') ? { color: color, width: 2 } : undefined,
                         fill: chartType === 'area' ? 'tozeroy' : undefined
-                    };
-                    traces.push(trace);
+                    });
 
-                    if (xValues.length > 1 && chartType !== 'box') {
+                    if (showFit && chartType !== 'box' && xValues.length > 1) {
                         const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
-                        const reg = calculateRegression(xNum, yValues);
-                        const spearman = calculateSpearman(xNum, yValues);
-                        statsData.push({ dep, reg, spearman });
-
-                        if (showBestFit && !isNaN(reg.slope) && !isNaN(reg.intercept)) {
+                        const { slope, intercept, rSquared } = calculateRegression(xNum, yValues);
+                        if (!isNaN(slope) && !isNaN(intercept)) {
                             const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Math.max(...xNum)];
-                            const yFit = xFit.map(x => reg.slope * (independent === 'TIMESTAMP' ? x.getTime() : x) + reg.intercept);
+                            const yFit = xFit.map(x => slope * (independent === 'TIMESTAMP' ? x.getTime() : x) + intercept);
                             fitTraces.push({
                                 x: xFit,
                                 y: yFit,
@@ -634,6 +523,7 @@
                                 name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (fit)`,
                                 line: { color: color, width: 2, dash: 'dash' }
                             });
+                            statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Slope=${slope.toFixed(2)}, R²=${rSquared.toFixed(2)}`);
                         }
                     }
                 });
@@ -641,60 +531,38 @@
 
             if (!traces.length) {
                 graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
-                              ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
-                graphInitialized = false;
+                                      ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
                 return;
             }
 
-            const statsText = statsData.map(data => {
-                const label = document.querySelector(`label[for="${data.dep}"], label[for="${data.dep}_dep"]`)?.textContent || data.dep;
-                if (data.anova) {
-                    return `${label}:\nF-Score: ${data.anova.fScore.toFixed(4)}\np-Value: ${data.anova.pValue.toFixed(4)}`;
-                } else {
-                    return `${label}:\n` +
-                           `Slope: ${data.reg.slope.toFixed(4)}, SE: ${data.reg.seSlope.toFixed(4)}, t: ${data.reg.tStat.toFixed(4)}, p: ${data.reg.pValueSlope.toFixed(4)}\n` +
-                           `R²: ${data.reg.rSquared.toFixed(4)}, Adj R²: ${data.reg.adjustedRSquared.toFixed(4)}, F: ${data.reg.fStat.toFixed(4)}, p: ${data.reg.pValueF.toFixed(4)}\n` +
-                           `RSE: ${data.reg.rse.toFixed(4)}\n` +
-                           `Spearman ρ: ${data.spearman.rho.toFixed(4)}, p: ${data.spearman.pValue.toFixed(4)}`;
-                }
-            }).join('\n\n');
-            document.getElementById('stats-content').innerHTML = statsText.replace(/\n/g, '<br>');
-            document.getElementById('stats-popup').style.display = showStatsPopup ? 'block' : 'none';
-            document.getElementById('stats-popup-content').innerHTML = statsText.replace(/\n/g, '<br>');
+            document.getElementById('stats-content').innerHTML = statsText.join('<br>');
 
-            const independent = independents[0];
             const xAxisTitle = independent === 'CO2_trmt' ? 'CO₂ Treatment (ppm)' : 
-                               independent === 'TIMESTAMP' ? 'Time' : 
-                               independent === 'Temp_target' ? 'Target Temperature (°C)' :
-                               independent === 'CO2_measured' ? 'Measured CO₂ (ppm)' :
-                               independent === 'H2O_measured' ? 'Measured H₂O (mmol/mol)' :
-                               document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
+                              independent === 'TIMESTAMP' ? 'Time' : 
+                              independent === 'Temp_target' ? 'Target Temperature (°C)' :
+                              independent === 'CO2_measured' ? 'Measured CO₂ (ppm)' :
+                              independent === 'H2O_measured' ? 'Measured H₂O (mmol/mol)' :
+                              document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
             const isAllSoilTemp = dependents.every(dep => dep.startsWith('TS_'));
-            const yAxisTitle = chartType === 'anova' ? 
-                               `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means` :
-                               dependents.length === 1 ? 
-                               document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent :
-                               isAllSoilTemp ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit})`;
+            const yAxisTitle = chartType === 'anova' ? `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means` :
+                              dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent :
+                              isAllSoilTemp ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit})`;
 
-            const annotations = showStats ? [{
+            const annotations = showFit ? statsText.map((text, i) => ({
                 x: 0.02,
-                y: 0.98,
+                y: 0.98 - (i * 0.06),
                 xref: 'paper',
                 yref: 'paper',
-                text: statsData.map(data => {
-                    const label = document.querySelector(`label[for="${data.dep}"], label[for="${data.dep}_dep"]`)?.textContent || data.dep;
-                    return data.anova ? `${label}: F=${data.anova.fScore.toFixed(2)}, p=${data.anova.pValue.toFixed(4)}` :
-                                       `${label}: Slope=${data.reg.slope.toFixed(2)}, R²=${data.reg.rSquared.toFixed(2)}`;
-                }).join('<br>'),
+                text: text,
                 showarrow: false,
                 font: { color: '#00FF00', family: 'Lato', size: 14 },
                 bgcolor: 'rgba(26, 26, 26, 0.7)',
                 bordercolor: 'transparent',
                 borderwidth: 0,
-                borderpad: 6,
+                borderpad: 4,
                 opacity: 0.9,
                 align: 'left'
-            }] : [];
+            })) : [];
 
             const layout = {
                 width: calculateGraphWidth(),
@@ -702,14 +570,7 @@
                 plot_bgcolor: '#1A1A1A',
                 paper_bgcolor: '#1A1A1A',
                 font: { color: '#FFFFFF', size: 12 },
-                title: {
-                    text: `${yAxisTitle} vs. ${xAxisTitle}`,
-                    font: { size: 16 },
-                    x: 0.5,
-                    xanchor: 'center',
-                    y: 0.95,
-                    yanchor: 'top'
-                },
+                title: { text: `${yAxisTitle} vs. ${xAxisTitle}`, font: { size: 16 }, x: 0.5, xanchor: 'center', y: 0.95, yanchor: 'top' },
                 xaxis: {
                     title: { text: xAxisTitle, font: { size: 14 } },
                     gridcolor: '#444',
@@ -718,36 +579,20 @@
                     automargin: true,
                     tickfont: { size: 12 }
                 },
-                yaxis: {
-                    title: { text: yAxisTitle, font: { size: 14 } },
-                    gridcolor: '#444',
-                    zerolinecolor: '#444',
-                    automargin: true
-                },
+                yaxis: { title: { text: yAxisTitle, font: { size: 14 } }, gridcolor: '#444', zerolinecolor: '#444', automargin: true },
                 margin: { t: 80, b: 120, l: 100, r: 40 },
                 showlegend: legendVisible,
-                legend: { 
-                    x: 1, y: 1, xanchor: 'right', yanchor: 'top', 
-                    bgcolor: 'rgba(26, 26, 26, 0.7)', bordercolor: 'transparent', 
-                    borderwidth: 0, font: { color: '#FFFFFF', size: 12 }, 
-                    traceorder: 'normal', orientation: 'v', cornerRadius: 10, 
-                    shadow: '0 0 8px #00FFFF'
-                },
+                legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.7)', bordercolor: 'transparent', borderwidth: 0, font: { color: '#FFFFFF', size: 12 }, traceorder: 'normal', orientation: 'v' },
                 annotations: annotations,
                 hovermode: 'closest'
             };
 
             graphDiv.innerHTML = '';
-            Plotly.newPlot('graph', showBestFit && chartType !== 'anova' ? traces.concat(fitTraces) : traces, layout, { responsive: true })
-                .then(() => {
-                    graphInitialized = true;
-                })
-                .catch(err => {
-                    console.error('Plotly error:', err);
-                    graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
-                                          ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
-                    graphInitialized = false;
-                });
+            Plotly.newPlot('graph', showFit && chartType !== 'anova' ? traces.concat(fitTraces) : traces, layout).catch(err => {
+                console.error('Plotly error:', err);
+                graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
+                                      ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
+            });
         }
 
         document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
@@ -758,36 +603,23 @@
         document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
         document.getElementById('legend-tab').addEventListener('click', toggleLegend);
         document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
-        document.getElementById('show-best-fit').addEventListener('change', updateGraph);
-        document.getElementById('show-stats').addEventListener('change', updateGraph);
-        document.getElementById('show-stats-popup').addEventListener('change', updateGraph);
+        document.getElementById('show-fit').addEventListener('change', debounceUpdateGraph);
 
         document.querySelectorAll('#independent-menu input').forEach(input => {
             input.addEventListener('change', () => {
-                const chartType = document.querySelector('#chart-type-menu input:checked').value;
-                const checkedInputs = Array.from(document.querySelectorAll('#independent-menu input:checked'));
-                if (checkedInputs.length > 1 && !multiVarAnalysisTypes.includes(chartType)) {
-                    input.checked = false;
-                    showWarningPopup('Must choose ANOVA for multiple X-axis variables');
-                    return;
-                }
-                updateGraph();
+                enforceSingleSelection('independent-menu', input.id);
+                debounceUpdateGraph();
             });
         });
 
         document.querySelectorAll('#dependent-menu input').forEach(input => {
-            input.addEventListener('change', updateGraph);
+            input.addEventListener('change', debounceUpdateGraph);
         });
 
         document.querySelectorAll('#chart-type-menu input').forEach(input => {
             input.addEventListener('change', () => {
                 document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
-                const checkedIndependents = Array.from(document.querySelectorAll('#independent-menu input:checked'));
-                if (checkedIndependents.length > 1 && !multiVarAnalysisTypes.includes(input.value)) {
-                    checkedIndependents.slice(1).forEach(extraInput => extraInput.checked = false);
-                    showWarningPopup('Switched to single X-axis mode');
-                }
-                updateGraph();
+                debounceUpdateGraph();
             });
         });
 
@@ -796,8 +628,8 @@
             defaultDate: '2015-08-01',
             onChange: (selectedDates) => {
                 startDate = selectedDates[0];
-                document.getElementById('time-range-toggle').innerHTML = `${startDate.toISOString().split('T')[0]}<br>${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
-                updateGraph();
+                document.getElementById('time-range-toggle').textContent = `${startDate.toISOString().split('T')[0]} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+                debounceUpdateGraph();
             }
         });
 
@@ -806,15 +638,13 @@
             defaultDate: '2025-04-05',
             onChange: (selectedDates) => {
                 endDate = selectedDates[0];
-                document.getElementById('time-range-toggle').innerHTML = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'}<br>${endDate.toISOString().split('T')[0]}`;
-                updateGraph();
+                document.getElementById('time-range-toggle').textContent = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate.toISOString().split('T')[0]}`;
+                debounceUpdateGraph();
             }
         });
 
         window.addEventListener('resize', () => {
-            if (dataLoaded && typeof Plotly !== 'undefined' && graphInitialized) {
-                Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
-            }
+            if (dataLoaded && typeof Plotly !== 'undefined') Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
         });
 
         loadData();
