@@ -81,7 +81,7 @@
         .sidebar-title span { display: block; font-size: 14px; }
         .button-container { display: flex; align-items: center; width: 100%; position: relative; }
         .button-label { color: #FFFF00; font-size: 12px; margin-right: 10px; width: 100px; text-align: right; padding-left: 10px; }
-        .dropdown-toggle, #analyze-button { 
+        .dropdown-toggle, #analyze-button, #control-panel-button { 
             background: rgba(26, 26, 26, 0.8); 
             border: 2px solid #00FFFF; 
             border-radius: 10px; 
@@ -89,11 +89,10 @@
             font-size: 10px; 
             padding: 4px 8px; 
             width: calc(100% - 120px); 
-            text-align: left; 
+            text-align: center; 
             cursor: pointer; 
             box-shadow: 0 0 8px #00FFFF; 
         }
-        #analyze-button { text-align: center; }
         .dropdown-menu { 
             position: absolute; 
             top: 100%; 
@@ -114,9 +113,6 @@
         .dropdown-menu.open { max-height: 200px; visibility: visible; }
         .dropdown-item { display: flex; align-items: center; margin-bottom: 3px; }
         #dependent-menu .dropdown-item label, #independent-menu .dropdown-item label { margin-left: 5px; }
-        #condition-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 8px; }
-        #condition-menu .dropdown-item label { color: inherit; }
-        #stats-menu #stats-content { color: #00FF00; font-family: 'VT323', monospace; font-size: 12px; }
         #time-range-menu { padding: 10px; }
         #time-range-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 10px; }
         #time-range-menu input[type="text"] { 
@@ -186,16 +182,21 @@
             font-size: 12px;
             z-index: 20;
             display: none;
-            width: 300px;
+            width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
         }
         .controls-popup h3 {
             margin: 0 0 10px;
             color: #DAA520;
             text-align: center;
         }
-        .controls-popup .dropdown-item { margin-bottom: 5px; }
-        .slider-container {
+        .controls-popup .slider-container {
             margin: 10px 0;
+        }
+        .slider-container label {
+            display: block;
+            margin-bottom: 5px;
         }
         .slider-container input[type="range"] {
             width: 100%;
@@ -212,6 +213,12 @@
             border-radius: 50%;
             cursor: pointer;
         }
+        .slider-values {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #00FF00;
+        }
     </style>
 </head>
 <body>
@@ -221,40 +228,8 @@
             <div class="sidebar-tab" id="sidebar-tab"><</div>
             <div class="sidebar-title">SPRUCE<br><span>Data Explorer</span></div>
             <div class="button-container">
-                <span class="button-label">Conditions:</span>
-                <div class="dropdown-toggle" id="condition-toggle">All</div>
-                <div class="dropdown-menu" id="condition-menu">
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="cond_ambient_ambient" value="ambient_ambient" checked><label for="cond_ambient_ambient" style="color: #0000FF;">Ambient, 0°C</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="cond_ambient_elevated" value="ambient_elevated" checked><label for="cond_ambient_elevated" style="color: #0000FF;">High CO2, 0°C</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="cond_2.25_ambient" value="2.25_ambient" checked><label for="cond_2.25_ambient" style="color: #4682B4;">Ambient, +2.25°C</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="cond_2.25_elevated" value="2.25_elevated" checked><label for="cond_2.25_elevated" style="color: #4682B4;">High CO2, +2.25°C</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="cond_4.5_ambient" value="4.5_ambient" checked><label for="cond_4.5_ambient" style="color: #FFA500;">Ambient, +4.5°C</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="cond_4.5_elevated" value="4.5_elevated" checked><label for="cond_4.5_elevated" style="color: #FFA500;">High CO2, +4.5°C</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="cond_6.75_ambient" value="6.75_ambient" checked><label for="cond_6.75_ambient" style="color: #FF4500;">Ambient, +6.75°C</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="cond_6.75_elevated" value="6.75_elevated" checked><label for="cond_6.75_elevated" style="color: #FF4500;">High CO2, +6.75°C</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="cond_9_ambient" value="9_ambient" checked><label for="cond_9_ambient" style="color: #FF0000;">Ambient, +9°C</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="cond_9_elevated" value="9_elevated" checked><label for="cond_9_elevated" style="color: #FF0000;">High CO2, +9°C</label>
-                    </div>
-                </div>
+                <span class="button-label">Control Panel:</span>
+                <div id="control-panel-button">Open Control Panel</div>
             </div>
             <div class="button-container">
                 <span class="button-label">X-Axis:</span>
@@ -339,538 +314,530 @@
         <h3 id="controls-title">Controls</h3>
         <div id="controls-content"></div>
     </div>
+    <div class="controls-popup" id="control-panel-popup">
+        <h3>Environmental Control Panel</h3>
+        <div id="control-panel-content"></div>
+    </div>
 
     <script>
-    let allData = [];
-    const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
-    let startDate = new Date('2015-08-01');
-    let endDate = new Date('2025-04-05');
-    let dataLoaded = false;
-    const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#FFD700', '#6A5ACD', '#20B2AA', '#DAA520', '#FF69B4', '#7FFF00'];
-    let tempRange = [0, 9]; // Default min/max temp range
-    let legendVisible = true; // Track legend state
+        let allData = [];
+        const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
+        let startDate = new Date('2015-08-01');
+        let endDate = new Date('2025-04-05');
+        let dataLoaded = false;
+        const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#FFD700', '#6A5ACD', '#20B2AA', '#DAA520', '#FF69B4', '#7FFF00'];
+        let tempRange = [0, 9];
+        let legendVisible = true;
 
-    const conditionMap = {
-        'ambient_ambient': { temp: 0, co2: 'Ambient', plot: 7 },
-        'ambient_elevated': { temp: 0, co2: 900, plot: 21 },
-        '2.25_ambient': { temp: 2.25, co2: 'Ambient', plot: 6 },
-        '2.25_elevated': { temp: 2.25, co2: 900, plot: 19 },
-        '4.5_ambient': { temp: 4.5, co2: 'Ambient', plot: 11 },
-        '4.5_elevated': { temp: 4.5, co2: 900, plot: 20 },
-        '6.75_ambient': { temp: 6.75, co2: 'Ambient', plot: 4 },
-        '6.75_elevated': { temp: 6.75, co2: 900, plot: 13 },
-        '9_ambient': { temp: 9, co2: 'Ambient', plot: 8 },
-        '9_elevated': { temp: 9, co2: 900, plot: 16 }
-    };
+        const controlRanges = {
+            'TS_200': { min: -10, max: 30, defaultMin: -10, defaultMax: 30, label: 'Soil Temp 200 cm (°C)' },
+            'TA_2_0': { min: -20, max: 40, defaultMin: -20, defaultMax: 40, label: 'Ambient Temp 2m (°C)' },
+            'CO2_measured': { min: 300, max: 1000, defaultMin: 300, defaultMax: 1000, label: 'Measured CO₂ (ppm)' },
+            'H2O_measured': { min: 0, max: 30, defaultMin: 0, defaultMax: 30, label: 'Measured H₂O (mmol/mol)' },
+            'RH_2_0': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Relative Humidity 2m (%)' },
+            'WS_10': { min: 0, max: 20, defaultMin: 0, defaultMax: 20, label: 'Wind Speed 10m (m/s)' },
+            'WD_10': { min: 0, max: 360, defaultMin: 0, defaultMax: 360, label: 'Wind Direction 10m (°)' },
+            'PAR_2': { min: 0, max: 2000, defaultMin: 0, defaultMax: 2000, label: 'PAR (µmol/m²s)' },
+            'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' }
+        };
+        let currentRanges = { ...controlRanges };
 
-    const unitMap = {
-        'TS_0': '°C', 'TS_5': '°C', 'TS_10': '°C', 'TS_20': '°C', 'TS_30': '°C', 
-        'TS_40': '°C', 'TS_50': '°C', 'TS_100': '°C', 'TS_200': '°C', 'TA_2_0': '°C',
-        'RH_2_0': '%', 'WS_10': 'm/s', 'WD_10': '°', 'PAR_2': 'µmol/m²s', 'PREC_6': 'mm',
-        'CO2_measured': 'ppm', 'H2O_measured': 'mmol/mol'
-    };
+        const unitMap = {
+            'TS_0': '°C', 'TS_5': '°C', 'TS_10': '°C', 'TS_20': '°C', 'TS_30': '°C', 
+            'TS_40': '°C', 'TS_50': '°C', 'TS_100': '°C', 'TS_200': '°C', 'TA_2_0': '°C',
+            'RH_2_0': '%', 'WS_10': 'm/s', 'WD_10': '°', 'PAR_2': 'µmol/m²s', 'PREC_6': 'mm',
+            'CO2_measured': 'ppm', 'H2O_measured': 'mmol/mol'
+        };
 
-    async function loadData() {
-        try {
-            const response = await fetch(dataUrl);
-            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-            allData = await response.json();
-            allData = allData.filter(row => {
-                row.TIMESTAMP = new Date(row.TIMESTAMP);
-                return !isNaN(row.TIMESTAMP);
-            });
-            console.log('Loaded data sample:', allData.slice(0, 5));
-            dataLoaded = true;
-            updateGraph();
-        } catch (error) {
-            console.error('Error loading data:', error);
-            document.getElementById('graph').innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
-        }
-    }
-
-    function toggleDropdown(id) {
-        const menus = document.querySelectorAll('.dropdown-menu');
-        menus.forEach(menu => {
-            if (menu.id !== id && menu.classList.contains('open')) {
-                menu.classList.remove('open');
+        async function loadData() {
+            try {
+                const response = await fetch(dataUrl);
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                allData = await response.json();
+                allData = allData.filter(row => {
+                    row.TIMESTAMP = new Date(row.TIMESTAMP);
+                    return !isNaN(row.TIMESTAMP);
+                });
+                console.log('Loaded data sample:', allData.slice(0, 5));
+                dataLoaded = true;
+                updateGraph();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('graph').innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
             }
-        });
-        const menu = document.getElementById(id);
-        if (menu) menu.classList.toggle('open');
-    }
-
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const graphContainer = document.getElementById('graph-container');
-        const tab = document.getElementById('sidebar-tab');
-        sidebar.classList.toggle('collapsed');
-        graphContainer.classList.toggle('full-width');
-        if (dataLoaded && typeof Plotly !== 'undefined') {
-            Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
         }
-        tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
-    }
 
-    function enforceSingleSelection(groupId, changedId) {
-        const checkboxes = document.querySelectorAll(`#${groupId} input[type="checkbox"]`);
-        checkboxes.forEach(checkbox => {
-            if (checkbox.id !== changedId && checkbox.checked) checkbox.checked = false;
-        });
-    }
-
-    function filterByConditions(data, conditions) {
-        if (!conditions.length) return data;
-        const selectedConditions = conditions.map(c => conditionMap[c]);
-        return data.filter(row => {
-            const co2Value = parseFloat(row.CO2_trmt);
-            const tempValue = parseFloat(row.Temp_target);
-            return selectedConditions.some(cond => 
-                row.Plot === cond.plot && 
-                (cond.co2 === 'Ambient' ? co2Value < 600 : co2Value >= 600) &&
-                Math.abs(tempValue - cond.temp) < 0.1
-            );
-        });
-    }
-
-    function filterByTempRange(data) {
-        return data.filter(row => {
-            const tempValue = parseFloat(row.Temp_target);
-            return tempValue >= tempRange[0] && tempValue <= tempRange[1];
-        });
-    }
-
-    function showControlsPopup(independent) {
-        const popup = document.getElementById('controls-popup');
-        const content = document.getElementById('controls-content');
-        const title = document.getElementById('controls-title');
-        popup.style.display = 'block';
-
-        if (independent === 'CO2_trmt') {
-            title.textContent = 'CO₂ Controls';
-            content.innerHTML = `
-                <div class="dropdown-item"><input type="checkbox" id="co2_ambient" checked><label for="co2_ambient">Ambient CO₂</label></div>
-                <div class="dropdown-item"><input type="checkbox" id="co2_elevated" checked><label for="co2_elevated">High CO₂</label></div>
-            `;
-            document.getElementById('co2_ambient').addEventListener('change', updateGraph);
-            document.getElementById('co2_elevated').addEventListener('change', updateGraph);
-        } else if (independent === 'Temp_target') {
-            title.textContent = 'Temperature Controls';
-            content.innerHTML = `
-                <div class="slider-container">
-                    <label>Min Temp (°C): <span id="min-temp-value">0</span></label>
-                    <input type="range" id="min-temp" min="0" max="9" value="0" step="0.01">
-                </div>
-                <div class="slider-container">
-                    <label>Max Temp (°C): <span id="max-temp-value">9</span></label>
-                    <input type="range" id="max-temp" min="0" max="9" value="9" step="0.01">
-                </div>
-            `;
-            const minTemp = document.getElementById('min-temp');
-            const maxTemp = document.getElementById('max-temp');
-            const minValue = document.getElementById('min-temp-value');
-            const maxValue = document.getElementById('max-temp-value');
-
-            minTemp.addEventListener('input', () => {
-                minValue.textContent = minTemp.value;
-                if (parseFloat(minTemp.value) > parseFloat(maxTemp.value)) maxTemp.value = minTemp.value;
-                tempRange = [parseFloat(minTemp.value), parseFloat(maxTemp.value)];
-                updateGraph();
+        function toggleDropdown(id) {
+            const menus = document.querySelectorAll('.dropdown-menu');
+            menus.forEach(menu => {
+                if (menu.id !== id && menu.classList.contains('open')) {
+                    menu.classList.remove('open');
+                }
             });
-            maxTemp.addEventListener('input', () => {
-                maxValue.textContent = maxTemp.value;
-                if (parseFloat(maxTemp.value) < parseFloat(minTemp.value)) minTemp.value = maxTemp.value;
-                tempRange = [parseFloat(minTemp.value), parseFloat(maxTemp.value)];
-                updateGraph();
-            });
-        } else {
-            popup.style.display = 'none';
+            const menu = document.getElementById(id);
+            if (menu) menu.classList.toggle('open');
         }
-    }
 
-    function updateConditionsBasedOnVariables(independent, dependents) {
-        const conditionCheckboxes = document.querySelectorAll('#condition-menu input[type="checkbox"]');
-        const isSoilTemp = dependents.some(dep => dep.startsWith('TS_'));
-        const isCO2 = independent === 'CO2_trmt';
-        const isTemp = independent === 'Temp_target';
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const graphContainer = document.getElementById('graph-container');
+            const tab = document.getElementById('sidebar-tab');
+            sidebar.classList.toggle('collapsed');
+            graphContainer.classList.toggle('full-width');
+            if (dataLoaded && typeof Plotly !== 'undefined') {
+                Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
+            }
+            tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
+        }
 
-        conditionCheckboxes.forEach(checkbox => {
-            const cond = conditionMap[checkbox.value];
-            if (isCO2 && isSoilTemp) {
-                const co2Ambient = document.getElementById('co2_ambient')?.checked ?? true;
-                const co2Elevated = document.getElementById('co2_elevated')?.checked ?? true;
-                checkbox.checked = (cond.co2 === 'Ambient' && co2Ambient) || (cond.co2 === 900 && co2Elevated);
-            } else if (isTemp) {
-                checkbox.checked = cond.temp >= tempRange[0] && cond.temp <= tempRange[1];
+        function enforceSingleSelection(groupId, changedId) {
+            const checkboxes = document.querySelectorAll(`#${groupId} input[type="checkbox"]`);
+            checkboxes.forEach(checkbox => {
+                if (checkbox.id !== changedId && checkbox.checked) checkbox.checked = false;
+            });
+        }
+
+        function filterByRanges(data) {
+            return data.filter(row => {
+                return Object.keys(currentRanges).every(key => {
+                    const value = parseFloat(row[key]);
+                    const range = currentRanges[key];
+                    return isNaN(value) || (value >= range.defaultMin && value <= range.defaultMax);
+                });
+            });
+        }
+
+        function filterByTempRange(data) {
+            return data.filter(row => {
+                const tempValue = parseFloat(row.Temp_target);
+                return tempValue >= tempRange[0] && tempValue <= tempRange[1];
+            });
+        }
+
+        function showControlsPopup(independent) {
+            const popup = document.getElementById('controls-popup');
+            const content = document.getElementById('controls-content');
+            const title = document.getElementById('controls-title');
+            popup.style.display = 'block';
+
+            if (independent === 'CO2_trmt') {
+                title.textContent = 'CO₂ Controls';
+                content.innerHTML = `
+                    <div class="dropdown-item"><input type="checkbox" id="co2_ambient" checked><label for="co2_ambient">Ambient CO₂</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="co2_elevated" checked><label for="co2_elevated">High CO₂</label></div>
+                `;
+                document.getElementById('co2_ambient').addEventListener('change', updateGraph);
+                document.getElementById('co2_elevated').addEventListener('change', updateGraph);
+            } else if (independent === 'Temp_target') {
+                title.textContent = 'Temperature Controls';
+                content.innerHTML = `
+                    <div class="slider-container">
+                        <label>Min Temp (°C): <span id="min-temp-value">0</span></label>
+                        <input type="range" id="min-temp" min="0" max="9" value="0" step="0.01">
+                    </div>
+                    <div class="slider-container">
+                        <label>Max Temp (°C): <span id="max-temp-value">9</span></label>
+                        <input type="range" id="max-temp" min="0" max="9" value="9" step="0.01">
+                    </div>
+                `;
+                const minTemp = document.getElementById('min-temp');
+                const maxTemp = document.getElementById('max-temp');
+                const minValue = document.getElementById('min-temp-value');
+                const maxValue = document.getElementById('max-temp-value');
+
+                minTemp.addEventListener('input', () => {
+                    minValue.textContent = minTemp.value;
+                    if (parseFloat(minTemp.value) > parseFloat(maxTemp.value)) maxTemp.value = minTemp.value;
+                    tempRange = [parseFloat(minTemp.value), parseFloat(maxTemp.value)];
+                    updateGraph();
+                });
+                maxTemp.addEventListener('input', () => {
+                    maxValue.textContent = maxTemp.value;
+                    if (parseFloat(maxTemp.value) < parseFloat(minTemp.value)) minTemp.value = maxTemp.value;
+                    tempRange = [parseFloat(minTemp.value), parseFloat(maxTemp.value)];
+                    updateGraph();
+                });
             } else {
-                checkbox.checked = true;
+                popup.style.display = 'none';
             }
-        });
+        }
 
-        const selectedCount = Array.from(conditionCheckboxes).filter(cb => cb.checked).length;
-        document.getElementById('condition-toggle').textContent = selectedCount === 10 ? 'All' : `${selectedCount} Selected`;
-    }
+        function toggleControlPanel() {
+            const popup = document.getElementById('control-panel-popup');
+            const content = document.getElementById('control-panel-content');
+            const isVisible = popup.style.display === 'block';
+            popup.style.display = isVisible ? 'none' : 'block';
 
-    function calculateRegression(x, y) {
-        const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
-        if (pairedData.length < 2) return { slope: NaN, intercept: NaN, rSquared: NaN };
-        const yValues = pairedData.map(d => d.y).sort((a, b) => a - b);
-        const q1 = yValues[Math.floor(yValues.length * 0.25)];
-        const q3 = yValues[Math.floor(yValues.length * 0.75)];
-        const iqr = q3 - q1;
-        const lowerBound = q1 - 1.5 * iqr;
-        const upperBound = q3 + 1.5 * iqr;
-        const filteredData = pairedData.filter(d => d.y >= lowerBound && d.y <= upperBound);
-        const filteredX = filteredData.map(d => d.x);
-        const filteredY = filteredData.map(d => d.y);
+            if (!isVisible) {
+                content.innerHTML = Object.keys(controlRanges).map(key => `
+                    <div class="slider-container">
+                        <label>${controlRanges[key].label}</label>
+                        <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].defaultMin}" step="0.1">
+                        <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].defaultMax}" step="0.1">
+                        <div class="slider-values">
+                            <span id="${key}-min-value">${controlRanges[key].defaultMin}</span>
+                            <span id="${key}-max-value">${controlRanges[key].defaultMax}</span>
+                        </div>
+                    </div>
+                `).join('');
 
-        const n = filteredX.length;
-        if (n < 2) return { slope: NaN, intercept: NaN, rSquared: NaN };
-        const sumX = filteredX.reduce((a, b) => a + b, 0);
-        const sumY = filteredY.reduce((a, b) => a + b, 0);
-        const sumXY = filteredX.reduce((sum, xi, i) => sum + xi * filteredY[i], 0);
-        const sumXX = filteredX.reduce((sum, xi) => sum + xi * xi, 0);
-        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-        const intercept = (sumY - slope * sumX) / n;
-        const yPred = filteredX.map(xi => slope * xi + intercept);
-        const ssTot = filteredY.reduce((sum, yi, i) => sum + Math.pow(yi - sumY / n, 2), 0);
-        const ssRes = filteredY.reduce((sum, yi, i) => sum + Math.pow(yi - yPred[i], 2), 0);
-        const rSquared = ssTot === 0 ? NaN : 1 - (ssRes / ssTot);
-        return { slope, intercept, rSquared };
-    }
+                Object.keys(controlRanges).forEach(key => {
+                    const minSlider = document.getElementById(`${key}-min`);
+                    const maxSlider = document.getElementById(`${key}-max`);
+                    const minValue = document.getElementById(`${key}-min-value`);
+                    const maxValue = document.getElementById(`${key}-max-value`);
 
-    function aggregateVariables(data) {
-        const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
-        const zones = ['A', 'B', 'C'];
-        return data.map(row => {
-            const newRow = { ...row };
-            depths.forEach(depth => {
-                const keys = zones.map(zone => `TS_${depth}_${zone}${depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 : depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9}`);
-                const values = keys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
-                newRow[`TS_${depth}`] = values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
-            });
-            const taKeys = ['TA_2_0_1', 'TA_2_0_2'];
-            const taValues = taKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
-            newRow['TA_2_0'] = taValues.length > 0 ? taValues.reduce((sum, v) => sum + v, 0) / taValues.length : null;
-            const rhKeys = ['RH_2_0_1', 'RH_2_0_2'];
-            const rhValues = rhKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
-            newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + v, 0) / rhValues.length : null;
-            return newRow;
-        });
-    }
+                    minSlider.addEventListener('input', () => {
+                        minValue.textContent = minSlider.value;
+                        if (parseFloat(minSlider.value) > parseFloat(maxSlider.value)) maxSlider.value = minSlider.value;
+                        currentRanges[key].defaultMin = parseFloat(minSlider.value);
+                        currentRanges[key].defaultMax = parseFloat(maxSlider.value);
+                        updateGraph();
+                    });
 
-    function getWeeklyTimestamps(data, start, end) {
-        const weeklyData = {};
-        data.forEach(row => {
-            const date = row.TIMESTAMP;
-            if ((!start || date >= start) && (!end || date <= new Date(end.getTime() + 24 * 60 * 60 * 1000 - 1))) {
-                const weekStart = new Date(date);
-                weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-                weekStart.setHours(0, 0, 0, 0);
-                const key = weekStart.toISOString().split('T')[0];
-                if (!weeklyData[key]) weeklyData[key] = { TIMESTAMP: weekStart, values: {} };
-                Object.keys(row).forEach(k => {
-                    if (k !== 'TIMESTAMP') {
-                        weeklyData[key].values[k] = weeklyData[key].values[k] || [];
-                        const value = parseFloat(row[k]);
-                        if (!isNaN(value)) weeklyData[key].values[k].push(value);
-                    }
+                    maxSlider.addEventListener('input', () => {
+                        maxValue.textContent = maxSlider.value;
+                        if (parseFloat(maxSlider.value) < parseFloat(minSlider.value)) minSlider.value = maxSlider.value;
+                        currentRanges[key].defaultMin = parseFloat(minSlider.value);
+                        currentRanges[key].defaultMax = parseFloat(maxSlider.value);
+                        updateGraph();
+                    });
                 });
             }
-        });
-        return Object.values(weeklyData).map(w => ({
-            TIMESTAMP: w.TIMESTAMP,
-            ...Object.keys(w.values).reduce((acc, k) => ({
-                ...acc,
-                [k]: w.values[k].length > 0 ? w.values[k].reduce((sum, v) => sum + v, 0) / w.values[k].length : null
-            }), {})
-        }));
-    }
-
-    function calculateGraphWidth() {
-        return document.getElementById('graph-container').clientWidth;
-    }
-
-    function calculateGraphHeight() {
-        return document.getElementById('graph-container').clientHeight;
-    }
-
-    function toggleLegend() {
-        if (dataLoaded && typeof Plotly !== 'undefined') {
-            legendVisible = !legendVisible;
-            Plotly.relayout('graph', { showlegend: legendVisible });
-        }
-    }
-
-    function filterOutliers(x, y) {
-        const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
-        if (pairedData.length < 2) return { x: x, y: y };
-        const yValues = pairedData.map(d => d.y).sort((a, b) => a - b);
-        const q1 = yValues[Math.floor(yValues.length * 0.25)];
-        const q3 = yValues[Math.floor(yValues.length * 0.75)];
-        const iqr = q3 - q1;
-        const lowerBound = q1 - 1.5 * iqr;
-        const upperBound = q3 + 1.5 * iqr;
-        const filtered = pairedData.filter(d => d.y >= lowerBound && d.y <= upperBound);
-        return { x: filtered.map(d => d.x), y: filtered.map(d => d.y) };
-    }
-
-    function updateGraph() {
-        const graphDiv = document.getElementById('graph');
-        graphDiv.innerHTML = '';
-        if (!dataLoaded) {
-            graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
-            return;
-        }
-        if (typeof Plotly === 'undefined') {
-            graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
-            return;
         }
 
-        const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || 'Temp_target';
-        const allDependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
-        let conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
-        const chartType = document.querySelector('#chart-type-menu input:checked').value;
-        const showFit = document.getElementById('show-fit').checked;
+        function calculateRegression(x, y) {
+            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
+            if (pairedData.length < 2) return { slope: NaN, intercept: NaN, rSquared: NaN };
+            const yValues = pairedData.map(d => d.y).sort((a, b) => a - b);
+            const q1 = yValues[Math.floor(yValues.length * 0.25)];
+            const q3 = yValues[Math.floor(yValues.length * 0.75)];
+            const iqr = q3 - q1;
+            const lowerBound = q1 - 1.5 * iqr;
+            const upperBound = q3 + 1.5 * iqr;
+            const filteredData = pairedData.filter(d => d.y >= lowerBound && d.y <= upperBound);
+            const filteredX = filteredData.map(d => d.x);
+            const filteredY = filteredData.map(d => d.y);
 
-        if (!allDependents.length) {
-            graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
-            return;
+            const n = filteredX.length;
+            if (n < 2) return { slope: NaN, intercept: NaN, rSquared: NaN };
+            const sumX = filteredX.reduce((a, b) => a + b, 0);
+            const sumY = filteredY.reduce((a, b) => a + b, 0);
+            const sumXY = filteredX.reduce((sum, xi, i) => sum + xi * filteredY[i], 0);
+            const sumXX = filteredX.reduce((sum, xi) => sum + xi * xi, 0);
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+            const yPred = filteredX.map(xi => slope * xi + intercept);
+            const ssTot = filteredY.reduce((sum, yi, i) => sum + Math.pow(yi - sumY / n, 2), 0);
+            const ssRes = filteredY.reduce((sum, yi, i) => sum + Math.pow(yi - yPred[i], 2), 0);
+            const rSquared = ssTot === 0 ? NaN : 1 - (ssRes / ssTot);
+            return { slope, intercept, rSquared };
         }
 
-        updateConditionsBasedOnVariables(independent, allDependents);
-        conditions = Array.from(document.querySelectorAll('#condition-menu input:checked')).map(input => input.value);
-        let workingData = filterByConditions(allData, conditions);
-        if (independent === 'Temp_target') workingData = filterByTempRange(workingData);
-        if (!workingData.length) {
-            graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
-            return;
-        }
-
-        if (startDate || endDate) {
-            workingData = workingData.filter(row => {
-                const rowDate = row.TIMESTAMP;
-                return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1));
+        function aggregateVariables(data) {
+            const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
+            const zones = ['A', 'B', 'C'];
+            return data.map(row => {
+                const newRow = { ...row };
+                depths.forEach(depth => {
+                    const keys = zones.map(zone => `TS_${depth}_${zone}${depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 : depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9}`);
+                    const values = keys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
+                    newRow[`TS_${depth}`] = values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
+                });
+                const taKeys = ['TA_2_0_1', 'TA_2_0_2'];
+                const taValues = taKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
+                newRow['TA_2_0'] = taValues.length > 0 ? taValues.reduce((sum, v) => sum + v, 0) / taValues.length : null;
+                const rhKeys = ['RH_2_0_1', 'RH_2_0_2'];
+                const rhValues = rhKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
+                newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + v, 0) / rhValues.length : null;
+                return newRow;
             });
         }
 
-        workingData = aggregateVariables(workingData);
-        if (independent === 'TIMESTAMP') {
-            workingData = getWeeklyTimestamps(workingData, startDate, endDate);
+        function getWeeklyTimestamps(data, start, end) {
+            const weeklyData = {};
+            data.forEach(row => {
+                const date = row.TIMESTAMP;
+                if ((!start || date >= start) && (!end || date <= new Date(end.getTime() + 24 * 60 * 60 * 1000 - 1))) {
+                    const weekStart = new Date(date);
+                    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                    weekStart.setHours(0, 0, 0, 0);
+                    const key = weekStart.toISOString().split('T')[0];
+                    if (!weeklyData[key]) weeklyData[key] = { TIMESTAMP: weekStart, values: {} };
+                    Object.keys(row).forEach(k => {
+                        if (k !== 'TIMESTAMP') {
+                            weeklyData[key].values[k] = weeklyData[key].values[k] || [];
+                            const value = parseFloat(row[k]);
+                            if (!isNaN(value)) weeklyData[key].values[k].push(value);
+                        }
+                    });
+                }
+            });
+            return Object.values(weeklyData).map(w => ({
+                TIMESTAMP: w.TIMESTAMP,
+                ...Object.keys(w.values).reduce((acc, k) => ({
+                    ...acc,
+                    [k]: w.values[k].length > 0 ? w.values[k].reduce((sum, v) => sum + v, 0) / w.values[k].length : null
+                }), {})
+            }));
         }
 
-        console.log('Filtered and aggregated data sample:', workingData.slice(0, 5));
-
-        const units = allDependents.map(dep => unitMap[dep]);
-        const commonUnit = units[0];
-        const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
-        if (!dependents.length) {
-            graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
-            return;
+        function calculateGraphWidth() {
+            return document.getElementById('graph-container').clientWidth;
         }
 
-        const traces = [];
-        const fitTraces = [];
-        dependents.forEach((dep, i) => {
-            let xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent])).filter(v => !isNaN(v));
-            let yValues = workingData.map(row => parseFloat(row[dep])).filter(v => !isNaN(v));
+        function calculateGraphHeight() {
+            return document.getElementById('graph-container').clientHeight;
+        }
 
-            if (xValues.length === 0 || yValues.length === 0) {
-                console.log(`No valid data for ${dep} vs ${independent}: xValues=${xValues.length}, yValues=${yValues.length}`);
+        function toggleLegend() {
+            if (dataLoaded && typeof Plotly !== 'undefined') {
+                legendVisible = !legendVisible;
+                Plotly.relayout('graph', { showlegend: legendVisible });
+                document.getElementById('legend-tab').textContent = legendVisible ? 'Hide Legend' : 'Show Legend';
+            }
+        }
+
+        function filterOutliers(x, y) {
+            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
+            if (pairedData.length < 2) return { x: x, y: y };
+            const yValues = pairedData.map(d => d.y).sort((a, b) => a - b);
+            const q1 = yValues[Math.floor(yValues.length * 0.25)];
+            const q3 = yValues[Math.floor(yValues.length * 0.75)];
+            const iqr = q3 - q1;
+            const lowerBound = q1 - 1.5 * iqr;
+            const upperBound = q3 + 1.5 * iqr;
+            const filtered = pairedData.filter(d => d.y >= lowerBound && d.y <= upperBound);
+            return { x: filtered.map(d => d.x), y: filtered.map(d => d.y) };
+        }
+
+        function updateGraph() {
+            const graphDiv = document.getElementById('graph');
+            graphDiv.innerHTML = '';
+            if (!dataLoaded) {
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
+                return;
+            }
+            if (typeof Plotly === 'undefined') {
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
                 return;
             }
 
-            const filtered = filterOutliers(xValues, yValues);
-            xValues = filtered.x;
-            yValues = filtered.y;
+            const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || 'Temp_target';
+            const allDependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
+            const chartType = document.querySelector('#chart-type-menu input:checked').value;
+            const showFit = document.getElementById('show-fit').checked;
 
-            traces.push({
-                x: xValues,
-                y: yValues,
-                mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
-                type: chartType === 'scatter' ? 'scattergl' : chartType === 'area' ? 'scattergl' : chartType,
-                name: document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep,
-                marker: { color: colors[i % colors.length], size: 8 },
-                line: (chartType === 'line' || chartType === 'area') ? { color: colors[i % colors.length], width: 2 } : undefined,
-                fill: chartType === 'area' ? 'tozeroy' : undefined
+            if (!allDependents.length) {
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
+                return;
+            }
+
+            let workingData = filterByRanges(allData);
+            if (independent === 'Temp_target') workingData = filterByTempRange(workingData);
+            if (!workingData.length) {
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
+                return;
+            }
+
+            if (startDate || endDate) {
+                workingData = workingData.filter(row => {
+                    const rowDate = row.TIMESTAMP;
+                    return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1));
+                });
+            }
+
+            workingData = aggregateVariables(workingData);
+            if (independent === 'TIMESTAMP') {
+                workingData = getWeeklyTimestamps(workingData, startDate, endDate);
+            }
+
+            console.log('Filtered and aggregated data sample:', workingData.slice(0, 5));
+
+            const units = allDependents.map(dep => unitMap[dep]);
+            const commonUnit = units[0];
+            const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
+            if (!dependents.length) {
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
+                return;
+            }
+
+            const traces = [];
+            const fitTraces = [];
+            dependents.forEach((dep, i) => {
+                let xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent])).filter(v => !isNaN(v));
+                let yValues = workingData.map(row => parseFloat(row[dep])).filter(v => !isNaN(v));
+
+                if (xValues.length === 0 || yValues.length === 0) {
+                    console.log(`No valid data for ${dep} vs ${independent}: xValues=${xValues.length}, yValues=${yValues.length}`);
+                    return;
+                }
+
+                const filtered = filterOutliers(xValues, yValues);
+                xValues = filtered.x;
+                yValues = filtered.y;
+
+                traces.push({
+                    x: xValues,
+                    y: yValues,
+                    mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
+                    type: chartType === 'scatter' ? 'scattergl' : chartType === 'area' ? 'scattergl' : chartType,
+                    name: document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep,
+                    marker: { color: colors[i % colors.length], size: 8 },
+                    line: (chartType === 'line' || chartType === 'area') ? { color: colors[i % colors.length], width: 2 } : undefined,
+                    fill: chartType === 'area' ? 'tozeroy' : undefined
+                });
+
+                if (showFit && xValues.length > 1) {
+                    const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
+                    const { slope, intercept, rSquared } = calculateRegression(xNum, yValues);
+                    if (!isNaN(slope) && !isNaN(intercept)) {
+                        const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Math.max(...xNum)];
+                        const yFit = xFit.map(x => slope * (independent === 'TIMESTAMP' ? x.getTime() : x) + intercept);
+                        fitTraces.push({
+                            x: xFit,
+                            y: yFit,
+                            mode: 'lines',
+                            type: 'scattergl',
+                            name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (fit)`,
+                            line: { color: colors[i % colors.length], width: 2, dash: 'dash' }
+                        });
+                    }
+                }
             });
 
-            if (showFit && xValues.length > 1) {
-                const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
-                const { slope, intercept, rSquared } = calculateRegression(xNum, yValues);
-                if (!isNaN(slope) && !isNaN(intercept)) {
-                    const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Math.max(...xNum)];
-                    const yFit = xFit.map(x => slope * (independent === 'TIMESTAMP' ? x.getTime() : x) + intercept);
-                    fitTraces.push({
-                        x: xFit,
-                        y: yFit,
-                        mode: 'lines',
-                        type: 'scattergl',
-                        name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (fit)`,
-                        line: { color: colors[i % colors.length], width: 2, dash: 'dash' }
-                    });
+            if (!traces.length) {
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
+                return;
+            }
+
+            const statsText = dependents.map(dep => {
+                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : parseFloat(row[independent])).filter(v => !isNaN(v));
+                const yValues = workingData.map(row => parseFloat(row[dep])).filter(v => !isNaN(v));
+                if (yValues.length > 0) {
+                    const { slope, rSquared } = calculateRegression(xValues, yValues);
+                    return `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Slope: ${slope.toFixed(4)}, R²: ${rSquared.toFixed(4)}`;
                 }
-            }
-        });
+                return `${dep}: No valid data points`;
+            }).join('<br>');
+            document.getElementById('stats-content').innerHTML = statsText;
 
-        if (!traces.length) {
-            graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
-            return;
-        }
+            const xAxisTitle = independent === 'CO2_trmt' ? 'CO₂ Treatment (ppm)' : 
+                              independent === 'TIMESTAMP' ? 'Time' : 
+                              independent === 'Temp_target' ? 'Target Temperature (°C)' :
+                              independent === 'CO2_measured' ? 'Measured CO₂ (ppm)' :
+                              independent === 'H2O_measured' ? 'Measured H₂O (mmol/mol)' :
+                              document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
+            const yAxisTitle = dependents.length === 1 ? 
+                               document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent :
+                               `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit})`;
 
-        const statsText = dependents.map(dep => {
-            const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : parseFloat(row[independent])).filter(v => !isNaN(v));
-            const yValues = workingData.map(row => parseFloat(row[dep])).filter(v => !isNaN(v));
-            if (yValues.length > 0) {
-                const { slope, rSquared } = calculateRegression(xValues, yValues);
-                return `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Slope: ${slope.toFixed(4)}, R²: ${rSquared.toFixed(4)}`;
-            }
-            return `${dep}: No valid data points`;
-        }).join('<br>');
-        document.getElementById('stats-content').innerHTML = statsText;
+            const annotations = showFit ? dependents.map((dep, i) => {
+                const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : parseFloat(row[independent])).filter(v => !isNaN(v));
+                const yValues = workingData.map(row => parseFloat(row[dep])).filter(v => !isNaN(v));
+                if (yValues.length > 0) {
+                    const { slope, rSquared } = calculateRegression(xValues, yValues);
+                    return {
+                        x: 0.5,
+                        y: 1 - (i * 0.05),
+                        xref: 'paper',
+                        yref: 'paper',
+                        text: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Slope: ${slope.toFixed(4)}, R²: ${rSquared.toFixed(4)}`,
+                        showarrow: false,
+                        font: { color: '#00FF00', family: 'VT323', monospace: true, size: 12 }
+                    };
+                }
+                return null;
+            }).filter(a => a !== null) : [];
 
-        const xAxisTitle = independent === 'CO2_trmt' ? 'CO₂ Treatment (ppm)' : 
-                          independent === 'TIMESTAMP' ? 'Time' : 
-                          independent === 'Temp_target' ? 'Target Temperature (°C)' :
-                          independent === 'CO2_measured' ? 'Measured CO₂ (ppm)' :
-                          independent === 'H2O_measured' ? 'Measured H₂O (mmol/mol)' :
-                          document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
-        const yAxisTitle = dependents.length === 1 ? 
-                           document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent :
-                           `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit})`;
-
-        const annotations = showFit ? dependents.map((dep, i) => {
-            const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : parseFloat(row[independent])).filter(v => !isNaN(v));
-            const yValues = workingData.map(row => parseFloat(row[dep])).filter(v => !isNaN(v));
-            if (yValues.length > 0) {
-                const { slope, rSquared } = calculateRegression(xValues, yValues);
-                return {
+            const layout = {
+                width: calculateGraphWidth(),
+                height: calculateGraphHeight(),
+                plot_bgcolor: '#1A1A1A',
+                paper_bgcolor: '#1A1A1A',
+                font: { color: '#FFFFFF', size: 12 },
+                title: {
+                    text: `${yAxisTitle} vs. ${xAxisTitle}`,
+                    font: { size: 16 },
                     x: 0.5,
-                    y: 1 - (i * 0.05),
-                    xref: 'paper',
-                    yref: 'paper',
-                    text: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Slope: ${slope.toFixed(4)}, R²: ${rSquared.toFixed(4)}`,
-                    showarrow: false,
-                    font: { color: '#00FF00', family: 'VT323', monospace: true, size: 12 }
-                };
-            }
-            return null;
-        }).filter(a => a !== null) : [];
+                    xanchor: 'center',
+                    y: 0.95,
+                    yanchor: 'top'
+                },
+                xaxis: {
+                    title: { text: xAxisTitle, font: { size: 14 } },
+                    gridcolor: '#444',
+                    zerolinecolor: '#444',
+                    type: independent === 'TIMESTAMP' ? 'date' : 'linear',
+                    dtick: independent === 'TIMESTAMP' ? 'M1' : undefined,
+                    automargin: true,
+                    tickfont: { size: 12 }
+                },
+                yaxis: {
+                    title: { text: yAxisTitle, font: { size: 14 } },
+                    gridcolor: '#444',
+                    zerolinecolor: '#444',
+                    automargin: true
+                },
+                margin: { t: 80, b: 100, l: 100, r: 40 },
+                showlegend: legendVisible,
+                legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.8)' },
+                annotations: annotations
+            };
 
-        const layout = {
-            width: calculateGraphWidth(),
-            height: calculateGraphHeight(),
-            plot_bgcolor: '#1A1A1A',
-            paper_bgcolor: '#1A1A1A',
-            font: { color: '#FFFFFF', size: 12 },
-            title: {
-                text: `${yAxisTitle} vs. ${xAxisTitle}`,
-                font: { size: 16 },
-                x: 0.5,
-                xanchor: 'center',
-                y: 0.95,
-                yanchor: 'top'
-            },
-            xaxis: {
-                title: { text: xAxisTitle, font: { size: 14 } },
-                gridcolor: '#444',
-                zerolinecolor: '#444',
-                type: independent === 'TIMESTAMP' ? 'date' : 'linear',
-                dtick: independent === 'TIMESTAMP' ? 'M1' : undefined,
-                automargin: true,
-                tickfont: { size: 12 }
-            },
-            yaxis: {
-                title: { text: yAxisTitle, font: { size: 14 } },
-                gridcolor: '#444',
-                zerolinecolor: '#444',
-                automargin: true
-            },
-            margin: { t: 80, b: 100, l: 100, r: 40 },
-            showlegend: legendVisible,
-            legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.8)' },
-            annotations: annotations
-        };
+            console.log('Traces:', traces);
+            console.log('Layout:', layout);
 
-        console.log('Traces:', traces);
-        console.log('Layout:', layout);
-
-        Plotly.newPlot('graph', showFit ? traces.concat(fitTraces) : traces, layout).catch(err => {
-            console.error('Plotly error:', err);
-            graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
-        });
-    }
-
-    document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
-    document.getElementById('condition-toggle').addEventListener('click', () => toggleDropdown('condition-menu'));
-    document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
-    document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
-    document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
-    document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
-    document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
-    document.getElementById('analyze-button').addEventListener('click', () => loadData());
-    document.getElementById('legend-tab').addEventListener('click', toggleLegend);
-    document.getElementById('show-fit').addEventListener('change', updateGraph);
-
-    document.querySelectorAll('#independent-menu input').forEach(input => {
-        input.addEventListener('change', () => {
-            enforceSingleSelection('independent-menu', input.id);
-            document.getElementById('independent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
-            showControlsPopup(input.value);
-            updateGraph();
-        });
-    });
-
-    document.querySelectorAll('#dependent-menu input').forEach(input => {
-        input.addEventListener('change', () => {
-            document.getElementById('dependent-toggle').textContent = 
-                Array.from(document.querySelectorAll('#dependent-menu input:checked'))
-                    .map(input => document.querySelector(`label[for="${input.id}"]`).textContent)
-                    .join(', ') || 'Select Dependent';
-            updateGraph();
-        });
-    });
-
-    document.querySelectorAll('#condition-menu input').forEach(input => {
-        input.addEventListener('change', () => {
-            updateGraph();
-        });
-    });
-
-    document.querySelectorAll('#chart-type-menu input').forEach(input => {
-        input.addEventListener('change', () => {
-            document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
-            updateGraph();
-        });
-    });
-
-    flatpickr('#start-date', {
-        dateFormat: 'Y-m-d',
-        defaultDate: '2015-08-01',
-        onChange: (selectedDates) => {
-            startDate = selectedDates[0];
-            document.getElementById('time-range-toggle').textContent = 
-                `${startDate.toISOString().split('T')[0]} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
-            updateGraph();
+            Plotly.newPlot('graph', showFit ? traces.concat(fitTraces) : traces, layout).catch(err => {
+                console.error('Plotly error:', err);
+                graphDiv.innerHTML = '<div class="welcome-message">Welcome to SPRUCE<hr>Whole Ecosystems Warming (WEW) Environmental Data<hr>Beginning August 2015</div>';
+            });
         }
-    });
 
-    flatpickr('#end-date', {
-        dateFormat: 'Y-m-d',
-        defaultDate: '2025-04-05',
-        onChange: (selectedDates) => {
-            endDate = selectedDates[0];
-            document.getElementById('time-range-toggle').textContent = 
-                `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate.toISOString().split('T')[0]}`;
-            updateGraph();
-        }
-    });
+        document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
+        document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
+        document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
+        document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
+        document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
+        document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
+        document.getElementById('analyze-button').addEventListener('click', () => loadData());
+        document.getElementById('legend-tab').addEventListener('click', toggleLegend);
+        document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
+        document.getElementById('show-fit').addEventListener('change', updateGraph);
 
-    window.addEventListener('resize', () => {
-        if (dataLoaded && typeof Plotly !== 'undefined') {
-            Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
-        }
-    });
-</script>e.toISOString().split('T')[0] : 'End'}`;
+        document.querySelectorAll('#independent-menu input').forEach(input => {
+            input.addEventListener('change', () => {
+                enforceSingleSelection('independent-menu', input.id);
+                document.getElementById('independent-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+                showControlsPopup(input.value);
+                updateGraph();
+            });
+        });
+
+        document.querySelectorAll('#dependent-menu input').forEach(input => {
+            input.addEventListener('change', () => {
+                document.getElementById('dependent-toggle').textContent = 
+                    Array.from(document.querySelectorAll('#dependent-menu input:checked'))
+                        .map(input => document.querySelector(`label[for="${input.id}"]`).textContent)
+                        .join(', ') || 'Select Dependent';
+                updateGraph();
+            });
+        });
+
+        document.querySelectorAll('#chart-type-menu input').forEach(input => {
+            input.addEventListener('change', () => {
+                document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+                updateGraph();
+            });
+        });
+
+        flatpickr('#start-date', {
+            dateFormat: 'Y-m-d',
+            defaultDate: '2015-08-01',
+            onChange: (selectedDates) => {
+                startDate = selectedDates[0];
+                document.getElementById('time-range-toggle').textContent = 
+                    `${startDate.toISOString().split('T')[0]} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
                 updateGraph();
             }
         });
