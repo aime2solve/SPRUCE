@@ -6,7 +6,8 @@
     <title>Comparative Biospheromics Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8" defer></script>
+   
+    <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js"></script>
     <style>
@@ -43,10 +44,10 @@
         .slider-container { margin: 10px 0; position: relative; }
         .slider-container label { display: block; margin-bottom: 5px; color: #00FFFF; }
         .range-slider { position: relative; width: 100%; height: 5px; background: #444; border-radius: 5px; }
-        .range-slider input[type="range"] { position: absolute; width: 100%; height: 5px; top: -5px; background: none; -webkit-appearance: none; pointer-events: none; }
+        .range-track { position: absolute; height: 5px; background: #00FFFF; z-index: 1; }
+        .range-slider input[type="range"] { position: absolute; width: 100%; height: 5px; top: -5px; background: none; -webkit-appearance: none; pointer-events: none; margin: 0; }
         .range-slider input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; background: #00FFFF; border-radius: 50%; cursor: pointer; pointer-events: auto; box-shadow: 0 0 5px #00FFFF; }
         .range-slider input[type="range"]::-webkit-slider-runnable-track { background: transparent; }
-        .range-track { position: absolute; height: 5px; background: #00FFFF; z-index: 1; }
         .slider-values { display: flex; justify-content: space-between; font-size: 11px; color: #00FF00; margin-top: 5px; }
         .warning-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #FF4500; font-family: 'VT323', monospace; font-size: 17px; text-align: center; text-shadow: 0 0 5px #FF4500; z-index: 5; }
         @media (max-width: 768px) { .sidebar { width: 200px; } .graph-container { width: calc(100vw - 200px); } .graph-container.full-width { width: 100vw; } .legend-tab { top: 10px; right: 10px; } }
@@ -65,7 +66,7 @@
             </div>
             <div class="button-container">
                 <span class="button-label">X-Axis:</span>
-                <div class="dropdown-toggle" id="independent-toggle">Select Independent</div>
+                <div class="dropdown-toggle" id="independent-toggle">Target Temperature (°C)</div>
                 <div class="dropdown-menu" id="independent-menu">
                     <div class="dropdown-item"><input type="checkbox" id="Temp_target" value="Temp_target" checked><label for="Temp_target">Target Temperature (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="CO2_trmt" value="CO2_trmt"><label for="CO2_trmt">CO₂ Treatment (ppm)</label></div>
@@ -81,7 +82,7 @@
             </div>
             <div class="button-container">
                 <span class="button-label">Y-Axis:</span>
-                <div class="dropdown-toggle" id="dependent-toggle">Select Dependent</div>
+                <div class="dropdown-toggle" id="dependent-toggle"><span style="color: #00FFFF;">Soil Temp 0 cm (°C)</span></div>
                 <div class="dropdown-menu" id="dependent-menu">
                     <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0" checked><label for="TS_0" style="color: #00FFFF;">Soil Temp 0 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_5" value="TS_5"><label for="TS_5" style="color: #FFFF00;">Soil Temp 5 cm (°C)</label></div>
@@ -251,7 +252,7 @@
 
         function filterByRanges(data) {
             return data.filter(row => {
-                return Object.keys(currentRanges).every(key => {
+                return Object.keys(current  (currentRanges).every(key => {
                     if (key === 'Soil_Depth') return true;
                     const value = parseFloat(row[key]);
                     const range = currentRanges[key];
@@ -287,12 +288,12 @@
                         <label>${controlRanges[key].label} Range</label>
                         <div class="range-slider">
                             <div class="range-track" id="${key}-track"></div>
-                            <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].min}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
-                            <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].max}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
+                            <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].defaultMin}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
+                            <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${controlRanges[key].defaultMax}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
                         </div>
                         <div class="slider-values">
-                            <span id="${key}-min-value">${controlRanges[key].min}</span>
-                            <span id="${key}-max-value">${controlRanges[key].max}</span>
+                            <span id="${key}-min-value">${controlRanges[key].defaultMin}</span>
+                            <span id="${key}-max-value">${controlRanges[key].defaultMax}</span>
                         </div>
                     </div>
                 `).join('');
@@ -320,7 +321,7 @@
                             minSlider.value = value;
                         }
                         currentRanges[key].defaultMin = value;
-                        minValue.textContent = value;
+                        minValue.textContent = value.toFixed(1);
                         if (key === 'Soil_Depth') depthRange[0] = value;
                         updateTrack();
                         updateGraph();
@@ -333,7 +334,7 @@
                             maxSlider.value = value;
                         }
                         currentRanges[key].defaultMax = value;
-                        maxValue.textContent = value;
+                        maxValue.textContent = value.toFixed(1);
                         if (key === 'Soil_Depth') depthRange[1] = value;
                         updateTrack();
                         updateGraph();
@@ -523,6 +524,10 @@
             const showBestFit = document.getElementById('show-best-fit').checked;
             const showStats = document.getElementById('show-stats').checked;
             const showStatsPopup = document.getElementById('show-stats-popup').checked;
+
+            // Update dropdown toggle text dynamically
+            document.getElementById('independent-toggle').innerHTML = independents.length ? independents.map(ind => document.querySelector(`label[for="${ind}"]`).textContent).join('<br>') : 'Select Independent';
+            document.getElementById('dependent-toggle').innerHTML = allDependents.length ? allDependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`).textContent}</span>`).join('<br>') : 'Select Dependent';
 
             if (!allDependents.length || !independents.length) {
                 graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
@@ -743,9 +748,6 @@
                                           ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
                     graphInitialized = false;
                 });
-
-            document.getElementById('independent-toggle').innerHTML = independents.map(ind => document.querySelector(`label[for="${ind}"]`).textContent).join('<br>') || 'Select Independent';
-            document.getElementById('dependent-toggle').innerHTML = dependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`).textContent}</span>`).join('<br>') || 'Select Dependent';
         }
 
         document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
