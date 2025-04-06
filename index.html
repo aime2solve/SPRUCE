@@ -23,15 +23,15 @@
         h1 { 
             color: #00FFFF; 
             text-align: center; 
-            padding: 2vh; /* Increased from 1vh */
-            font-family: 'Comfortaa', 'Orbitron', 'Exo 2', sans-serif; /* Changed to Comfortaa */
+            padding: 2vh; 
+            font-family: 'Comfortaa', 'Orbitron', 'Exo 2', sans-serif; 
             font-size: calc(16px + 1.5vw); 
             margin: 0; 
             text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; 
             animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; 
             flex-shrink: 0; 
             z-index: 11; 
-            line-height: 1.5; /* Added for breathing room */
+            line-height: 1.5; 
         }
         @keyframes glowBreathe {
             0% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; }
@@ -44,7 +44,7 @@
             display: flex; 
             flex-grow: 1; 
             overflow: hidden; 
-            height: calc(100vh - 4vh); /* Adjusted for increased title padding */
+            height: calc(100vh - 4vh); 
             position: relative;
         }
         .sidebar { 
@@ -151,7 +151,7 @@
             right: 0; 
             width: calc(100vw - 250px); 
             background-color: #1A1A1A; 
-            height: calc(100vh - 4vh); /* Adjusted for title height */
+            height: calc(100vh - 4vh); 
             transition: width 0.3s ease, left 0.3s ease; 
             z-index: 1; 
             overflow: hidden; 
@@ -191,7 +191,7 @@
         .legend-tab { 
             position: absolute; 
             top: 50px; 
-            right: 1vw; /* Changed to relative unit */
+            right: 1vw; 
             background: rgba(26, 26, 26, 0.8); 
             border: 2px solid #00FFFF; 
             border-radius: 5px; 
@@ -199,8 +199,8 @@
             padding: 5px 10px; 
             cursor: pointer; 
             z-index: 5; 
-            font-size: calc(10px + 0.5vw); /* Responsive font size */
-            white-space: nowrap; /* Prevents text wrapping */
+            font-size: calc(10px + 0.5vw); 
+            white-space: nowrap; 
         }
         .controls-popup {
             position: fixed;
@@ -223,8 +223,8 @@
             margin: 0 0 10px;
             color: #DAA520;
             text-align: center;
-            font-family: 'Exo 2', sans-serif; /* Same as Data Explorer */
-            font-size: 18px; /* Same size as Data Explorer */
+            font-family: 'Exo 2', sans-serif;
+            font-size: 18px;
         }
         .slider-container {
             margin: 10px 0;
@@ -287,7 +287,7 @@
             .graph-container { width: calc(100vw - 200px); }
             .graph-container.full-width { width: 100vw; }
             .legend-tab { 
-                top: 40px; /* Move up slightly for smaller screens */
+                top: 40px; 
                 right: 1vw; 
                 padding: 4px 8px; 
             }
@@ -328,7 +328,7 @@
                     <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0">Relative Humidity 2m (%)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction 10m (°)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PRE C_6"><label for="PREC_6">Precipitation (mm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="CO2_measured" value="CO2_measured"><label for="CO2_measured">Measured CO₂ (ppm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="H2O_measured" value="H2O_measured"><label for="H2O_measured">Measured H₂O (mmol/mol)</label></div>
                 </div>
@@ -400,7 +400,7 @@
         <div id="controls-content"></div>
     </div>
     <div class="controls-popup" id="control-panel-popup">
-        <h3>Control Panel</h3> <!-- Changed to Control Panel -->
+        <h3>Control Panel</h3>
         <div id="control-panel-content"></div>
     </div>
 
@@ -410,10 +410,27 @@
         let startDate = new Date('2015-08-01');
         let endDate = new Date('2025-04-05');
         let dataLoaded = false;
-        const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#6A5ACD', '#20B2AA', '#DAA520', '#FF69B4', '#7FFF00'];
-        let tempRange = [0, 9];
-        let depthRange = [0, 200];
         let legendVisible = true;
+
+        // Define color mapping for dependent variables
+        const dependentColors = {
+            'TS_0': '#00FFFF',         // Cyan
+            'TS_5': '#FFFF00',         // Yellow
+            'TS_10': '#FF00FF',        // Magenta
+            'TS_20': '#00FF00',        // Green
+            'TS_30': '#FF0000',        // Red
+            'TS_40': '#0000FF',        // Blue
+            'TS_50': '#FFA500',        // Orange
+            'TS_100': '#800080',       // Purple
+            'TS_200': '#008080',       // Teal
+            'TA_2_0': '#FF6347',       // Tomato
+            'RH_2_0': '#4682B4',       // Steel Blue
+            'WD_10': '#6A5ACD',        // Slate Blue
+            'PAR_2': '#20B2AA',        // Light Sea Green
+            'PREC_6': '#DAA520',       // Goldenrod
+            'CO2_measured': '#FF69B4', // Hot Pink
+            'H2O_measured': '#7FFF00'  // Chartreuse
+        };
 
         const controlRanges = {
             'TS_200': { min: -10, max: 30, defaultMin: -10, defaultMax: 30, label: 'Soil Temp (°C)' },
@@ -427,6 +444,8 @@
             'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' }
         };
         let currentRanges = { ...controlRanges };
+        let tempRange = [0, 9];
+        let depthRange = [0, 200];
 
         const unitMap = {
             'TS_0': '°C', 'TS_5': '°C', 'TS_10': '°C', 'TS_20': '°C', 'TS_30': '°C', 
@@ -735,7 +754,7 @@
             const traces = [];
             const fitTraces = [];
             let invalidTraces = [];
-            dependents.forEach((dep, i) => {
+            dependents.forEach((dep) => {
                 let xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent])).filter(v => !isNaN(v));
                 let yValues = workingData.map(row => parseFloat(row[dep])).filter(v => !isNaN(v));
 
@@ -749,14 +768,15 @@
                 xValues = filtered.x;
                 yValues = filtered.y;
 
+                const color = dependentColors[dep] || '#FFFFFF'; // Fallback to white if no color defined
                 traces.push({
                     x: xValues,
                     y: yValues,
                     mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
                     type: chartType === 'scatter' ? 'scattergl' : chartType === 'area' ? 'scattergl' : chartType,
                     name: document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep,
-                    marker: { color: colors[i], size: 8 }, /* Colors match dropdown */
-                    line: (chartType === 'line' || chartType === 'area') ? { color: colors[i], width: 2 } : undefined,
+                    marker: { color: color, size: 8 },
+                    line: (chartType === 'line' || chartType === 'area') ? { color: color, width: 2 } : undefined,
                     fill: chartType === 'area' ? 'tozeroy' : undefined
                 });
 
@@ -772,7 +792,7 @@
                             mode: 'lines',
                             type: 'scattergl',
                             name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (fit)`,
-                            line: { color: colors[i], width: 2, dash: 'dash' }
+                            line: { color: color, width: 2, dash: 'dash' }
                         });
                     }
                 }
