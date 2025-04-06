@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparative Biospheromics Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&display=swap" rel="stylesheet">
+    <!-- Galaxy BT not on Google Fonts; using fallback with local check -->
+    <style>
+        @font-face {
+            font-family: 'Galaxy BT';
+            src: url('path-to-galaxy-bt.woff2') format('woff2'); /* Add if you have the font file */
+        }
+    </style>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -24,7 +31,7 @@
             color: #00FFFF; 
             text-align: center; 
             padding: 1vh; 
-            font-family: 'Orbitron', sans-serif; 
+            font-family: 'Galaxy BT', 'Orbitron', sans-serif; /* Galaxy BT with fallback */
             font-size: calc(16px + 1.5vw); 
             margin: 0; 
             text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; 
@@ -61,7 +68,7 @@
             transition: transform 0.3s ease; 
             z-index: 10; 
         }
-        .sidebar.collapsed { transform: translateX(-250px); } /* Full width for smoother slide */
+        .sidebar.collapsed { transform: translateX(-250px); }
         .sidebar-tab { 
             position: absolute; 
             top: 0; 
@@ -81,17 +88,17 @@
         }
         .sidebar-title { 
             font-family: 'Exo 2', sans-serif; 
-            font-size: 20px; 
+            font-size: 24px; /* Increased from 20px */
             color: #DAA520; 
             text-align: center; 
             text-shadow: 0 0 10px #DAA520; 
             line-height: 1.2; 
             margin-top: 0; 
         }
-        .sidebar-title span { display: block; font-size: 14px; }
+        .sidebar-title span { display: block; font-size: 16px; } /* Increased from 14px */
         .button-container { display: flex; align-items: center; width: 100%; position: relative; }
         .button-label { color: #FFFF00; font-size: 12px; margin-right: 10px; width: 100px; text-align: right; padding-left: 10px; }
-        .dropdown-toggle, #analyze-button, #control-panel-button { 
+        .dropdown-toggle, #control-panel-button { 
             background: rgba(26, 26, 26, 0.8); 
             border: 2px solid #00FFFF; 
             border-radius: 10px; 
@@ -134,20 +141,20 @@
             margin-top: 5px; 
             font-size: 10px; 
         }
-        #stats-menu { color: #00FF00; }
+        #stats-menu { color: #00FF00; font-size: 14px; } /* Increased from 10px */
         .graph-container { 
             position: absolute; 
             right: 0; 
             width: calc(100vw - 250px); 
             background-color: #1A1A1A; 
             height: calc(100vh - 2vh); 
-            transition: width 0.3s ease, left 0.3s ease; /* Added left for smoothness */
+            transition: width 0.3s ease, left 0.3s ease; 
             z-index: 1; 
             overflow: hidden; 
         }
         .graph-container.full-width { 
             width: 100vw; 
-            left: 0; /* Ensures it expands fully left */
+            left: 0; 
         }
         #graph { 
             width: 100%; 
@@ -277,7 +284,7 @@
             <div class="sidebar-title">SPRUCE<br><span>Data Explorer</span></div>
             <div class="button-container">
                 <span class="button-label">Control Panel:</span>
-                <div id="control-panel-button">Open Control Panel</div>
+                <div id="control-panel-button">Show Control Panel</div>
             </div>
             <div class="button-container">
                 <span class="button-label">X-Axis:</span>
@@ -314,7 +321,7 @@
                     <div class="dropdown-item"><input type="checkbox" id="WS_10_dep" value="WS_10"><label for="WS_10_dep" style="color: #FFD700;">Wind Speed 10m (m/s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WD_10_dep" value="WD_10"><label for="WD_10_dep" style="color: #6A5ACD;">Wind Direction 10m (°)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2_dep" value="PAR_2"><label for="PAR_2_dep" style="color: #20B2AA;">PAR (µmol/m²s)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PRE_6"><label for="PREC_6_dep" style="color: #DAA520;">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PREC_6"><label for="PREC_6_dep" style="color: #DAA520;">Precipitation (mm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="CO2_measured_dep" value="CO2_measured"><label for="CO2_measured_dep" style="color: #FF69B4;">Measured CO₂ (ppm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="H2O_measured_dep" value="H2O_measured"><label for="H2O_measured_dep" style="color: #7FFF00;">Measured H₂O (mmol/mol)</label></div>
                 </div>
@@ -348,10 +355,6 @@
                     </div>
                 </div>
             </div>
-            <div class="button-container">
-                <span class="button-label">Analyze:</span>
-                <div id="analyze-button">Analyze</div>
-            </div>
         </div>
         <div class="graph-container" id="graph-container">
             <div id="graph">
@@ -380,7 +383,7 @@
         let dataLoaded = false;
         const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#FFD700', '#6A5ACD', '#20B2AA', '#DAA520', '#FF69B4', '#7FFF00'];
         let tempRange = [0, 9];
-        let depthRange = [0, 200]; // Default soil depth range (cm)
+        let depthRange = [0, 200];
         let legendVisible = true;
 
         const controlRanges = {
@@ -455,7 +458,7 @@
         function filterByRanges(data) {
             return data.filter(row => {
                 return Object.keys(currentRanges).every(key => {
-                    if (key === 'Soil_Depth') return true; // Handled separately in filterByDepthRange
+                    if (key === 'Soil_Depth') return true;
                     const value = parseFloat(row[key]);
                     const range = currentRanges[key];
                     return isNaN(value) || (value >= range.defaultMin && value <= range.defaultMax);
@@ -476,7 +479,7 @@
                 const newRow = { ...row };
                 depths.forEach(depth => {
                     if (depth < depthRange[0] || depth > depthRange[1]) {
-                        newRow[`TS_${depth}`] = null; // Null out data outside depth range
+                        newRow[`TS_${depth}`] = null;
                     }
                 });
                 return newRow;
@@ -489,7 +492,7 @@
                 popup.style.display = 'block';
                 const content = document.getElementById('controls-content');
                 const title = document.getElementById('controls-title');
-                popup.style.display = 'none'; // Placeholder for future controls
+                popup.style.display = 'none'; // Placeholder
             } else {
                 popup.style.display = 'none';
             }
@@ -498,8 +501,10 @@
         function toggleControlPanel() {
             const popup = document.getElementById('control-panel-popup');
             const content = document.getElementById('control-panel-content');
+            const button = document.getElementById('control-panel-button');
             const isVisible = popup.style.display === 'block';
             popup.style.display = isVisible ? 'none' : 'block';
+            button.textContent = isVisible ? 'Show Control Panel' : 'Hide Control Panel';
 
             if (!isVisible) {
                 content.innerHTML = Object.keys(controlRanges).map(key => `
@@ -768,9 +773,10 @@
                               independent === 'CO2_measured' ? 'Measured CO₂ (ppm)' :
                               independent === 'H2O_measured' ? 'Measured H₂O (mmol/mol)' :
                               document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
+            const isAllSoilTemp = dependents.every(dep => dep.startsWith('TS_'));
             const yAxisTitle = dependents.length === 1 ? 
                                document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent :
-                               `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit})`;
+                               isAllSoilTemp ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit})`;
 
             const annotations = showFit ? dependents.map((dep, i) => {
                 const xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP.getTime() : parseFloat(row[independent])).filter(v => !isNaN(v));
@@ -778,13 +784,21 @@
                 if (yValues.length > 0) {
                     const { slope, rSquared } = calculateRegression(xValues, yValues);
                     return {
-                        x: 0.5,
-                        y: 1 - (i * 0.05),
+                        x: 0.02,
+                        y: 0.98 - (i * 0.06),
                         xref: 'paper',
                         yref: 'paper',
                         text: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Slope: ${slope.toFixed(4)}, R²: ${rSquared.toFixed(4)}`,
                         showarrow: false,
-                        font: { color: '#00FF00', family: 'VT323', monospace: true, size: 12 }
+                        font: { color: '#00FF00', family: 'VT323', size: 14 },
+                        bgcolor: 'rgba(26, 26, 26, 0.7)',
+                        bordercolor: '#00FFFF',
+                        borderwidth: 1,
+                        borderpad: 4,
+                        opacity: 0.9,
+                        align: 'left',
+                        cornerRadius: 10,
+                        shadow: '0 0 8px #00FFFF'
                     };
                 }
                 return null;
@@ -811,9 +825,9 @@
                     type: independent === 'TIMESTAMP' ? 'date' : 'linear',
                     automargin: true,
                     tickfont: { size: 12 },
-                    autorange: independent === 'TIMESTAMP' ? true : undefined, // Auto-scale for time
-                    tickmode: independent === 'TIMESTAMP' ? 'auto' : undefined, // Minimal ticks
-                    nticks: independent === 'TIMESTAMP' ? 5 : undefined // Suggest fewer ticks
+                    autorange: independent === 'TIMESTAMP' ? true : undefined,
+                    tickmode: independent === 'TIMESTAMP' ? 'auto' : undefined,
+                    nticks: independent === 'TIMESTAMP' ? 5 : undefined
                 },
                 yaxis: {
                     title: { text: yAxisTitle, font: { size: 14 } },
@@ -823,7 +837,20 @@
                 },
                 margin: { t: 80, b: 120, l: 100, r: 40 },
                 showlegend: legendVisible,
-                legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.8)' },
+                legend: { 
+                    x: 1, 
+                    y: 1, 
+                    xanchor: 'right', 
+                    yanchor: 'top', 
+                    bgcolor: 'rgba(26, 26, 26, 0.7)', 
+                    bordercolor: '#00FFFF', 
+                    borderwidth: 1,
+                    font: { color: '#FFFFFF', size: 12 },
+                    traceorder: 'normal',
+                    orientation: 'v',
+                    cornerRadius: 10,
+                    shadow: '0 0 8px #00FFFF'
+                },
                 annotations: annotations
             };
 
@@ -844,7 +871,6 @@
         document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
         document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
         document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
-        document.getElementById('analyze-button').addEventListener('click', () => loadData());
         document.getElementById('legend-tab').addEventListener('click', toggleLegend);
         document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
         document.getElementById('show-fit').addEventListener('change', updateGraph);
@@ -902,6 +928,9 @@
                 Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
             }
         });
+
+        // Load data on page load since plotting is dynamic
+        loadData();
     </script>
 </body>
 </html>
