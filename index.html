@@ -269,6 +269,8 @@
                     <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction 10m (°)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="CO2_measured" value="CO2_measured"><label for="CO2_measured">Measured CO₂ (ppm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="H2O_measured" value="H2O_measured"><label for="H2O_measured">Measured H₂O (mmol/mol)</label></div>
                 </div>
             </div>
             <div class="button-container">
@@ -290,6 +292,8 @@
                     <div class="dropdown-item"><input type="checkbox" id="WD_10_dep" value="WD_10"><label for="WD_10_dep" style="color: #6A5ACD;">Wind Direction 10m (°)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2_dep" value="PAR_2"><label for="PAR_2_dep" style="color: #20B2AA;">PAR (µmol/m²s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PREC_6"><label for="PREC_6_dep" style="color: #DAA520;">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="CO2_measured_dep" value="CO2_measured"><label for="CO2_measured_dep" style="color: #FF69B4;">Measured CO₂ (ppm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="H2O_measured_dep" value="H2O_measured"><label for="H2O_measured_dep" style="color: #7FFF00;">Measured H₂O (mmol/mol)</label></div>
                 </div>
             </div>
             <div class="button-container">
@@ -338,11 +342,11 @@
 
     <script>
         let allData = [];
-        const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily.json';
+        const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
         let startDate = new Date('2015-08-01');
         let endDate = new Date('2025-04-05');
         let dataLoaded = false;
-        const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#FFD700', '#6A5ACD', '#20B2AA', '#DAA520'];
+        const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347', '#4682B4', '#FFD700', '#6A5ACD', '#20B2AA', '#DAA520', '#FF69B4', '#7FFF00'];
         let tempRange = [0, 9]; // Default min/max temp range
 
         const conditionMap = {
@@ -361,7 +365,8 @@
         const unitMap = {
             'TS_0': '°C', 'TS_5': '°C', 'TS_10': '°C', 'TS_20': '°C', 'TS_30': '°C', 
             'TS_40': '°C', 'TS_50': '°C', 'TS_100': '°C', 'TS_200': '°C', 'TA_2_0': '°C',
-            'RH_2_0': '%', 'WS_10': 'm/s', 'WD_10': '°', 'PAR_2': 'µmol/m²s', 'PREC_6': 'mm'
+            'RH_2_0': '%', 'WS_10': 'm/s', 'WD_10': '°', 'PAR_2': 'µmol/m²s', 'PREC_6': 'mm',
+            'CO2_measured': 'ppm', 'H2O_measured': 'mmol/mol'
         };
 
         async function loadData() {
@@ -689,7 +694,7 @@
                     const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
                     const { slope, intercept, rSquared } = calculateRegression(xNum, yValues);
                     if (!isNaN(slope) && !isNaN(intercept)) {
-                        const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Max(...xNum)];
+                        const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Math.max(...xNum)];
                         const yFit = xFit.map(x => slope * (independent === 'TIMESTAMP' ? x.getTime() : x) + intercept);
                         fitTraces.push({
                             x: xFit,
@@ -722,6 +727,8 @@
             const xAxisTitle = independent === 'CO2_trmt' ? 'CO₂ Treatment (ppm)' : 
                               independent === 'TIMESTAMP' ? 'Time' : 
                               independent === 'Temp_target' ? 'Target Temperature (°C)' :
+                              independent === 'CO2_measured' ? 'Measured CO₂ (ppm)' :
+                              independent === 'H2O_measured' ? 'Measured H₂O (mmol/mol)' :
                               document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
             const yAxisTitle = dependents.length === 1 ? 
                                document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent :
