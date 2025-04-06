@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js"></script>
     <style>
         body, html { 
             margin: 0; 
@@ -31,7 +32,7 @@
             animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; 
             flex-shrink: 0; 
             z-index: 11; 
-            line-height: 1.2; /* Reduced for tighter title */
+            line-height: 1.2; 
         }
         @keyframes glowBreathe {
             0% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; }
@@ -51,10 +52,10 @@
             width: 250px; 
             background: rgba(26, 26, 26, 0.8); 
             border-right: 2px solid #00FFFF; 
-            padding: 10px; /* Reduced from 15px */
+            padding: 10px; 
             display: flex; 
             flex-direction: column; 
-            gap: 8px; /* Tighter spacing */
+            gap: 8px; 
             position: absolute; 
             top: 0; 
             left: 0;
@@ -87,7 +88,7 @@
             text-align: center; 
             text-shadow: 0 0 10px #DAA520; 
             line-height: 1.1; 
-            margin: 0 0 8px; /* Tighter spacing */
+            margin: 0 0 8px; 
         }
         .sidebar-title span { 
             display: block; 
@@ -98,12 +99,12 @@
             align-items: center; 
             width: 100%; 
             position: relative; 
-            margin: 0; /* No extra margin */
+            margin: 0; 
         }
         .button-label { 
             color: #FFFF00; 
             font-size: 15px; 
-            margin-right: 8px; /* Reduced from 10px */
+            margin-right: 8px; 
             width: 100px; 
             text-align: right; 
             padding-left: 10px; 
@@ -114,19 +115,15 @@
             border-radius: 10px; 
             color: #00FFFF; 
             font-size: 13px; 
-            padding: 4px 6px; /* Reduced from 6px 8px */
-            width: calc(100% - 118px); /* Adjusted for tighter fit */
+            padding: 4px 6px; 
+            width: calc(100% - 118px); 
             text-align: center; 
             cursor: pointer; 
             box-shadow: 0 0 8px #00FFFF; 
-            line-height: 1.2; /* Minimized height */
-            white-space: nowrap; /* Prevent wrapping unless necessary */
+            line-height: 1.2; 
+            white-space: pre-wrap; 
             overflow: hidden; 
             text-overflow: ellipsis; 
-        }
-        #time-range-toggle { 
-            white-space: pre-wrap; /* Allow line break for dates */
-            line-height: 1.2; 
         }
         .dropdown-menu { 
             position: absolute; 
@@ -209,7 +206,7 @@
         }
         .legend-tab { 
             position: absolute; 
-            top: 50px; /* Below sidebar-tab */
+            top: 50px; 
             right: -40px; 
             width: 40px; 
             height: 40px; 
@@ -352,7 +349,7 @@
                     <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0">Relative Humidity 2m (%)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction 10m (°)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PRE_6"><label for="PREC_6">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="CO2_measured" value="CO2_measured"><label for="CO2_measured">Measured CO₂ (ppm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="H2O_measured" value="H2O_measured"><label for="H2O_measured">Measured H₂O (mmol/mol)</label></div>
                 </div>
@@ -381,7 +378,7 @@
             </div>
             <div class="button-container">
                 <span class="button-label">Time Range:</span>
-                <div class="dropdown-toggle" id="time-range-toggle">2015-08-01<br>2025-04-05</div>
+                <div class="dropdown-toggle" id="time-range-toggle">2015-08-01\n2025-04-05</div>
                 <div class="dropdown-menu" id="time-range-menu">
                     <div class="dropdown-item"><label for="start-date">Start Date:</label><input type="text" id="start-date" value="2015-08-01"></div>
                     <div class="dropdown-item"><label for="end-date">End Date:</label><input type="text" id="end-date" value="2025-04-05"></div>
@@ -461,9 +458,10 @@
             'RH_2_0': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Relative Humidity 2m (%)' },
             'WD_10': { min: 0, max: 360, defaultMin: 0, defaultMax: 360, label: 'Wind Direction 10m (°)' },
             'PAR_2': { min: 0, max: 2000, defaultMin: 0, defaultMax: 2000, label: 'PAR (µmol/m²s)' },
-            'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' }
+            'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' },
+            'Temp_target': { min: 0, max: 9, defaultMin: 0, defaultMax: 9, label: 'Target Temp (°C)' }
         };
-        let currentRanges = { ...controlRanges };
+        let currentRanges = JSON.parse(JSON.stringify(controlRanges));
         let tempRange = [0, 9];
         let depthRange = [0, 200];
 
@@ -538,7 +536,7 @@
         function filterByTempRange(data) {
             return data.filter(row => {
                 const tempValue = parseFloat(row.Temp_target);
-                return tempValue >= tempRange[0] && tempValue <= tempRange[1];
+                return isNaN(tempValue) || (tempValue >= tempRange[0] && tempValue <= tempRange[1]);
             });
         }
 
@@ -555,15 +553,6 @@
             });
         }
 
-        function showControlsPopup(independent) {
-            const popup = document.getElementById('controls-popup');
-            if (independent.length > 1 || (independent[0] !== 'CO2_trmt' && independent[0] !== 'Temp_target')) {
-                popup.style.display = 'none'; // Placeholder
-            } else {
-                popup.style.display = 'none';
-            }
-        }
-
         function toggleControlPanel() {
             const popup = document.getElementById('control-panel-popup');
             const content = document.getElementById('control-panel-content');
@@ -575,7 +564,7 @@
             if (!isVisible) {
                 content.innerHTML = Object.keys(controlRanges).map(key => `
                     <div class="slider-container">
-                        <label>${controlRanges[key].label}</label>
+                        <label>${controlRanges[key].label} Range</label>
                         <div class="range-slider">
                             <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMin}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
                             <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMax}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
@@ -599,6 +588,7 @@
                         if (value > parseFloat(maxSlider.value)) maxSlider.value = value;
                         currentRanges[key].defaultMin = value;
                         if (key === 'Soil_Depth') depthRange[0] = value;
+                        else if (key === 'Temp_target') tempRange[0] = value;
                         updateGraph();
                     });
 
@@ -608,23 +598,36 @@
                         if (value < parseFloat(minSlider.value)) minSlider.value = value;
                         currentRanges[key].defaultMax = value;
                         if (key === 'Soil_Depth') depthRange[1] = value;
+                        else if (key === 'Temp_target') tempRange[1] = value;
                         updateGraph();
                     });
                 });
             }
         }
 
+        function gaussianCDF(z) {
+            return 0.5 * (1 + erf(z / Math.sqrt(2)));
+        }
+
+        function erf(x) {
+            const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429;
+            const p = 0.3275911;
+            const sign = x < 0 ? -1 : 1;
+            x = Math.abs(x);
+            const t = 1 / (1 + p * x);
+            return sign * (1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x));
+        }
+
+        function tDistPValue(t, df) {
+            const tAbs = Math.abs(t);
+            return 2 * (1 - gaussianCDF(tAbs)); // Simplified approximation
+        }
+
         function calculateRegression(x, y) {
             const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.x) && !isNaN(d.y));
             if (pairedData.length < 2) return { slope: NaN, intercept: NaN, rSquared: NaN, pValue: NaN, tStat: NaN, fStat: NaN, seSlope: NaN, rse: NaN };
 
-            const yValues = pairedData.map(d => d.y).sort((a, b) => a - b);
-            const q1 = yValues[Math.floor(yValues.length * 0.25)];
-            const q3 = yValues[Math.floor(yValues.length * 0.75)];
-            const iqr = q3 - q1;
-            const lowerBound = q1 - 1.5 * iqr;
-            const upperBound = q3 + 1.5 * iqr;
-            const filteredData = pairedData.filter(d => d.y >= lowerBound && d.y <= upperBound);
+            const filteredData = pairedData.filter(d => d.y >= jStat.percentile(pairedData.map(d => d.y), 0.25) - 1.5 * (jStat.percentile(pairedData.map(d => d.y), 0.75) - jStat.percentile(pairedData.map(d => d.y), 0.25)) && d.y <= jStat.percentile(pairedData.map(d => d.y), 0.75) + 1.5 * (jStat.percentile(pairedData.map(d => d.y), 0.75) - jStat.percentile(pairedData.map(d => d.y), 0.25)));
             const filteredX = filteredData.map(d => d.x);
             const filteredY = filteredData.map(d => d.y);
 
@@ -650,34 +653,10 @@
             const seSlope = rse / Math.sqrt(filteredX.reduce((sum, xi) => sum + Math.pow(xi - meanX, 2), 0));
             const tStat = slope / seSlope;
             const fStat = (ssReg / 1) / (ssRes / (n - 2));
-
-            const tDistPValue = (t) => {
-                const df = n - 2;
-                const tAbs = Math.abs(t);
-                if (df > 100) return 2 * (1 - gaussianCDF(tAbs));
-                return 2 * (1 - tDistCDF(tAbs, df));
-            };
-            const pValueSlope = tDistPValue(tStat);
-            const pValueF = tDistPValue(Math.sqrt(fStat));
+            const pValueSlope = tDistPValue(tStat, n - 2);
+            const pValueF = tDistPValue(Math.sqrt(fStat), n - 2);
 
             return { slope, intercept, rSquared, adjustedRSquared, pValueSlope, tStat, fStat, pValueF, seSlope, rse };
-        }
-
-        function gaussianCDF(z) {
-            return 0.5 * (1 + erf(z / Math.sqrt(2)));
-        }
-
-        function erf(x) {
-            const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429;
-            const p = 0.3275911;
-            const sign = x < 0 ? -1 : 1;
-            x = Math.abs(x);
-            const t = 1 / (1 + p * x);
-            return sign * (1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x));
-        }
-
-        function tDistCDF(t, df) {
-            return gaussianCDF(t);
         }
 
         function calculateSpearman(x, y) {
@@ -689,8 +668,28 @@
             const dSquared = rankedX.reduce((sum, rx, i) => sum + Math.pow(rx.r - rankedY[i].r, 2), 0);
             const rho = 1 - (6 * dSquared) / (n * (n * n - 1));
             const tStat = rho * Math.sqrt((n - 2) / (1 - rho * rho));
-            const pValue = tDistPValue(tStat);
+            const pValue = tDistPValue(tStat, n - 2);
             return { rho, pValue };
+        }
+
+        function calculateANOVA(data, independent, dependent) {
+            const groups = {};
+            data.forEach(row => {
+                const group = row[independent];
+                if (!groups[group]) groups[group] = [];
+                const value = parseFloat(row[dependent]);
+                if (!isNaN(value)) groups[group].push(value);
+            });
+
+            const groupArrays = Object.values(groups).filter(arr => arr.length > 0);
+            if (groupArrays.length < 2) return { fScore: NaN, pValue: NaN };
+
+            const fScore = jStat.anovafscore(...groupArrays);
+            const pValue = jStat.anovaftest(...groupArrays);
+            const means = groupArrays.map(arr => jStat.mean(arr));
+            const groupNames = Object.keys(groups).filter(key => groups[key].length > 0);
+
+            return { fScore, pValue, means, groupNames };
         }
 
         function aggregateVariables(data) {
@@ -753,16 +752,16 @@
             if (dataLoaded && typeof Plotly !== 'undefined') {
                 legendVisible = !legendVisible;
                 Plotly.relayout('graph', { showlegend: legendVisible });
-                document.getElementById('legend-tab').textContent = legendVisible ? 'L' : 'L'; // Keep simple
+                document.getElementById('legend-tab').textContent = legendVisible ? 'L' : 'L';
             }
         }
 
         function filterOutliers(x, y) {
             const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.x) && !isNaN(d.y));
             if (pairedData.length < 2) return { x: x, y: y };
-            const yValues = pairedData.map(d => d.y).sort((a, b) => a - b);
-            const q1 = yValues[Math.floor(yValues.length * 0.25)];
-            const q3 = yValues[Math.floor(yValues.length * 0.75)];
+            const yValues = pairedData.map(d => d.y);
+            const q1 = jStat.percentile(yValues, 0.25);
+            const q3 = jStat.percentile(yValues, 0.75);
             const iqr = q3 - q1;
             const lowerBound = q1 - 1.5 * iqr;
             const upperBound = q3 + 1.5 * iqr;
@@ -822,14 +821,32 @@
             let invalidTraces = [];
             const statsData = [];
 
-            if (chartType !== 'anova' || independents.length === 1) {
+            if (chartType === 'anova' && independents.length > 1 && dependents.length === 1) {
+                const anovaResults = calculateANOVA(workingData, independents[0], dependents[0]);
+                if (isNaN(anovaResults.fScore)) {
+                    graphDiv.innerHTML = '<div class="warning-message">Insufficient data for ANOVA</div>';
+                    return;
+                }
+
+                traces.push({
+                    x: anovaResults.groupNames,
+                    y: anovaResults.means,
+                    type: 'bar',
+                    name: `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means`,
+                    marker: { color: dependentColors[dependents[0]] || '#00FFFF' }
+                });
+
+                statsData.push({
+                    dep: dependents[0],
+                    anova: { fScore: anovaResults.fScore, pValue: anovaResults.pValue }
+                });
+            } else {
                 const independent = independents[0];
                 dependents.forEach(dep => {
                     let xValues = workingData.map(row => independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent])).filter(v => v !== null && !isNaN(v));
                     let yValues = workingData.map(row => parseFloat(row[dep])).filter(v => v !== null && !isNaN(v));
 
                     if (xValues.length === 0 || yValues.length === 0 || xValues.length !== yValues.length) {
-                        console.log(`Invalid data for ${dep} vs ${independent}: xValues=${xValues.length}, yValues=${yValues.length}`);
                         invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has no valid data`);
                         return;
                     }
@@ -871,9 +888,6 @@
                         }
                     }
                 });
-            } else {
-                graphDiv.innerHTML = '<div class="warning-message">ANOVA not fully implemented yet.</div>';
-                return;
             }
 
             if (!traces.length) {
@@ -882,18 +896,20 @@
                 return;
             }
 
-            const statsText = statsData.map(({ dep, reg, spearman }) => {
-                const label = document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep;
-                return `${label}:\n` +
-                       `  Slope: ${reg.slope.toFixed(4)}, SE: ${reg.seSlope.toFixed(4)}, t: ${reg.tStat.toFixed(4)}, p: ${reg.pValueSlope.toFixed(4)}\n` +
-                       `  R²: ${reg.rSquared.toFixed(4)}, Adj R²: ${reg.adjustedRSquared.toFixed(4)}, F: ${reg.fStat.toFixed(4)}, p: ${reg.pValueF.toFixed(4)}\n` +
-                       `  RSE: ${reg.rse.toFixed(4)}\n` +
-                       `  Spearman ρ: ${spearman.rho.toFixed(4)}, p: ${spearman.pValue.toFixed(4)}`;
+            const statsText = statsData.map(data => {
+                const label = document.querySelector(`label[for="${data.dep}"], label[for="${data.dep}_dep"]`)?.textContent || data.dep;
+                if (data.anova) {
+                    return `${label}:\nF-Score: ${data.anova.fScore.toFixed(4)}\np-Value: ${data.anova.pValue.toFixed(4)}`;
+                } else {
+                    return `${label}:\n` +
+                           `Slope: ${data.reg.slope.toFixed(4)}, SE: ${data.reg.seSlope.toFixed(4)}, t: ${data.reg.tStat.toFixed(4)}, p: ${data.reg.pValueSlope.toFixed(4)}\n` +
+                           `R²: ${data.reg.rSquared.toFixed(4)}, Adj R²: ${data.reg.adjustedRSquared.toFixed(4)}, F: ${data.reg.fStat.toFixed(4)}, p: ${data.reg.pValueF.toFixed(4)}\n` +
+                           `RSE: ${data.reg.rse.toFixed(4)}\n` +
+                           `Spearman ρ: ${data.spearman.rho.toFixed(4)}, p: ${data.spearman.pValue.toFixed(4)}`;
+                }
             }).join('\n\n');
             document.getElementById('stats-content').innerHTML = statsText.replace(/\n/g, '<br>');
-
-            const popup = document.getElementById('stats-popup');
-            popup.style.display = showStatsPopup ? 'block' : 'none';
+            document.getElementById('stats-popup').style.display = showStatsPopup ? 'block' : 'none';
             document.getElementById('stats-popup-content').innerHTML = statsText.replace(/\n/g, '<br>');
 
             const independent = independents[0];
@@ -904,7 +920,9 @@
                                independent === 'H2O_measured' ? 'Measured H₂O (mmol/mol)' :
                                document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
             const isAllSoilTemp = dependents.every(dep => dep.startsWith('TS_'));
-            const yAxisTitle = dependents.length === 1 ? 
+            const yAxisTitle = chartType === 'anova' ? 
+                               `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means` :
+                               dependents.length === 1 ? 
                                document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent :
                                isAllSoilTemp ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit})`;
 
@@ -913,9 +931,10 @@
                 y: 0.98,
                 xref: 'paper',
                 yref: 'paper',
-                text: statsData.map(({ dep, reg }) => {
-                    const label = document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep;
-                    return `${label}: Slope: ${reg.slope.toFixed(4)}, R²: ${reg.rSquared.toFixed(4)}`;
+                text: statsData.map(data => {
+                    const label = document.querySelector(`label[for="${data.dep}"], label[for="${data.dep}_dep"]`)?.textContent || data.dep;
+                    return data.anova ? `${label}: F=${data.anova.fScore.toFixed(2)}, p=${data.anova.pValue.toFixed(4)}` :
+                                       `${label}: Slope=${data.reg.slope.toFixed(2)}, R²=${data.reg.rSquared.toFixed(2)}`;
                 }).join('<br>'),
                 showarrow: false,
                 font: { color: '#00FF00', family: 'Lato', size: 14 },
@@ -945,12 +964,9 @@
                     title: { text: xAxisTitle, font: { size: 14 } },
                     gridcolor: '#444',
                     zerolinecolor: '#444',
-                    type: independent === 'TIMESTAMP' ? 'date' : 'linear',
+                    type: independent === 'TIMESTAMP' ? 'date' : chartType === 'anova' ? 'category' : 'linear',
                     automargin: true,
-                    tickfont: { size: 12 },
-                    autorange: independent === 'TIMESTAMP' ? true : undefined,
-                    tickmode: independent === 'TIMESTAMP' ? 'auto' : undefined,
-                    nticks: independent === 'TIMESTAMP' ? 5 : undefined
+                    tickfont: { size: 12 }
                 },
                 yaxis: {
                     title: { text: yAxisTitle, font: { size: 14 } },
@@ -971,26 +987,16 @@
                 hovermode: 'closest'
             };
 
-            console.log('Traces:', traces);
-            console.log('Fit Traces:', fitTraces);
-
-            // Ensure clean slate
             Plotly.purge('graph');
-            Plotly.newPlot('graph', showBestFit ? traces.concat(fitTraces) : traces, layout, { responsive: true })
-                .then(() => console.log('Plot successful'))
+            Plotly.newPlot('graph', showBestFit && chartType !== 'anova' ? traces.concat(fitTraces) : traces, layout, { responsive: true })
                 .catch(err => {
                     console.error('Plotly error:', err);
                     graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
                                           ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
                 });
 
-            const dependentToggle = document.getElementById('dependent-toggle');
-            const selectedLabels = Array.from(document.querySelectorAll('#dependent-menu input:checked'))
-                .map(input => {
-                    const label = document.querySelector(`label[for="${input.id}"]`);
-                    return `<span style="color: ${label.style.color}">${label.textContent}</span>`;
-                }).join(', ');
-            dependentToggle.innerHTML = selectedLabels || 'Select Dependent';
+            document.getElementById('independent-toggle').innerHTML = independents.map(ind => document.querySelector(`label[for="${ind}"]`).textContent).join('\n') || 'Select Independent';
+            document.getElementById('dependent-toggle').innerHTML = dependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`).textContent}</span>`).join('\n') || 'Select Dependent';
         }
 
         document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
@@ -1014,9 +1020,6 @@
                     showWarningPopup('Must choose ANOVA for multiple X-axis variables');
                     return;
                 }
-                document.getElementById('independent-toggle').textContent = 
-                    checkedInputs.map(input => document.querySelector(`label[for="${input.id}"]`).textContent).join(', ') || 'Select Independent';
-                showControlsPopup(checkedInputs.map(input => input.value));
                 updateGraph();
             });
         });
@@ -1031,8 +1034,6 @@
                 const checkedIndependents = Array.from(document.querySelectorAll('#independent-menu input:checked'));
                 if (checkedIndependents.length > 1 && !multiVarAnalysisTypes.includes(input.value)) {
                     checkedIndependents.slice(1).forEach(extraInput => extraInput.checked = false);
-                    document.getElementById('independent-toggle').textContent = 
-                        document.querySelector(`label[for="${checkedIndependents[0].id}"]`).textContent || 'Select Independent';
                     showWarningPopup('Switched to single X-axis mode');
                 }
                 updateGraph();
@@ -1044,8 +1045,7 @@
             defaultDate: '2015-08-01',
             onChange: (selectedDates) => {
                 startDate = selectedDates[0];
-                document.getElementById('time-range-toggle').innerHTML = 
-                    `${startDate.toISOString().split('T')[0]}\n${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+                document.getElementById('time-range-toggle').innerHTML = `${startDate.toISOString().split('T')[0]}\n${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
                 updateGraph();
             }
         });
@@ -1055,8 +1055,7 @@
             defaultDate: '2025-04-05',
             onChange: (selectedDates) => {
                 endDate = selectedDates[0];
-                document.getElementById('time-range-toggle').innerHTML = 
-                    `${startDate ? startDate.toISOString().split('T')[0] : 'Start'}\n${endDate.toISOString().split('T')[0]}`;
+                document.getElementById('time-range-toggle').innerHTML = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'}\n${endDate.toISOString().split('T')[0]}`;
                 updateGraph();
             }
         });
