@@ -453,7 +453,7 @@
 
     function calculateFit(x, y, fitType) {
         const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] }))
-            .filter(d => !isNaN(d.x) && !isNaN(d.y) && d.x !== null && d.y !== null && d.x > 0); // x > 0 for log/exp
+            .filter(d => !isNaN(d.x) && !isNaN(d.y) && d.x !== null && d.y !== null && d.x > 0);
         if (pairedData.length < 2) {
             console.log('Insufficient data for fit:', pairedData.length);
             return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
@@ -467,8 +467,8 @@
         console.log('xNum variation:', { min: Math.min(...xNum), max: Math.max(...xNum) });
 
         const fits = {};
+        const defaultResult = { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
 
-        // Linear: y = mx + b
         const linearFit = () => {
             const sumX = xNum.reduce((a, b) => a + b, 0);
             const sumY = yNum.reduce((a, b) => a + b, 0);
@@ -486,7 +486,6 @@
             return calculateStats(xNum, yNum, yPred, 'linear', { slope, intercept });
         };
 
-        // Logarithmic: y = a + b * ln(x)
         const logFit = () => {
             const logX = xNum.map(x => Math.log(x));
             const sumLogX = logX.reduce((a, b) => a + b, 0);
@@ -505,7 +504,6 @@
             return calculateStats(xNum, yNum, yPred, 'logarithmic', { slope, intercept });
         };
 
-        // Exponential: y = a * e^(bx)
         const expFit = () => {
             const validPairs = pairedData.filter(d => d.y > 0);
             if (validPairs.length < 2) {
@@ -532,17 +530,30 @@
             return calculateStats(xNum, yNum, yPred, 'exponential', { a, b });
         };
 
-        // Polynomial (Quadratic): y = ax² + bx + c
         const polyFit = () => {
+            if (typeof math === 'undefined' || !math.lusolve) {
+                console.error('math.js not loaded or lusolve unavailable');
+                return null;
+            }
             const X = xNum.map(x => [1, x, x * x]);
             const Y = yNum;
-            const XtX = math.multiply(math.transpose(X), X);
-            const XtY = math.multiply(math.transpose(X), Y);
-            const coeffs = math.lusolve(XtX, XtY);
-            const c = coeffs._data[0][0], b = coeffs._data[1][0], a = coeffs._data[2][0];
-            if (!isFinite(a) || !isFinite(b) || !isFinite(c)) return null;
-            const yPred = xNum.map(x => a * x * x + b * x + c);
-            return calculateStats(xNum, yNum, yPred, 'polynomial', { a, b, c });
+            try {
+                const XtX = math.multiply(math.transpose(X), X);
+                const XtY = math.multiply(math.transpose(X), Y);
+                console.log('Polynomial intermediates:', { XtX, XtY });
+                const coeffs = math.lusolve(XtX, XtY);
+                if (!coeffs || !coeffs._data || coeffs._data.length < 3) {
+                    console.log('Invalid coeffs from lusolve:', coeffs);
+                    return null;
+                }
+                const c = coeffs._data[0][0], b = coeffs._data[1][0], a = coeffs._data[2][0];
+                if (!isFinite(a) || !isFinite(b) || !isFinite(c)) return null;
+                const yPred = xNum.map(x => a * x * x + b * x + c);
+                return calculateStats(xNum, yNum, yPred, 'polynomial', { a, b, c });
+            } catch (e) {
+                console.error('Polynomial fit failed:', e.message);
+                return null;
+            }
         };
 
         if (fitType === 'auto') {
@@ -556,7 +567,7 @@
                 .map(([type, fit]) => ({ type, ...fit }));
             if (validFits.length === 0) {
                 console.log('No valid fits computed');
-                return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
+                return defaultResult;
             }
             const bestFit = validFits.reduce((best, current) => 
                 (best.rSquared > current.rSquared) ? best : current
@@ -565,11 +576,11 @@
             return bestFit;
         } else {
             switch (fitType) {
-                case 'linear': return linearFit() || { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
-                case 'logarithmic': return logFit() || { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
-                case 'exponential': return expFit() || { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
-                case 'polynomial': return polyFit() || { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
-                default: return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
+                case 'linear': return linearFit() || defaultResult;
+                case 'logarithmic': return logFit() || defaultResult;
+                case 'exponential': return expFit() || defaultResult;
+                case 'polynomial': return polyFit() || defaultResult;
+                default: return defaultResult;
             }
         }
     }
@@ -682,7 +693,10 @@
     }
 
     function calculateGraphWidth() { return document.getElementById('graph-container').clientWidth; }
-    function calculateGraphHeight() { return document.getElementById('graph-container').clientHeight; }
+    function calculateGraphHeight() { 
+        const headerHeight = document.querySelector('h1').offsetHeight || 60; // Default to 60px if not found
+        return window.innerHeight - headerHeight;
+    }
 
     function toggleLegend() {
         if (dataLoaded && graphInitialized) {
@@ -721,7 +735,7 @@
         const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || null;
         const allDependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
         const chartType = document.querySelector('#chart-type-menu input:checked').value;
-        const fitType = document.querySelector('#fit-options input:checked')?.value || 'auto'; // Default to auto
+        const fitType = document.querySelector('#fit-options input:checked')?.value || 'auto';
         const showFit = document.getElementById('show-fit').checked;
         const showOnChart = document.getElementById('show-on-chart').checked;
 
@@ -871,7 +885,7 @@
             y: 0.98,
             xref: 'paper',
             yref: 'paper',
-            text: statsText.join('<br>'),
+            text: statsText.slice(0, 5).join('<br>') + (statsText.length > 5 ? '<br>(Truncated, see Stats menu)' : ''),
             showarrow: false,
             font: { color: '#00FF00', family: 'Lato', size: window.innerWidth <= 480 ? 10 : 12 },
             bgcolor: 'rgba(26, 26, 26, 0.7)',
@@ -898,10 +912,10 @@
                 zerolinecolor: '#444' 
             },
             margin: { 
-                t: window.innerWidth <= 480 ? 60 : 80, 
-                b: window.innerWidth <= 480 ? 100 : 120, 
-                l: window.innerWidth <= 480 ? 80 : 100, 
-                r: window.innerWidth <= 480 ? 30 : 40 
+                t: window.innerWidth <= 480 ? 50 : 60, 
+                b: window.innerWidth <= 480 ? 80 : 100, 
+                l: window.innerWidth <= 480 ? 60 : 80, 
+                r: window.innerWidth <= 480 ? 20 : 30 
             },
             showlegend: legendVisible,
             legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.7)', font: { size: window.innerWidth <= 480 ? 10 : 12 } },
@@ -994,10 +1008,10 @@
             width: calculateGraphWidth(), 
             height: calculateGraphHeight(),
             margin: { 
-                t: window.innerWidth <= 480 ? 60 : 80, 
-                b: window.innerWidth <= 480 ? 100 : 120, 
-                l: window.innerWidth <= 480 ? 80 : 100, 
-                r: window.innerWidth <= 480 ? 30 : 40 
+                t: window.innerWidth <= 480 ? 50 : 60, 
+                b: window.innerWidth <= 480 ? 80 : 100, 
+                l: window.innerWidth <= 480 ? 60 : 80, 
+                r: window.innerWidth <= 480 ? 20 : 30 
             },
             font: { size: window.innerWidth <= 480 ? 10 : 12 },
             title: { font: { size: window.innerWidth <= 480 ? 14 : 16 } },
@@ -1009,78 +1023,13 @@
     });
 
     const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js';
-    script.onload = loadData;
-    document.head.appendChild(script);
-</script>toggleDropdown('chart-type-menu'));
-        document.getElementById('legend-tab').addEventListener('click', toggleLegend);
-        document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
-        document.getElementById('show-fit').addEventListener('change', updateGraph);
-        document.getElementById('show-on-chart').addEventListener('change', updateGraph);
-
-        document.querySelectorAll('#independent-menu input').forEach(input => {
-            input.addEventListener('change', () => {
-                enforceSingleSelection('independent-menu', input.id);
-                updateGraph();
-            });
-        });
-
-        document.querySelectorAll('#dependent-menu input').forEach(input => {
-            input.addEventListener('change', updateGraph);
-        });
-
-        document.querySelectorAll('#chart-type-menu input').forEach(input => {
-            input.addEventListener('change', () => {
-                document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
-                updateStatsOptions();
-                updateGraph();
-            });
-        });
-
-        document.querySelectorAll('#fit-options input').forEach(input => {
-            input.addEventListener('change', updateGraph);
-        });
-
-        flatpickr('#start-date', {
-            dateFormat: 'Y-m-d',
-            defaultDate: '2015-08-01',
-            onChange: (selectedDates) => {
-                startDate = selectedDates[0];
-                document.getElementById('time-range-toggle').textContent = `${startDate.toISOString().split('T')[0]} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
-                updateGraph();
-            }
-        });
-
-        flatpickr('#end-date', {
-            dateFormat: 'Y-m-d',
-            defaultDate: '2025-04-05',
-            onChange: (selectedDates) => {
-                endDate = selectedDates[0];
-                document.getElementById('time-range-toggle').textContent = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate.toISOString().split('T')[0]}`;
-                updateGraph();
-            }
-        });
-
-        window.addEventListener('resize', () => {
-            if (dataLoaded && graphInitialized) Plotly.relayout('graph', { 
-                width: calculateGraphWidth(), 
-                height: calculateGraphHeight(),
-                margin: { 
-                    t: window.innerWidth <= 480 ? 60 : 80, 
-                    b: window.innerWidth <= 480 ? 100 : 120, 
-                    l: window.innerWidth <= 480 ? 80 : 100, 
-                    r: window.innerWidth <= 480 ? 30 : 40 
-                },
-                font: { size: window.innerWidth <= 480 ? 10 : 12 },
-                title: { font: { size: window.innerWidth <= 480 ? 14 : 16 } },
-                legend: { font: { size: window.innerWidth <= 480 ? 10 : 12 } }
-            });
-            const sidebar = document.getElementById('sidebar');
-            const mobileButton = document.getElementById('mobile-sidebar-button');
-            mobileButton.style.display = sidebar.classList.contains('collapsed') && window.innerWidth <= 480 ? 'block' : 'none';
-        });
-
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.2.0/math.min.js'; // Updated to latest version
+    script.onload = () => {
+        if (typeof math === 'undefined') console.error('math.js failed to initialize');
         loadData();
-    </script>
+    };
+    script.onerror = () => console.error('Failed to load math.js');
+    document.head.appendChild(script);
+</script>
 </body>
 </html>
