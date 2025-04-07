@@ -37,11 +37,11 @@
         #time-range-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 10px; }
         #time-range-menu input[type="text"] { width: 100%; background: rgba(26, 26, 26, 0.8); border: 1px solid #00FFFF; color: #00FFFF; padding: 4px; margin-top: 5px; font-size: 11px; }
         #stats-menu { color: #00FF00; font-family: 'VT323', monospace; font-size: 15px; }
-        #plot-number-menu { width: 300px; left: auto; right: -10px; top: 40px; } /* Adjusted positioning */
+        #plot-number-menu { width: 300px; left: auto; right: -10px; top: 40px; }
         .graph-container { position: absolute; right: 0; width: calc(100vw - 250px); background-color: #1A1A1A; height: calc(100vh - 4vh); transition: width 0.3s ease, left 0.3s ease; z-index: 1; overflow: hidden; }
         .graph-container.full-width { width: 100vw; left: 0; }
-        #graph { width: 100%; height: 100%; min-width: 320px; min-height: 240px; }
-        .welcome-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00FF00; font-family: 'VT323', monospace; font-size: 20px; text-align: center; text-shadow: 0 0 10px #00FF00; }
+        #graph { width: 100%; height: 100%; min-width: 320px; min-height: 240px; position: relative; }
+        .welcome-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00FF00; font-family: 'VT323', monospace; font-size: 20px; text-align: center; text-shadow: 0 0 10px #00FF00; z-index: 2; }
         .welcome-message img { display: block; margin: 0 auto; max-width: 300px; height: auto; }
         .welcome-message hr { border: 1px solid #00FFFF; width: 80%; margin: 10px auto; }
         .legend-tab { position: absolute; top: 50px; right: 1vw; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 5px; color: #00FFFF; padding: 5px 10px; cursor: pointer; z-index: 5; font-size: calc(10px + 0.5vw); white-space: nowrap; }
@@ -92,7 +92,7 @@
                 <div class="dropdown-toggle" id="dependent-toggle">Select Dependent</div>
                 <div class="dropdown-menu" id="dependent-menu">
                     <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0"><label for="TS_0" style="color: #00FFFF;">Soil Temp 0 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_5" value="TS_5"><label for="TS_5KILL" style="color: #FFFF00;">Soil Temp 5 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_5" value="TS_5"><label for="TS_5" style="color: #FFFF00;">Soil Temp 5 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_10" value="TS_10"><label for="TS_10" style="color: #FF00FF;">Soil Temp 10 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_20" value="TS_20"><label for="TS_20" style="color: #00FF00;">Soil Temp 20 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_30" value="TS_30"><label for="TS_30" style="color: #FF0000;">Soil Temp 30 cm (°C)</label></div>
@@ -150,7 +150,7 @@
 
         <div class="graph-container" id="graph-container">
             <div id="graph">
-                <div class="welcome-message">
+                <div class="welcome-message" id="welcome-message">
                     <a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a>
                     <hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO₂ concentrations.<hr>Beginning August 2015
                 </div>
@@ -162,7 +162,7 @@
     <div class="controls-popup" id="control-panel-popup">
         <div class="controls-header">
             <h3 style="flex-grow: 1; text-align: left;">Control Panel</h3>
-            <div class="dropdown-toggle" id="plot-number-toggle" style="width: 80px;">Plot # (All)</div>
+            <div class="dropdown-toggle" id="plot-number-toggle" style="width: 80px;">Plot # (all)</div>
             <div class="dropdown-menu" id="plot-number-menu"></div>
         </div>
         <div id="control-panel-content"></div>
@@ -178,7 +178,7 @@
         let cachedData = null;
         let graphInitialized = false;
         let statsOpened = false;
-        let selectedPlots = []; // Array to store selected plot numbers
+        let selectedPlots = [];
 
         const dependentColors = {
             'TS_0': '#00FFFF', 'TS_5': '#FFFF00', 'TS_10': '#FF00FF', 'TS_20': '#00FF00', 'TS_30': '#FF0000',
@@ -225,7 +225,7 @@
 
         async function loadData() {
             const graphDiv = document.getElementById('graph');
-            graphDiv.innerHTML = '<div class="welcome-message">Loading data...</div>';
+            graphDiv.innerHTML = '<div class="welcome-message" id="welcome-message">Loading data...</div>';
             try {
                 const response = await fetch(dataUrl);
                 if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
@@ -245,8 +245,11 @@
 
                 const plotMenu = document.getElementById('plot-number-menu');
                 plotMenu.innerHTML = Object.entries(plotConditions).map(([plot, cond]) =>
-                    `<div class="dropdown-item"><input type="checkbox" id="plot-${plot}" value="${plot}"><label for="plot-${plot}">Plot ${plot} (${cond.temp}, ${cond.co2}, ${cond.chamber})</label></div>`
+                    `<div class="dropdown-item"><input type="checkbox" id="plot-${plot}" value="${plot}" checked><label for="plot-${plot}">Plot ${plot} (${cond.temp}, ${cond.co2}, ${cond.chamber})</label></div>`
                 ).join('');
+
+                selectedPlots = Object.keys(plotConditions).map(Number);
+                document.getElementById('plot-number-toggle').textContent = 'Plot # (all)';
 
                 dataLoaded = true;
                 cachedData = aggregateVariables(allData);
@@ -255,8 +258,11 @@
                 document.querySelectorAll('#plot-number-menu input').forEach(input => {
                     input.addEventListener('change', () => {
                         selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked')).map(cb => Number(cb.value));
-                        document.getElementById('plot-number-toggle').textContent = selectedPlots.length ? `Plot # (${selectedPlots.join(', ')})` : 'Plot # (All)';
-                        console.log(`Selected Plots: ${selectedPlots.length ? selectedPlots.join(', ') : 'All'}`);
+                        const totalPlots = Object.keys(plotConditions).length;
+                        const toggleText = selectedPlots.length === totalPlots ? 'Plot # (all)' :
+                                          selectedPlots.length > 0 ? 'Plot # (some)' : 'Plot # (none)';
+                        document.getElementById('plot-number-toggle').textContent = toggleText;
+                        console.log(`Selected Plots: ${selectedPlots.length ? selectedPlots.join(', ') : 'None'}`);
                         debounceUpdateGraph();
                     });
                 });
@@ -274,7 +280,7 @@
         function resetGraph() {
             const graphDiv = document.getElementById('graph');
             if (graphInitialized) Plotly.purge(graphDiv);
-            graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO₂ concentrations.<hr>Beginning August 2015</div>';
+            graphDiv.innerHTML = '<div class="welcome-message" id="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO₂ concentrations.<hr>Beginning August 2015</div>';
             graphInitialized = false;
         }
 
@@ -583,7 +589,7 @@
                 return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1)) &&
                        (selectedPlots.length === 0 || selectedPlots.includes(row.Plot));
             });
-            console.log(`Filtered data length: ${workingData.length}, Selected Plots: ${selectedPlots.length ? selectedPlots.join(', ') : 'All'}`);
+            console.log(`Filtered data length: ${workingData.length}, Selected Plots: ${selectedPlots.length ? selectedPlots.join(', ') : 'None'}`);
             if (independent === 'TIMESTAMP') workingData = getWeeklyTimestamps(workingData, startDate, endDate);
 
             const units = allDependents.map(dep => unitMap[dep]);
@@ -731,6 +737,10 @@
             const data = traces.concat(showStats && fitTraces.length ? fitTraces : []);
 
             console.log('Traces:', traces.length, 'Fit Traces:', fitTraces.length, 'Annotations:', annotations.length);
+
+            // Ensure welcome message is removed before plotting
+            const welcomeMessage = document.getElementById('welcome-message');
+            if (welcomeMessage) welcomeMessage.style.display = 'none';
 
             if (!graphInitialized) {
                 Plotly.newPlot(graphDiv, data, layout, { responsive: true })
