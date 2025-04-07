@@ -60,15 +60,17 @@
     </style>
 </head>
 <body>
-    <h1>COMPARATIVE BIOSPHEROMICS DASHBOARD</h1>
+    <h1>Comparative Biospheromics Dashboard</h1>
     <div class="container">
         <div class="sidebar" id="sidebar">
-            <div class="sidebar-tab" id="sidebar-tab"><</div>
+            <div class="sidebar-tab" id="sidebar-tab">&lt;</div>
             <div class="sidebar-title">SPRUCE<br><span>Data Explorer</span></div>
+
             <div class="button-container">
                 <span class="button-label">Control Panel:</span>
                 <div id="control-panel-button">Show Control Panel</div>
             </div>
+
             <div class="button-container">
                 <span class="button-label">X-Axis:</span>
                 <div class="dropdown-toggle" id="independent-toggle">Time</div>
@@ -83,6 +85,7 @@
                     <div class="dropdown-item"><input type="checkbox" id="H2O_measured" value="H2O_measured"><label for="H2O_measured">Measured H₂O (mmol/mol)</label></div>
                 </div>
             </div>
+
             <div class="button-container">
                 <span class="button-label">Y-Axis:</span>
                 <div class="dropdown-toggle" id="dependent-toggle">Select Dependent</div>
@@ -105,6 +108,7 @@
                     <div class="dropdown-item"><input type="checkbox" id="H2O_measured_dep" value="H2O_measured"><label for="H2O_measured_dep" style="color: #7FFF00;">Measured H₂O (mmol/mol)</label></div>
                 </div>
             </div>
+
             <div class="button-container">
                 <span class="button-label">Time Range:</span>
                 <div class="dropdown-toggle" id="time-range-toggle">2015-08-01 - 2025-04-05</div>
@@ -113,6 +117,7 @@
                     <div class="dropdown-item"><label for="end-date">End Date:</label><input type="text" id="end-date" value="2025-04-05"></div>
                 </div>
             </div>
+
             <div class="button-container">
                 <span class="button-label">Chart Type:</span>
                 <div class="dropdown-toggle" id="chart-type-toggle">Scatter</div>
@@ -125,6 +130,7 @@
                     <div class="dropdown-item"><input type="radio" name="chart-type" id="anova" value="anova"><label for="anova">ANOVA</label></div>
                 </div>
             </div>
+
             <div class="button-container">
                 <span class="button-label">Stats:</span>
                 <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
@@ -141,11 +147,18 @@
                 </div>
             </div>
         </div>
+
         <div class="graph-container" id="graph-container">
-            <div id="graph"><div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div></div>
+            <div id="graph">
+                <div class="welcome-message">
+                    <a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a>
+                    <hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO₂ concentrations.<hr>Beginning August 2015
+                </div>
+            </div>
             <div class="legend-tab" id="legend-tab">Show Legend</div>
         </div>
     </div>
+
     <div class="controls-popup" id="control-panel-popup">
         <h3>Control Panel</h3>
         <div id="control-panel-content"></div>
@@ -191,11 +204,16 @@
         };
 
         async function loadData() {
+            const graphDiv = document.getElementById('graph');
+            graphDiv.innerHTML = '<div class="welcome-message">Loading data...</div>';
             try {
                 const response = await fetch(dataUrl);
                 if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                allData = await response.json();
-                allData = allData.map(row => {
+                const rawJson = await response.json();
+                console.log('Raw JSON structure (first 5 rows):', rawJson.slice(0, 5));
+                console.log('PAR_2 in raw data:', rawJson.slice(0, 5).map(row => ({ TIMESTAMP: row.Year + '-' + row.DFOY, PAR_2: row.PAR_2 })));
+
+                allData = rawJson.map(row => {
                     const year = parseInt(row.Year, 10);
                     const dfoy = parseFloat(row.DFOY);
                     const day = Math.floor(dfoy);
@@ -206,6 +224,7 @@
                     row.TIMESTAMP = date;
                     return row;
                 }).filter(row => !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date);
+
                 console.log('Raw data sample (checking PAR_2):');
                 allData.slice(0, 5).forEach(row => console.log(`TIMESTAMP: ${row.TIMESTAMP.toISOString()}, PAR_2: ${row.PAR_2}`));
                 dataLoaded = true;
@@ -215,14 +234,14 @@
                 updateGraph();
             } catch (error) {
                 console.error('Error loading data:', error);
-                resetGraph();
+                graphDiv.innerHTML = '<div class="warning-message">Failed to load data. Check the console for details.</div>';
             }
         }
 
         function resetGraph() {
             const graphDiv = document.getElementById('graph');
             if (graphInitialized) Plotly.purge(graphDiv);
-            graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+            graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO₂ concentrations.<hr>Beginning August 2015</div>';
             graphInitialized = false;
         }
 
@@ -487,7 +506,7 @@
         function aggregateVariables(data) {
             const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
             const zones = ['A', 'B', 'C'];
-            return data.map(row => {
+            const result = data.map(row => {
                 const newRow = { ...row };
                 depths.forEach(depth => {
                     const suffix = depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 : depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9;
@@ -501,12 +520,30 @@
                 const rhKeys = ['RH_2_0_1', 'RH_2_0_2'];
                 const rhValues = rhKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
                 newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + v, 0) / rhValues.length : null;
+
                 ['CO2_measured', 'H2O_measured', 'WD_10', 'PAR_2', 'PREC_6'].forEach(key => {
-                    const value = parseFloat(row[key]);
-                    newRow[key] = isNaN(value) ? null : value;
+                    let rawValue = row[key];
+                    if (rawValue === undefined) {
+                        console.warn(`Warning: ${key} is undefined in row with TIMESTAMP ${row.TIMESTAMP?.toISOString()}`);
+                        newRow[key] = null;
+                    } else {
+                        const value = parseFloat(rawValue);
+                        newRow[key] = isNaN(value) ? null : value;
+                        if (key === 'PAR_2' && !isNaN(value)) {
+                            console.log(`Parsed PAR_2: ${value} for TIMESTAMP ${row.TIMESTAMP?.toISOString()}`);
+                        }
+                    }
                 });
                 return newRow;
             });
+
+            const par2Values = result.map(row => row.PAR_2).filter(v => v !== null);
+            if (par2Values.length === 0) {
+                console.warn('No valid PAR_2 data found in aggregated dataset. Check the source JSON.');
+            } else {
+                console.log(`Found ${par2Values.length} valid PAR_2 values. Sample:`, par2Values.slice(0, 5));
+            }
+            return result;
         }
 
         function getWeeklyTimestamps(data, start, end) {
@@ -704,7 +741,9 @@
             if (!traces.length) {
                 console.warn('No valid traces to plot:', invalidTraces);
                 resetGraph();
-                if (invalidTraces.length) graphDiv.innerHTML += `<div class="warning-message">${invalidTraces.join('<br>')}</div>`;
+                if (invalidTraces.length) {
+                    graphDiv.innerHTML = `<div class="warning-message">${invalidTraces.join('<br>')}<br>Check the data source or variable selection.</div>`;
+                }
                 return;
             }
 
