@@ -239,8 +239,9 @@
                     date.setDate(day);
                     date.setHours(Math.floor(fractionalDay * 24), Math.floor((fractionalDay * 24 % 1) * 60), 0, 0);
                     row.TIMESTAMP = date;
+                    row.Plot = Number(row.Plot); // Ensure Plot is a number
                     return row;
-                }).filter(row => !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date);
+                }).filter(row => !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date && !isNaN(row.Plot));
 
                 // Populate Plot # dropdown with radio buttons
                 const plotMenu = document.getElementById('plot-number-menu');
@@ -260,12 +261,14 @@
                     input.addEventListener('change', () => {
                         selectedPlot = input.value === 'all' ? 'all' : Number(input.value);
                         document.getElementById('plot-number-toggle').textContent = input.value === 'all' ? 'Plot # (All)' : `Plot #${input.value}`;
+                        console.log(`Selected Plot: ${selectedPlot}`); // Debug log
                         debounceUpdateGraph();
                     });
                 });
 
                 // Attach Plot # toggle listener
-                document.getElementById('plot-number-toggle').addEventListener('click', () => {
+                const plotToggle = document.getElementById('plot-number-toggle');
+                plotToggle.addEventListener('click', () => {
                     console.log('Plot # button clicked'); // Debug log
                     toggleDropdown('plot-number-menu');
                 });
@@ -289,13 +292,15 @@
             });
             const menu = document.getElementById(id);
             if (menu) {
-                const wasOpen = menu.classList.contains('open');
                 menu.classList.toggle('open');
-                if (id === 'stats-menu' && !wasOpen) {
+                console.log(`Toggled dropdown: ${id}, now ${menu.classList.contains('open') ? 'open' : 'closed'}`); // Debug log
+                if (id === 'stats-menu' && menu.classList.contains('open')) {
                     statsOpened = true;
                     updateStatsOptions();
                     updateGraph();
                 }
+            } else {
+                console.error(`Dropdown menu with id "${id}" not found`);
             }
         }
 
@@ -657,13 +662,15 @@
                 return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1)) &&
                        (selectedPlot === 'all' || row.Plot === selectedPlot);
             });
+            console.log(`Filtered data length: ${workingData.length}, Selected Plot: ${selectedPlot}`); // Debug log
             if (independent === 'TIMESTAMP') workingData = getWeeklyTimestamps(workingData, startDate, endDate);
 
             const units = allDependents.map(dep => unitMap[dep]);
-            const commonUnit = units[0];
-            const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
+            const commonUnit = units.every(u => u === units[0]) ? units[0] : null;
+            const dependents = commonUnit ? allDependents.filter(dep => unitMap[dep] === commonUnit) : allDependents;
             if (!dependents.length || !workingData.length) {
                 resetGraph();
+                console.warn('No valid data after filtering');
                 return;
             }
 
@@ -728,7 +735,7 @@
                         const mean = jStat.mean(yValues);
                         const stdDev = jStat.stdev(yValues);
                         statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Mean=${mean.toFixed(2)}, SD=${stdDev.toFixed(2)}`);
-                    } else if (['scatter', 'line', 'area'].includes(chartType) && xValues.length > 1) {
+                    } else if (['scatter', 'line', 'area'].includes(chartType) && xValues.length > 1 && showStats) {
                         const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
                         const fit = calculateFit(xNum, yValues, fitType);
                         if (fit.type !== 'none') {
@@ -764,7 +771,9 @@
                 return;
             }
 
-            if (statsOpened) document.getElementById('stats-content').innerHTML = statsText.length ? statsText.join('<br>') : 'No stats available';
+            if (statsOpened) {
+                document.getElementById('stats-content').innerHTML = statsText.length ? statsText.join('<br>') : 'No stats available';
+            }
 
             const xAxisTitle = independent === 'TIMESTAMP' ? 'Time' : 
                               independent === 'CO2_measured' ? 'Measured CO₂ (ppm)' :
@@ -773,7 +782,7 @@
             const isAllSoilTemp = dependents.every(dep => dep.startsWith('TS_'));
             const yAxisTitle = chartType === 'anova' ? `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means` :
                               dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent :
-                              isAllSoilTemp ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit})`;
+                              isAllSoilTemp ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit || 'Mixed Units'})`;
 
             const annotations = showStats && statsText.length ? [{
                 x: 0.02,
@@ -814,29 +823,36 @@
                 hovermode: 'closest'
             };
 
-            const data = ['scatter', 'line', 'area'].includes(chartType) && fitTraces.length ? traces.concat(fitTraces) : traces;
+            const data = ['scatter', 'line', 'area'].includes(chartType) && fitTraces.length && showStats ? traces.concat(fitTraces) : traces;
+
+            console.log('Traces:', traces.length, 'Fit Traces:', fitTraces.length, 'Annotations:', annotations.length); // Debug log
 
             graphDiv.innerHTML = '';
 
             if (!graphInitialized) {
                 Plotly.newPlot(graphDiv, data, layout, { responsive: true })
-                    .then(() => graphInitialized = true)
+                    .then(() => {
+                        graphInitialized = true;
+                        console.log('Graph initialized');
+                    })
                     .catch(err => {
                         console.error('Plotly newPlot error:', err);
                         resetGraph();
                     });
             } else {
-                try {
-                    Plotly.react(graphDiv, data, layout);
-                } catch (err) {
-                    console.error('Plotly react error:', err);
-                    Plotly.newPlot(graphDiv, data, layout, { responsive: true })
-                        .then(() => graphInitialized = true)
-                        .catch(err => {
-                            console.error('Plotly fallback newPlot error:', err);
-                            resetGraph();
-                        });
-                }
+                Plotly.react(graphDiv, data, layout)
+                    .catch(err => {
+                        console.error('Plotly react error:', err);
+                        Plotly.newPlot(graphDiv, data, layout, { responsive: true })
+                            .then(() => {
+                                graphInitialized = true;
+                                console.log('Graph reinitialized after react failure');
+                            })
+                            .catch(err => {
+                                console.error('Plotly fallback newPlot error:', err);
+                                resetGraph();
+                            });
+                    });
             }
         }
 
