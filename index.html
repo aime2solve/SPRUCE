@@ -464,17 +464,18 @@
             const n = pairedData.length;
 
             console.log('Fit inputs:', { xNum: xNum.slice(0, 5), yNum: yNum.slice(0, 5), total: n });
+            console.log('xNum variation:', { min: Math.min(...xNum), max: Math.max(...xNum) });
 
             const sumX = xNum.reduce((a, b) => a + b, 0);
             const sumY = yNum.reduce((a, b) => a + b, 0);
             const sumXY = pairedData.reduce((sum, d) => sum + d.x * d.y, 0);
-            const sumXX = xNum.reduce((sum, d) => sum + d.x * d.x, 0);
+            const sumXX = xNum.reduce((sum, d) => sum + d * d, 0);
             const denominator = n * sumXX - sumX * sumX;
 
             console.log('Fit intermediates:', { sumX, sumY, sumXY, sumXX, denominator });
 
             if (!isFinite(denominator) || denominator === 0) {
-                console.log('Invalid denominator:', { n, sumXX, sumX, reason: denominator === 0 ? 'zero' : 'non-finite' });
+                console.log('Invalid denominator:', { n, sumXX, sumX, reason: denominator === 0 ? 'zero (no variation)' : 'non-finite' });
                 return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
             }
 
@@ -576,9 +577,9 @@
                 const date = row.TIMESTAMP;
                 if ((!start || date >= start) && (!end || date <= new Date(end.getTime() + 24 * 60 * 60 * 1000 - 1))) {
                     const weekStart = new Date(date);
-                    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                    weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Start of week (Sunday)
                     weekStart.setHours(0, 0, 0, 0);
-                    const key = weekStart.toISOString().split('T')[0];
+                    const key = weekStart.getTime(); // Use timestamp as key for uniqueness
                     if (!weeklyData[key]) weeklyData[key] = { TIMESTAMP: weekStart, values: {} };
                     Object.keys(row).forEach(k => {
                         if (k !== 'TIMESTAMP') {
@@ -589,13 +590,15 @@
                     });
                 }
             });
-            return Object.values(weeklyData).map(w => ({
+            const result = Object.values(weeklyData).map(w => ({
                 TIMESTAMP: w.TIMESTAMP,
                 ...Object.keys(w.values).reduce((acc, k) => ({
                     ...acc,
                     [k]: w.values[k].length > 0 ? w.values[k].reduce((sum, v) => sum + v, 0) / w.values[k].length : null
                 }), {})
             }));
+            console.log('Weekly timestamps sample:', result.slice(0, 5).map(d => d.TIMESTAMP));
+            return result;
         }
 
         function calculateGraphWidth() { return document.getElementById('graph-container').clientWidth; }
@@ -659,7 +662,6 @@
             });
             console.log(`Filtered data length: ${workingData.length}, Selected Plots: ${selectedPlots.length ? selectedPlots.join(', ') : 'None'}`);
             
-            // Apply weekly aggregation only if TIMESTAMP is independent and chart type supports it
             if (independent === 'TIMESTAMP' && ['scatter', 'line', 'area'].includes(chartType)) {
                 workingData = getWeeklyTimestamps(workingData, startDate, endDate);
             }
