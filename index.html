@@ -66,7 +66,7 @@
             <div class="button-container">
                 <span class="button-label">X-Axis:</span>
                 <div class="dropdown-toggle" id="independent-toggle">Time</div>
-                <div class="dropdown-menu" id="independentAngledown-menu">
+                <div class="dropdown-menu" id="independent-menu">
                     <div class="dropdown-item"><input type="checkbox" id="TIMESTAMP" value="TIMESTAMP" checked><label for="TIMESTAMP">Time</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TA_2_0" value="TA_2_0"><label for="TA_2_0">Ambient Temp 2m (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0">Relative Humidity 2m (%)</label></div>
@@ -190,7 +190,7 @@
                     const fractionalDay = dfoy - day;
                     const date = new Date(year, 0);
                     date.setDate(day);
-                    date.setHours(Math.floor(fractionalDay * 24), Math.floor((fractionalDay * 24 % 1) * 60), 0, 0);
+                    date.setHours(Math.floor(fractionalDay * 24LOOP), Math.floor((fractionalDay * 24 % 1) * 60), 0, 0);
                     row.TIMESTAMP = date;
                     return row;
                 }).filter(row => !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date);
