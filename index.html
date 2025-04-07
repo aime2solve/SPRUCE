@@ -768,6 +768,9 @@
 
             const data = ['scatter', 'line', 'area'].includes(chartType) && fitTraces.length ? traces.concat(fitTraces) : traces;
 
+            // Clear welcome message before plotting
+            graphDiv.innerHTML = '';
+
             if (!graphInitialized) {
                 Plotly.newPlot(graphDiv, data, layout, { responsive: true })
                     .then(() => graphInitialized = true)
