@@ -207,8 +207,15 @@
                 updateGraph();
             } catch (error) {
                 console.error('Error loading data:', error);
-                document.getElementById('graph').innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+                resetGraph();
             }
+        }
+
+        function resetGraph() {
+            const graphDiv = document.getElementById('graph');
+            if (graphInitialized) Plotly.purge(graphDiv);
+            graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+            graphInitialized = false;
         }
 
         function toggleDropdown(id) {
@@ -333,7 +340,7 @@
         }
 
         function calculateFit(x, y, fitType = 'auto') {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y) && !isNaN(d.x));
+            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y) && !isNaN(d.x) && d.x > 0); // Ensure x > 0 for logarithmic
             if (pairedData.length < 2) return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
 
             const xNum = pairedData.map(d => d.x);
@@ -564,8 +571,7 @@
         function updateGraph() {
             const graphDiv = document.getElementById('graph');
             if (!dataLoaded || typeof Plotly === 'undefined') {
-                graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
-                graphInitialized = false;
+                resetGraph();
                 return;
             }
 
@@ -579,8 +585,7 @@
             document.getElementById('dependent-toggle').innerHTML = allDependents.length ? allDependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent}</span>`).join('<br>') : 'Select Dependent';
 
             if (!allDependents.length || !independent) {
-                graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
-                graphInitialized = false;
+                resetGraph();
                 return;
             }
 
@@ -598,8 +603,7 @@
             const commonUnit = units[0];
             const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
             if (!dependents.length || !workingData.length) {
-                graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
-                graphInitialized = false;
+                resetGraph();
                 return;
             }
 
@@ -633,7 +637,7 @@
                         .filter(d => d.x !== null && !isNaN(d.x) && d.y !== null && !isNaN(d.y));
                     
                     if (pairedData.length === 0) {
-                        console.warn(`No valid data for ${dep} vs ${independent}: pairedData length=${pairedData.length}`);
+                        console.warn(`No valid data for ${dep} vs ${independent}: pairedData length=0`);
                         invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has no valid data`);
                         return;
                     }
@@ -669,7 +673,10 @@
                         const fit = calculateFit(xNum, yValues, fitType);
                         if (fit.type !== 'none') {
                             const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Math.max(...xNum)];
-                            const yFit = fit.yPred.slice(0, 2); // Use only min and max for simplicity
+                            const yFit = fit.type === 'linear' ? xFit.map(x => fit.params.intercept + fit.params.slope * x) :
+                                        fit.type === 'exponential' ? xFit.map(x => fit.params.a * Math.exp(fit.params.b * x)) :
+                                        fit.type === 'polynomial' ? xFit.map(x => fit.params.a + fit.params.b * x + fit.params.c * x * x) :
+                                        fit.type === 'logarithmic' ? xFit.map(x => fit.params.a + fit.params.b * Math.log(x)) : [];
                             fitTraces.push({
                                 x: xFit,
                                 y: yFit,
@@ -690,9 +697,8 @@
 
             if (!traces.length) {
                 console.warn('No valid traces to plot:', invalidTraces);
-                graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
-                                      ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
-                graphInitialized = false;
+                resetGraph();
+                if (invalidTraces.length) graphDiv.innerHTML += `<div class="warning-message">${invalidTraces.join('<br>')}</div>`;
                 return;
             }
 
@@ -746,18 +752,28 @@
                 hovermode: 'closest'
             };
 
-            console.log('Plotting traces:', traces);
-            graphDiv.innerHTML = '';
-            Plotly.newPlot('graph', ['scatter', 'line', 'area'].includes(chartType) && fitTraces.length ? traces.concat(fitTraces) : traces, layout, { responsive: true })
-                .then(() => {
-                    graphInitialized = true;
-                })
-                .catch(err => {
-                    console.error('Plotly plotting error:', err);
-                    graphDiv.innerHTML = `<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>
-                                          ${invalidTraces.length ? `<div class="warning-message">${invalidTraces.join('<br>')}</div>` : ''}`;
-                    graphInitialized = false;
-                });
+            const data = ['scatter', 'line', 'area'].includes(chartType) && fitTraces.length ? traces.concat(fitTraces) : traces;
+            console.log('Plotting traces:', data);
+
+            if (!graphInitialized) {
+                Plotly.newPlot(graphDiv, data, layout, { responsive: true })
+                    .then(() => graphInitialized = true)
+                    .catch(err => {
+                        console.error('Plotly newPlot error:', err);
+                        resetGraph();
+                    });
+            } else {
+                Plotly.react(graphDiv, data, layout)
+                    .catch(err => {
+                        console.error('Plotly react error:', err);
+                        Plotly.newPlot(graphDiv, data, layout, { responsive: true })
+                            .then(() => graphInitialized = true)
+                            .catch(err => {
+                                console.error('Plotly fallback newPlot error:', err);
+                                resetGraph();
+                            });
+                    });
+            }
         }
 
         document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
