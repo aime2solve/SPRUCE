@@ -190,7 +190,7 @@
                     const fractionalDay = dfoy - day;
                     const date = new Date(year, 0);
                     date.setDate(day);
-                    date.setHours(Math.floor(fractionalDay * 24LOOP), Math.floor((fractionalDay * 24 % 1) * 60), 0, 0);
+                    date.setHours(Math.floor(fractionalDay * 24), Math.floor((fractionalDay * 24 % 1) * 60), 0, 0);
                     row.TIMESTAMP = date;
                     return row;
                 }).filter(row => !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date);
