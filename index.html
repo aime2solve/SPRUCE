@@ -29,8 +29,8 @@
         .button-label { color: #FFFF00; font-size: 13px; margin-right: 10px; width: 100px; text-align: right; padding-left: 10px; }
         .dropdown-toggle, #control-panel-button { background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 11px; padding: 4px 8px; width: calc(100% - 120px); text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; }
         #time-range-toggle { font-size: 10px; white-space: nowrap; }
-        .dropdown-menu { position: absolute; top: 100%; left: 110px; width: calc(100% - 120px); max-height: 200px; overflow-y: auto; background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 11px; padding: 8px; visibility: hidden; z-index: 10; }
-        .dropdown-menu.open { visibility: visible; }
+        .dropdown-menu { position: absolute; top: 100%; left: 110px; width: calc(100% - 120px); max-height: 200px; overflow-y: auto; background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 11px; padding: 8px; z-index: 20; display: none; }
+        .dropdown-menu.open { display: block; }
         .dropdown-item { display: flex; align-items: center; margin-bottom: 3px; }
         #dependent-menu .dropdown-item label, #independent-menu .dropdown-item label, #plot-number-menu .dropdown-item label { margin-left: 5px; }
         #time-range-menu { padding: 10px; }
@@ -284,13 +284,13 @@
         function toggleDropdown(id) {
             const menus = document.querySelectorAll('.dropdown-menu');
             menus.forEach(menu => {
-                if (menu.id !== id && menu.classList.contains('open')) menu.classList.remove('open');
+                if (menu.id !== id && menu.style.display === 'block') menu.style.display = 'none';
             });
             const menu = document.getElementById(id);
             if (menu) {
-                menu.classList.toggle('open');
-                console.log(`Toggled dropdown: ${id}, now ${menu.classList.contains('open') ? 'open' : 'closed'}`);
-                if (id === 'stats-menu' && menu.classList.contains('open')) {
+                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                console.log(`Toggled dropdown: ${id}, now ${menu.style.display === 'block' ? 'open' : 'closed'}`);
+                if (id === 'stats-menu' && menu.style.display === 'block') {
                     statsOpened = true;
                     updateStatsOptions();
                     updateGraph();
@@ -695,7 +695,8 @@
                     const pairedData = workingData
                         .map(row => ({
                             x: independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent]),
-                            y: parseFloat(row[dep])
+                            y: parseFloat(row[dep]),
+                            plot: row.Plot
                         }))
                         .filter(d => d.x !== null && !isNaN(d.x) && d.y !== null && !isNaN(d.y));
                     
@@ -707,6 +708,7 @@
 
                     let xValues = pairedData.map(d => d.x);
                     let yValues = pairedData.map(d => d.y);
+                    const plotValues = pairedData.map(d => d.plot);
 
                     const filtered = filterOutliers(xValues, yValues);
                     xValues = filtered.x;
@@ -734,20 +736,22 @@
                     } else if (['scatter', 'line', 'area'].includes(chartType) && xValues.length > 1 && showStats) {
                         const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
                         const fit = calculateFit(xNum, yValues, fitType);
-                        if (fit.type !== 'none') {
+                        if (fit.type !== 'none' && fit.yPred.length > 0) {
                             const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Math.max(...xNum)];
                             const yFit = fit.type === 'linear' ? xFit.map(x => fit.params.intercept + fit.params.slope * x) :
                                         fit.type === 'exponential' ? xFit.map(x => fit.params.a * Math.exp(fit.params.b * x)) :
                                         fit.type === 'polynomial' ? xFit.map(x => fit.params.a + fit.params.b * x + fit.params.c * x * x) :
                                         fit.type === 'logarithmic' ? xFit.map(x => fit.params.a + fit.params.b * Math.log(x)) : [];
-                            fitTraces.push({
-                                x: xFit,
-                                y: yFit,
-                                mode: 'lines',
-                                type: 'scattergl',
-                                name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (${fit.type} fit)`,
-                                line: { color: color, width: 2, dash: 'dash' }
-                            });
+                            if (yFit.every(y => !isNaN(y))) {
+                                fitTraces.push({
+                                    x: xFit,
+                                    y: yFit,
+                                    mode: 'lines',
+                                    type: 'scattergl',
+                                    name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (${fit.type} fit)`,
+                                    line: { color: color, width: 2, dash: 'dash' }
+                                });
+                            }
                             const eq = fit.type === 'linear' ? `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}x` :
                                       fit.type === 'exponential' ? `y = ${fit.params.a.toFixed(2)}e^(${fit.params.b.toFixed(2)}x)` :
                                       fit.type === 'polynomial' ? `y = ${fit.params.a.toFixed(2)} + ${fit.params.b.toFixed(2)}x + ${fit.params.c.toFixed(2)}x²` :
