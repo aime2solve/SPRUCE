@@ -22,7 +22,7 @@
         .container { display: flex; flex-grow: 1; overflow: hidden; height: calc(100vh - 4vh); position: relative; }
         .sidebar { width: 250px; background: rgba(26, 26, 26, 0.8); border-right: 2px solid #00FFFF; padding: 15px; display: flex; flex-direction: column; gap: 15px; position: absolute; top: 0; left: 0; height: 100%; transition: transform 0.3s ease; z-index: 10; }
         .sidebar.collapsed { transform: translateX(-250px); }
-        .sidebar-tab { position: absolute; top: 0; right: -40px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-left: none; border-radius: 0 10px 10px 0; color: #00FFFF; font-size: 19px; line-height: 36px; text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; }
+        .sidebar-tab { position: absolute; top: 0; right: -40px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-left: none; border-radius: 0 10px 10px 0; color: #00FFFF; font-size: 19px; line-height: 36px; text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; z-index: 11; }
         .sidebar-title { font-family: 'Exo 2', sans-serif; font-size: 26px; color: #DAA520; text-align: center; text-shadow: 0 0 10px #DAA520; line-height: 1.2; margin-top: 0; }
         .sidebar-title span { display: block; font-size: 18px; }
         .button-container { display: flex; align-items: center; width: 100%; position: relative; }
@@ -57,8 +57,36 @@
         .range-slider input[type="range"]::-webkit-slider-runnable-track { background: transparent; }
         .slider-values { display: flex; justify-content: space-between; font-size: 11px; color: #00FF00; margin-top: 5px; }
         .warning-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #FF4500; font-family: 'VT323', monospace; font-size: 17px; text-align: center; text-shadow: 0 0 5px #FF4500; z-index: 5; }
-        @media (max-width: 768px) { .sidebar { width: 200px; } .graph-container { width: calc(100vw - 200px); } .graph-container.full-width { width: 100vw; } .legend-tab { top: 40px; right: 1vw; padding: 4px 8px; } }
-        @media (max-width: 480px) { .sidebar { width: 150px; } .graph-container { width: calc(100vw - 150px); } .graph-container.full-width { width: 100vw; } .legend-tab { top: 30px; right: 1vw; padding: 3px 6px; } .button-label { font-size: 11px; width: 80px; } .dropdown-toggle, #control-panel-button { width: calc(100% - 90px); } .dropdown-menu { left: 90px; width: calc(100% - 90px); } }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .sidebar { width: 200px; }
+            .graph-container { width: calc(100vw - 200px); }
+            .graph-container.full-width { width: 100vw; }
+            .legend-tab { top: 40px; right: 1vw; padding: 4px 8px; font-size: 12px; }
+            .controls-popup { width: 300px; font-size: 11px; }
+            .sidebar-title { font-size: 20px; }
+            .sidebar-title span { font-size: 14px; }
+            .button-label { font-size: 11px; width: 80px; }
+            .dropdown-toggle, #control-panel-button { font-size: 10px; width: calc(100% - 90px); }
+            .dropdown-menu { left: 90px; width: calc(100% - 90px); font-size: 10px; }
+            #plot-number-menu { width: 250px; }
+            h1 { font-size: calc(14px + 1vw); }
+        }
+        @media (max-width: 480px) {
+            .sidebar { width: 150px; }
+            .graph-container { width: calc(100vw - 150px); }
+            .graph-container.full-width { width: 100vw; }
+            .legend-tab { top: 30px; right: 1vw; padding: 3px 6px; font-size: 10px; }
+            .controls-popup { width: 90vw; padding: 10px; }
+            .sidebar-title { font-size: 18px; }
+            .sidebar-title span { font-size: 12px; }
+            .button-label { font-size: 10px; width: 70px; }
+            .dropdown-toggle, #control-panel-button { font-size: 9px; width: calc(100% - 80px); }
+            .dropdown-menu { left: 80px; width: calc(100% - 80px); font-size: 9px; }
+            #plot-number-menu { width: 200px; top: 35px; }
+            h1 { font-size: calc(12px + 1vw); }
+        }
     </style>
 </head>
 <body>
@@ -707,7 +735,7 @@
                 yref: 'paper',
                 text: statsText.join('<br>'),
                 showarrow: false,
-                font: { color: '#00FF00', family: 'Lato', size: 12 },
+                font: { color: '#00FF00', family: 'Lato', size: window.innerWidth <= 480 ? 10 : 12 },
                 bgcolor: 'rgba(26, 26, 26, 0.7)',
                 bordercolor: 'transparent',
                 borderpad: 4
@@ -718,8 +746,8 @@
                 height: calculateGraphHeight(),
                 plot_bgcolor: '#1A1A1A',
                 paper_bgcolor: '#1A1A1A',
-                font: { color: '#FFFFFF', size: 12 },
-                title: { text: `${yAxisTitle} vs. ${xAxisTitle}`, font: { size: 16 } },
+                font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 },
+                title: { text: `${yAxisTitle} vs. ${xAxisTitle}`, font: { size: window.innerWidth <= 480 ? 14 : 16 } },
                 xaxis: {
                     title: xAxisTitle,
                     gridcolor: '#444',
@@ -731,9 +759,14 @@
                     gridcolor: '#444', 
                     zerolinecolor: '#444' 
                 },
-                margin: { t: 80, b: 100, l: 100, r: 40 }, // Adjusted margins: increased bottom (b) and left (l)
+                margin: { 
+                    t: window.innerWidth <= 480 ? 60 : 80, 
+                    b: window.innerWidth <= 480 ? 100 : 120, 
+                    l: window.innerWidth <= 480 ? 80 : 100, 
+                    r: window.innerWidth <= 480 ? 30 : 40 
+                },
                 showlegend: legendVisible,
-                legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.7)' },
+                legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.7)', font: { size: window.innerWidth <= 480 ? 10 : 12 } },
                 annotations: annotations,
                 hovermode: 'closest'
             };
@@ -817,7 +850,19 @@
         });
 
         window.addEventListener('resize', () => {
-            if (dataLoaded && graphInitialized) Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
+            if (dataLoaded && graphInitialized) Plotly.relayout('graph', { 
+                width: calculateGraphWidth(), 
+                height: calculateGraphHeight(),
+                margin: { 
+                    t: window.innerWidth <= 480 ? 60 : 80, 
+                    b: window.innerWidth <= 480 ? 100 : 120, 
+                    l: window.innerWidth <= 480 ? 80 : 100, 
+                    r: window.innerWidth <= 480 ? 30 : 40 
+                },
+                font: { size: window.innerWidth <= 480 ? 10 : 12 },
+                title: { font: { size: window.innerWidth <= 480 ? 14 : 16 } },
+                legend: { font: { size: window.innerWidth <= 480 ? 10 : 12 } }
+            });
         });
 
         loadData();
