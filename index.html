@@ -65,11 +65,9 @@
             </div>
             <div class="button-container">
                 <span class="button-label">X-Axis:</span>
-                <div class="dropdown-toggle" id="independent-toggle">Target Temperature (°C)</div>
-                <div class="dropdown-menu" id="independent-menu">
-                    <div class="dropdown-item"><input type="checkbox" id="Temp_target" value="Temp_target" checked><label for="Temp_target">Target Temperature (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="CO2_trmt" value="CO2_trmt"><label for="CO2_trmt">CO₂ Treatment (ppm)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TIMESTAMP" value="TIMESTAMP"><label for="TIMESTAMP">Time</label></div>
+                <div class="dropdown-toggle" id="independent-toggle">Time</div>
+                <div class="dropdown-menu" id="independentAngledown-menu">
+                    <div class="dropdown-item"><input type="checkbox" id="TIMESTAMP" value="TIMESTAMP" checked><label for="TIMESTAMP">Time</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TA_2_0" value="TA_2_0"><label for="TA_2_0">Ambient Temp 2m (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0">Relative Humidity 2m (%)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction 10m (°)</label></div>
@@ -126,7 +124,8 @@
                 <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
                 <div class="dropdown-menu" id="stats-menu">
                     <div id="stats-content"></div>
-                    <div class="dropdown-item"><input type="checkbox" id="show-fit" checked><label for="show-fit">Show Fit & Stats on Chart</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="show-fit" checked><label for="show-fit">Show Fit</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="show-stats" checked><label for="show-stats">Show Stats</label></div>
                 </div>
             </div>
         </div>
@@ -149,6 +148,7 @@
         let legendVisible = true;
         let cachedData = null;
         let graphInitialized = false;
+        let statsOpened = false;
 
         const dependentColors = {
             'TS_0': '#00FFFF', 'TS_5': '#FFFF00', 'TS_10': '#FF00FF', 'TS_20': '#00FF00', 'TS_30': '#FF0000',
@@ -166,8 +166,7 @@
             'RH_2_0': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Relative Humidity 2m (%)' },
             'WD_10': { min: 0, max: 360, defaultMin: 0, defaultMax: 360, label: 'Wind Direction 10m (°)' },
             'PAR_2': { min: 0, max: 2000, defaultMin: 0, defaultMax: 2000, label: 'PAR (µmol/m²s)' },
-            'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' },
-            'Temp_target': { min: 0, max: 9, defaultMin: 0, defaultMax: 9, label: 'Target Temp (°C)' }
+            'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' }
         };
         let currentRanges = JSON.parse(JSON.stringify(controlRanges));
         let depthRange = [0, 200];
@@ -212,7 +211,10 @@
                 if (menu.id !== id && menu.classList.contains('open')) menu.classList.remove('open');
             });
             const menu = document.getElementById(id);
-            if (menu) menu.classList.toggle('open');
+            if (menu) {
+                menu.classList.toggle('open');
+                if (id === 'stats-menu' && !statsOpened && menu.classList.contains('open')) statsOpened = true;
+            }
         }
 
         function toggleSidebar() {
@@ -319,21 +321,61 @@
             }
         }
 
-        function calculateRegression(x, y) {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
-            if (pairedData.length < 2) return { slope: NaN, intercept: NaN, rSquared: NaN };
+        function calculateFit(x, y) {
+            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y) && !isNaN(d.x));
+            if (pairedData.length < 2) return { type: 'none', params: {}, rSquared: NaN };
+
+            const xNum = pairedData.map(d => d.x);
+            const yNum = pairedData.map(d => d.y);
+
+            // Linear fit: y = a + bx
             const n = pairedData.length;
-            const sumX = pairedData.reduce((a, b) => a + b.x, 0);
-            const sumY = pairedData.reduce((a, b) => a + b.y, 0);
+            const sumX = xNum.reduce((a, b) => a + b, 0);
+            const sumY = yNum.reduce((a, b) => a + b, 0);
             const sumXY = pairedData.reduce((sum, d) => sum + d.x * d.y, 0);
-            const sumXX = pairedData.reduce((sum, d) => sum + d.x * d.x, 0);
+            const sumXX = xNum.reduce((sum, d) => sum + d.x * d.x, 0);
             const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
             const intercept = (sumY - slope * sumX) / n;
-            const yPred = pairedData.map(d => slope * d.x + intercept);
-            const ssTot = pairedData.reduce((sum, d) => sum + Math.pow(d.y - sumY / n, 2), 0);
-            const ssRes = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPred[i], 2), 0);
-            const rSquared = ssTot === 0 ? NaN : 1 - (ssRes / ssTot);
-            return { slope, intercept, rSquared };
+            const yPredLinear = xNum.map(x => slope * x + intercept);
+            const ssTot = yNum.reduce((sum, d) => sum + Math.pow(d - sumY / n, 2), 0);
+            const ssResLinear = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredLinear[i], 2), 0);
+            const rSquaredLinear = ssTot === 0 ? NaN : 1 - (ssResLinear / ssTot);
+
+            // Exponential fit: y = a * exp(bx)
+            const logY = yNum.map(y => Math.log(y)).filter(y => !isNaN(y) && y !== -Infinity);
+            const xExp = xNum.slice(0, logY.length);
+            const sumXExp = xExp.reduce((a, b) => a + b, 0);
+            const sumLogY = logY.reduce((a, b) => a + b, 0);
+            const sumXLogY = xExp.reduce((sum, xi, i) => sum + xi * logY[i], 0);
+            const sumXXExp = xExp.reduce((sum, xi) => sum + xi * xi, 0);
+            const nExp = logY.length;
+            const bExp = (nExp * sumXLogY - sumXExp * sumLogY) / (nExp * sumXXExp - sumXExp * sumXExp);
+            const aExp = Math.exp((sumLogY - bExp * sumXExp) / nExp);
+            const yPredExp = xNum.map(x => aExp * Math.exp(bExp * x));
+            const ssResExp = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredExp[i], 2), 0);
+            const rSquaredExp = ssTot === 0 || nExp < 2 ? NaN : 1 - (ssResExp / ssTot);
+
+            // Quadratic fit: y = a + bx + cx^2
+            const x2 = xNum.map(x => x * x);
+            const sumX2 = x2.reduce((a, b) => a + b, 0);
+            const sumX2X = x2.reduce((sum, x2i, i) => sum + x2i * xNum[i], 0);
+            const sumX2Y = x2.reduce((sum, x2i, i) => sum + x2i * yNum[i], 0);
+            const sumX2X2 = x2.reduce((sum, x2i) => sum + x2i * x2i, 0);
+            const denom = n * sumXX * sumX2X2 + 2 * sumX * sumX2 * sumX2X - sumXX * sumX2 * sumX2 - n * sumX2X2 * sumX2 - sumX * sumX * sumX2X2;
+            const cQuad = ((n * sumXX * sumX2Y + sumX * sumX2 * sumXY - sumXX * sumX2 * sumY - n * sumX2X * sumXY - sumX * sumX * sumX2Y) / denom);
+            const bQuad = ((sumX2X * sumX2 * sumY + sumX * sumX2Y * sumX2 - sumX2X * sumX2X * sumY - sumX * sumX * sumX2Y - sumX2 * sumX2 * sumXY) / denom);
+            const aQuad = (sumY - bQuad * sumX - cQuad * sumX2) / n;
+            const yPredQuad = xNum.map(x => aQuad + bQuad * x + cQuad * x * x);
+            const ssResQuad = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredQuad[i], 2), 0);
+            const rSquaredQuad = ssTot === 0 ? NaN : 1 - (ssResQuad / ssTot);
+
+            // Select best fit based on R²
+            const fits = [
+                { type: 'linear', params: { slope, intercept }, rSquared: rSquaredLinear, yPred: yPredLinear },
+                { type: 'exponential', params: { a: aExp, b: bExp }, rSquared: rSquaredExp, yPred: yPredExp },
+                { type: 'quadratic', params: { a: aQuad, b: bQuad, c: cQuad }, rSquared: rSquaredQuad, yPred: yPredQuad }
+            ];
+            return fits.reduce((best, current) => isNaN(current.rSquared) || current.rSquared < best.rSquared ? best : current);
         }
 
         function calculateANOVA(data, independent, dependent) {
@@ -370,7 +412,7 @@
                 const rhKeys = ['RH_2_0_1', 'RH_2_0_2'];
                 const rhValues = rhKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
                 newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + v, 0) / rhValues.length : null;
-                ['CO2_measured', 'H2O_measured', 'WD_10', 'PAR_2', 'PREC_6', 'Temp_target', 'CO2_trmt'].forEach(key => {
+                ['CO2_measured', 'H2O_measured', 'WD_10', 'PAR_2', 'PREC_6'].forEach(key => {
                     newRow[key] = parseFloat(row[key]) || null;
                 });
                 return newRow;
@@ -447,6 +489,7 @@
             const allDependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
             const chartType = document.querySelector('#chart-type-menu input:checked').value;
             const showFit = document.getElementById('show-fit').checked;
+            const showStats = document.getElementById('show-stats').checked;
 
             document.getElementById('independent-toggle').textContent = independent ? document.querySelector(`label[for="${independent}"]`)?.textContent || 'Select Independent' : 'Select Independent';
             document.getElementById('dependent-toggle').innerHTML = allDependents.length ? allDependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent}</span>`).join('<br>') : 'Select Dependent';
@@ -532,19 +575,24 @@
 
                     if (showFit && chartType !== 'box' && xValues.length > 1) {
                         const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
-                        const { slope, intercept, rSquared } = calculateRegression(xNum, yValues);
-                        if (!isNaN(slope) && !isNaN(intercept)) {
+                        const fit = calculateFit(xNum, yValues);
+                        if (fit.type !== 'none') {
                             const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Math.max(...xNum)];
-                            const yFit = xFit.map(x => slope * (independent === 'TIMESTAMP' ? x.getTime() : x) + intercept);
+                            const yFit = fit.type === 'linear' ? xFit.map(x => fit.params.intercept + fit.params.slope * x) :
+                                        fit.type === 'exponential' ? xFit.map(x => fit.params.a * Math.exp(fit.params.b * x)) :
+                                        xFit.map(x => fit.params.a + fit.params.b * x + fit.params.c * x * x);
                             fitTraces.push({
                                 x: xFit,
                                 y: yFit,
                                 mode: 'lines',
                                 type: 'scattergl',
-                                name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (fit)`,
+                                name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (${fit.type} fit)`,
                                 line: { color: color, width: 2, dash: 'dash' }
                             });
-                            statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Slope=${slope.toFixed(2)}, R²=${rSquared.toFixed(2)}`);
+                            const eq = fit.type === 'linear' ? `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}x` :
+                                      fit.type === 'exponential' ? `y = ${fit.params.a.toFixed(2)}e^(${fit.params.b.toFixed(2)}x)` :
+                                      `y = ${fit.params.a.toFixed(2)} + ${fit.params.b.toFixed(2)}x + ${fit.params.c.toFixed(2)}x²`;
+                            statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: ${eq}, R²=${fit.rSquared.toFixed(2)}`);
                         }
                     }
                 });
@@ -558,11 +606,9 @@
                 return;
             }
 
-            document.getElementById('stats-content').innerHTML = statsText.join('<br>');
+            if (statsOpened) document.getElementById('stats-content').innerHTML = statsText.join('<br>');
 
-            const xAxisTitle = independent === 'CO2_trmt' ? 'CO₂ Treatment (ppm)' : 
-                              independent === 'TIMESTAMP' ? 'Time' : 
-                              independent === 'Temp_target' ? 'Target Temperature (°C)' :
+            const xAxisTitle = independent === 'TIMESTAMP' ? 'Time' : 
                               independent === 'CO2_measured' ? 'Measured CO₂ (ppm)' :
                               independent === 'H2O_measured' ? 'Measured H₂O (mmol/mol)' :
                               document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
@@ -571,12 +617,12 @@
                               dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent :
                               isAllSoilTemp ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit})`;
 
-            const annotations = showFit ? statsText.map((text, i) => ({
+            const annotations = showStats && statsText.length ? [{
                 x: 0.02,
-                y: 0.98 - (i * 0.06),
+                y: 0.98,
                 xref: 'paper',
                 yref: 'paper',
-                text: text,
+                text: statsText.join('<br>'),
                 showarrow: false,
                 font: { color: '#00FF00', family: 'Lato', size: 14 },
                 bgcolor: 'rgba(26, 26, 26, 0.7)',
@@ -585,7 +631,7 @@
                 borderpad: 4,
                 opacity: 0.9,
                 align: 'left'
-            })) : [];
+            }] : [];
 
             const layout = {
                 width: calculateGraphWidth(),
@@ -633,6 +679,7 @@
         document.getElementById('legend-tab').addEventListener('click', toggleLegend);
         document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
         document.getElementById('show-fit').addEventListener('change', debounceUpdateGraph);
+        document.getElementById('show-stats').addEventListener('change', debounceUpdateGraph);
 
         document.querySelectorAll('#independent-menu input').forEach(input => {
             input.addEventListener('change', () => {
