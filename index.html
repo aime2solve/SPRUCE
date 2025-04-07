@@ -726,8 +726,12 @@
                     zerolinecolor: '#444',
                     type: independent === 'TIMESTAMP' ? 'date' : chartType === 'anova' ? 'category' : 'linear'
                 },
-                yaxis: { title: yAxisTitle, gridcolor: '#444', zerolinecolor: '#444' },
-                margin: { t: 80, b: 80, l: 80, r: 40 },
+                yaxis: { 
+                    title: yAxisTitle, 
+                    gridcolor: '#444', 
+                    zerolinecolor: '#444' 
+                },
+                margin: { t: 80, b: 100, l: 100, r: 40 }, // Adjusted margins: increased bottom (b) and left (l)
                 showlegend: legendVisible,
                 legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.7)' },
                 annotations: annotations,
@@ -738,7 +742,6 @@
 
             console.log('Traces:', traces.length, 'Fit Traces:', fitTraces.length, 'Annotations:', annotations.length);
 
-            // Ensure welcome message is removed before plotting
             const welcomeMessage = document.getElementById('welcome-message');
             if (welcomeMessage) welcomeMessage.style.display = 'none';
 
