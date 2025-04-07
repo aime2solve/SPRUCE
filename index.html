@@ -63,7 +63,7 @@
     <h1>Comparative Biospheromics Dashboard</h1>
     <div class="container">
         <div class="sidebar" id="sidebar">
-            <div class="sidebar-tab" id="sidebar-tab">&lt;</div>
+            <div class="sidebar-tab" id="sidebar-tab"><</div>
             <div class="sidebar-title">SPRUCE<br><span>Data Explorer</span></div>
 
             <div class="button-container">
@@ -79,7 +79,6 @@
                     <div class="dropdown-item"><input type="checkbox" id="TA_2_0" value="TA_2_0"><label for="TA_2_0">Ambient Temp 2m (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0">Relative Humidity 2m (%)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction 10m (°)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="PAR_2" value="PAR_2"><label for="PAR_2">PAR (µmol/m²s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="CO2_measured" value="CO2_measured"><label for="CO2_measured">Measured CO₂ (ppm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="H2O_measured" value="H2O_measured"><label for="H2O_measured">Measured H₂O (mmol/mol)</label></div>
@@ -102,7 +101,6 @@
                     <div class="dropdown-item"><input type="checkbox" id="TA_2_0_dep" value="TA_2_0"><label for="TA_2_0_dep" style="color: #FF6347;">Ambient Temp 2m (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="RH_2_0_dep" value="RH_2_0"><label for="RH_2_0_dep" style="color: #4682B4;">Relative Humidity 2m (%)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WD_10_dep" value="WD_10"><label for="WD_10_dep" style="color: #6A5ACD;">Wind Direction 10m (°)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="PAR_2_dep" value="PAR_2"><label for="PAR_2_dep" style="color: #20B2AA;">PAR (µmol/m²s)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PREC_6"><label for="PREC_6_dep" style="color: #DAA520;">Precipitation (mm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="CO2_measured_dep" value="CO2_measured"><label for="CO2_measured_dep" style="color: #FF69B4;">Measured CO₂ (ppm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="H2O_measured_dep" value="H2O_measured"><label for="H2O_measured_dep" style="color: #7FFF00;">Measured H₂O (mmol/mol)</label></div>
@@ -178,7 +176,7 @@
         const dependentColors = {
             'TS_0': '#00FFFF', 'TS_5': '#FFFF00', 'TS_10': '#FF00FF', 'TS_20': '#00FF00', 'TS_30': '#FF0000',
             'TS_40': '#0000FF', 'TS_50': '#FFA500', 'TS_100': '#800080', 'TS_200': '#008080',
-            'TA_2_0': '#FF6347', 'RH_2_0': '#4682B4', 'WD_10': '#6A5ACD', 'PAR_2': '#20B2AA',
+            'TA_2_0': '#FF6347', 'RH_2_0': '#4682B4', 'WD_10': '#6A5ACD',
             'PREC_6': '#DAA520', 'CO2_measured': '#FF69B4', 'H2O_measured': '#7FFF00'
         };
 
@@ -190,7 +188,6 @@
             'H2O_measured': { min: 0, max: 30, defaultMin: 0, defaultMax: 30, label: 'Measured H₂O (mmol/mol)' },
             'RH_2_0': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Relative Humidity 2m (%)' },
             'WD_10': { min: 0, max: 360, defaultMin: 0, defaultMax: 360, label: 'Wind Direction 10m (°)' },
-            'PAR_2': { min: 0, max: 2000, defaultMin: 0, defaultMax: 2000, label: 'PAR (µmol/m²s)' },
             'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' }
         };
         let currentRanges = JSON.parse(JSON.stringify(controlRanges));
@@ -199,7 +196,7 @@
         const unitMap = {
             'TS_0': '°C', 'TS_5': '°C', 'TS_10': '°C', 'TS_20': '°C', 'TS_30': '°C', 
             'TS_40': '°C', 'TS_50': '°C', 'TS_100': '°C', 'TS_200': '°C', 'TA_2_0': '°C',
-            'RH_2_0': '%', 'WD_10': '°', 'PAR_2': 'µmol/m²s', 'PREC_6': 'mm',
+            'RH_2_0': '%', 'WD_10': '°', 'PREC_6': 'mm',
             'CO2_measured': 'ppm', 'H2O_measured': 'mmol/mol'
         };
 
@@ -209,11 +206,8 @@
             try {
                 const response = await fetch(dataUrl);
                 if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                const rawJson = await response.json();
-                console.log('Raw JSON structure (first 5 rows):', rawJson.slice(0, 5));
-                console.log('PAR_2 in raw data:', rawJson.slice(0, 5).map(row => ({ TIMESTAMP: row.Year + '-' + row.DFOY, PAR_2: row.PAR_2 })));
-
-                allData = rawJson.map(row => {
+                allData = await response.json();
+                allData = allData.map(row => {
                     const year = parseInt(row.Year, 10);
                     const dfoy = parseFloat(row.DFOY);
                     const day = Math.floor(dfoy);
@@ -225,12 +219,8 @@
                     return row;
                 }).filter(row => !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date);
 
-                console.log('Raw data sample (checking PAR_2):');
-                allData.slice(0, 5).forEach(row => console.log(`TIMESTAMP: ${row.TIMESTAMP.toISOString()}, PAR_2: ${row.PAR_2}`));
                 dataLoaded = true;
                 cachedData = aggregateVariables(allData);
-                console.log('Aggregated data sample (checking PAR_2):');
-                cachedData.slice(0, 5).forEach(row => console.log(`TIMESTAMP: ${row.TIMESTAMP.toISOString()}, PAR_2: ${row.PAR_2}`));
                 updateGraph();
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -506,7 +496,7 @@
         function aggregateVariables(data) {
             const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
             const zones = ['A', 'B', 'C'];
-            const result = data.map(row => {
+            return data.map(row => {
                 const newRow = { ...row };
                 depths.forEach(depth => {
                     const suffix = depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 : depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9;
@@ -520,30 +510,12 @@
                 const rhKeys = ['RH_2_0_1', 'RH_2_0_2'];
                 const rhValues = rhKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
                 newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + v, 0) / rhValues.length : null;
-
-                ['CO2_measured', 'H2O_measured', 'WD_10', 'PAR_2', 'PREC_6'].forEach(key => {
-                    let rawValue = row[key];
-                    if (rawValue === undefined) {
-                        console.warn(`Warning: ${key} is undefined in row with TIMESTAMP ${row.TIMESTAMP?.toISOString()}`);
-                        newRow[key] = null;
-                    } else {
-                        const value = parseFloat(rawValue);
-                        newRow[key] = isNaN(value) ? null : value;
-                        if (key === 'PAR_2' && !isNaN(value)) {
-                            console.log(`Parsed PAR_2: ${value} for TIMESTAMP ${row.TIMESTAMP?.toISOString()}`);
-                        }
-                    }
+                ['CO2_measured', 'H2O_measured', 'WD_10', 'PREC_6'].forEach(key => {
+                    const value = parseFloat(row[key]);
+                    newRow[key] = isNaN(value) ? null : value;
                 });
                 return newRow;
             });
-
-            const par2Values = result.map(row => row.PAR_2).filter(v => v !== null);
-            if (par2Values.length === 0) {
-                console.warn('No valid PAR_2 data found in aggregated dataset. Check the source JSON.');
-            } else {
-                console.log(`Found ${par2Values.length} valid PAR_2 values. Sample:`, par2Values.slice(0, 5));
-            }
-            return result;
         }
 
         function getWeeklyTimestamps(data, start, end) {
@@ -638,9 +610,6 @@
                 return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1));
             });
             if (independent === 'TIMESTAMP') workingData = getWeeklyTimestamps(workingData, startDate, endDate);
-
-            console.log('Filtered data sample (checking PAR_2):');
-            workingData.slice(0, 5).forEach(row => console.log(`TIMESTAMP: ${row.TIMESTAMP.toISOString()}, PAR_2: ${row.PAR_2}`));
 
             const units = allDependents.map(dep => unitMap[dep]);
             const commonUnit = units[0];
@@ -798,7 +767,6 @@
             };
 
             const data = ['scatter', 'line', 'area'].includes(chartType) && fitTraces.length ? traces.concat(fitTraces) : traces;
-            console.log('Plotting traces:', data);
 
             if (!graphInitialized) {
                 Plotly.newPlot(graphDiv, data, layout, { responsive: true })
