@@ -159,6 +159,10 @@
 
     <div class="controls-popup" id="control-panel-popup">
         <h3>Control Panel</h3>
+        <div style="position: absolute; top: 10px; right: 10px;">
+            <div class="dropdown-toggle" id="plot-number-toggle">Plot # (All)</div>
+            <div class="dropdown-menu" id="plot-number-menu"></div>
+        </div>
         <div id="control-panel-content"></div>
     </div>
 
@@ -172,6 +176,7 @@
         let cachedData = null;
         let graphInitialized = false;
         let statsOpened = false;
+        let selectedPlots = new Set();
 
         const dependentColors = {
             'TS_0': '#00FFFF', 'TS_5': '#FFFF00', 'TS_10': '#FF00FF', 'TS_20': '#00FF00', 'TS_30': '#FF0000',
@@ -219,9 +224,38 @@
                     return row;
                 }).filter(row => !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date);
 
+                // Extract unique plots and conditions
+                const plotConditions = {};
+                allData.forEach(row => {
+                    const plot = row.Plot;
+                    if (plot !== undefined && !plotConditions[plot]) {
+                        const temp = row.Treatment_Temp || 'Ambient';
+                        const co2 = row.Treatment_CO2 || 'Ambient';
+                        plotConditions[plot] = `${temp === 'Ambient' ? 'Ambient' : `+${temp}°C`}, ${co2 === 'Ambient' ? 'Ambient' : `+${co2} ppm`}`;
+                    }
+                });
+                selectedPlots = new Set(Object.keys(plotConditions).map(Number));
+
+                // Populate Plot # dropdown
+                const plotMenu = document.getElementById('plot-number-menu');
+                plotMenu.innerHTML = Object.entries(plotConditions).map(([plot, condition]) =>
+                    `<div class="dropdown-item"><input type="checkbox" id="plot-${plot}" value="${plot}" checked><label for="plot-${plot}">Plot ${plot} (${condition})</label></div>`
+                ).join('');
+
                 dataLoaded = true;
                 cachedData = aggregateVariables(allData);
                 updateGraph();
+
+                // Add event listeners for plot checkboxes
+                document.querySelectorAll('#plot-number-menu input').forEach(input => {
+                    input.addEventListener('change', () => {
+                        const plotNum = Number(input.value);
+                        if (input.checked) selectedPlots.add(plotNum);
+                        else selectedPlots.delete(plotNum);
+                        document.getElementById('plot-number-toggle').textContent = selectedPlots.size === Object.keys(plotConditions).length ? 'Plot # (All)' : `Plot # (${selectedPlots.size})`;
+                        debounceUpdateGraph();
+                    });
+                });
             } catch (error) {
                 console.error('Error loading data:', error);
                 graphDiv.innerHTML = '<div class="warning-message">Failed to load data. Check the console for details.</div>';
@@ -445,7 +479,7 @@
                     const bLog = (nLog * sumLnXY - sumLnX * sumYLog) / (nLog * sumLnXLnX - sumLnX * sumLnX);
                     const aLog = (sumYLog - bLog * sumLnX) / nLog;
                     const yPredLog = xNum.map(x => aLog + bLog * Math.log(x));
-                    const ssTotLog = yNum.reduce((sum, d) => sum + Math.pow(d - jStat.mean(yNum), 2), 0);
+                    const ssTotLog = yNum.reduce((sum, d) => sum + Math.pow(d - jStatκληmean(yNum), 2), 0);
                     const ssResLog = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredLog[i], 2), 0);
                     const rSquaredLog = ssTotLog === 0 ? NaN : 1 - (ssResLog / ssTotLog);
                     const msRegLog = (ssTotLog - ssResLog) / 1;
@@ -607,7 +641,8 @@
             workingData = filterByDepthRange(workingData);
             workingData = workingData.filter(row => {
                 const rowDate = row.TIMESTAMP;
-                return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1));
+                return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1)) &&
+                       selectedPlots.has(row.Plot);
             });
             if (independent === 'TIMESTAMP') workingData = getWeeklyTimestamps(workingData, startDate, endDate);
 
@@ -768,7 +803,6 @@
 
             const data = ['scatter', 'line', 'area'].includes(chartType) && fitTraces.length ? traces.concat(fitTraces) : traces;
 
-            // Clear welcome message before plotting
             graphDiv.innerHTML = '';
 
             if (!graphInitialized) {
@@ -779,16 +813,17 @@
                         resetGraph();
                     });
             } else {
-                Plotly.react(graphDiv, data, layout)
-                    .catch(err => {
-                        console.error('Plotly react error:', err);
-                        Plotly.newPlot(graphDiv, data, layout, { responsive: true })
-                            .then(() => graphInitialized = true)
-                            .catch(err => {
-                                console.error('Plotly fallback newPlot error:', err);
-                                resetGraph();
-                            });
-                    });
+                try {
+                    Plotly.react(graphDiv, data, layout);
+                } catch (err) {
+                    console.error('Plotly react error:', err);
+                    Plotly.newPlot(graphDiv, data, layout, { responsive: true })
+                        .then(() => graphInitialized = true)
+                        .catch(err => {
+                            console.error('Plotly fallback newPlot error:', err);
+                            resetGraph();
+                        });
+                }
             }
         }
 
@@ -800,6 +835,7 @@
         document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
         document.getElementById('legend-tab').addEventListener('click', toggleLegend);
         document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
+        document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu'));
         document.getElementById('show-stats').addEventListener('change', debounceUpdateGraph);
 
         document.querySelectorAll('#independent-menu input').forEach(input => {
