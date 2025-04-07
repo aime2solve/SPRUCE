@@ -17,7 +17,7 @@
             font-style: normal;
         }
         body, html { margin: 0; padding: 0; height: 100vh; width: 100vw; background-color: #000000; font-family: 'Lato', sans-serif; overflow: hidden; display: flex; flex-direction: column; }
-        h1 { color: #00FFFF; text-align: center; padding: 2vh; font-family: 'Nasalization', sans-serif; font-size: calc(16px + 1.5vw); margin: 0; text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; flex-shrink: 0; z-index: 11; line-height: 1.5; }
+        h1 { color: #00FFFF; text-align: center; padding: 2vh; font-family: 'Nasalization', sans-serif; font-size: calc(16px + 1.5vw); margin: 0; text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; flex-shrink: 0; z-index: 11; line-height: 1.5; text-transform: uppercase; }
         @keyframes glowBreathe { 0%, 100% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; } 25%, 75% { text-shadow: 2px 2px 5px #00CC66, -2px -2px 5px #00CC66, 0 0 12px #00FFFF; } 50% { text-shadow: 2px 2px 4.5px #00CC66, -2px -2px 4.5px #00CC66, 0 0 11px #00FFFF; } }
         .container { display: flex; flex-grow: 1; overflow: hidden; height: calc(100vh - 4vh); position: relative; }
         .sidebar { width: 250px; background: rgba(26, 26, 26, 0.8); border-right: 2px solid #00FFFF; padding: 15px; display: flex; flex-direction: column; gap: 15px; position: absolute; top: 0; left: 0; height: 100%; transition: transform 0.3s ease; z-index: 10; }
@@ -60,7 +60,7 @@
     </style>
 </head>
 <body>
-    <h1>Comparative Biospheromics Dashboard</h1>
+    <h1>COMPARATIVE BIOSPHEROMICS DASHBOARD</h1>
     <div class="container">
         <div class="sidebar" id="sidebar">
             <div class="sidebar-tab" id="sidebar-tab"><</div>
@@ -206,10 +206,12 @@
                     row.TIMESTAMP = date;
                     return row;
                 }).filter(row => !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date);
-                console.log('Raw data sample (checking PAR_2):', allData.slice(0, 5).map(row => ({ TIMESTAMP: row.TIMESTAMP.toISOString(), PAR_2: row.PAR_2 })));
+                console.log('Raw data sample (checking PAR_2):');
+                allData.slice(0, 5).forEach(row => console.log(`TIMESTAMP: ${row.TIMESTAMP.toISOString()}, PAR_2: ${row.PAR_2}`));
                 dataLoaded = true;
                 cachedData = aggregateVariables(allData);
-                console.log('Aggregated data sample (checking PAR_2):', cachedData.slice(0, 5).map(row => ({ TIMESTAMP: row.TIMESTAMP.toISOString(), PAR_2: row.PAR_2 })));
+                console.log('Aggregated data sample (checking PAR_2):');
+                cachedData.slice(0, 5).forEach(row => console.log(`TIMESTAMP: ${row.TIMESTAMP.toISOString()}, PAR_2: ${row.PAR_2}`));
                 updateGraph();
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -600,7 +602,8 @@
             });
             if (independent === 'TIMESTAMP') workingData = getWeeklyTimestamps(workingData, startDate, endDate);
 
-            console.log('Filtered data sample (checking PAR_2):', workingData.slice(0, 5).map(row => ({ TIMESTAMP: row.TIMESTAMP.toISOString(), PAR_2: row.PAR_2 })));
+            console.log('Filtered data sample (checking PAR_2):');
+            workingData.slice(0, 5).forEach(row => console.log(`TIMESTAMP: ${row.TIMESTAMP.toISOString()}, PAR_2: ${row.PAR_2}`));
 
             const units = allDependents.map(dep => unitMap[dep]);
             const commonUnit = units[0];
