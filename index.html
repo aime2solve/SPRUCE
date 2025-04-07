@@ -94,7 +94,7 @@
                     <div class="dropdown-item"><input type="checkbox" id="RH_2_0_dep" value="RH_2_0"><label for="RH_2_0_dep" style="color: #4682B4;">Relative Humidity 2m (%)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="WD_10_dep" value="WD_10"><label for="WD_10_dep" style="color: #6A5ACD;">Wind Direction 10m (°)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="PAR_2_dep" value="PAR_2"><label for="PAR_2_dep" style="color: #20B2AA;">PAR (µmol/m²s)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PREC_6"><label for="PREC_6_dep" style="color: #DAA520;">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PREgC_6"><label for="PREC_6_dep" style="color: #DAA520;">Precipitation (mm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="CO2_measured_dep" value="CO2_measured"><label for="CO2_measured_dep" style="color: #FF69B4;">Measured CO₂ (ppm)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="H2O_measured_dep" value="H2O_measured"><label for="H2O_measured_dep" style="color: #7FFF00;">Measured H₂O (mmol/mol)</label></div>
                 </div>
@@ -125,7 +125,7 @@
                 <div class="dropdown-menu" id="stats-menu">
                     <div id="stats-content"></div>
                     <div class="dropdown-item"><input type="checkbox" id="show-fit" checked><label for="show-fit">Show Fit</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="show-stats" checked><label for="show-stats">Show Stats</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="show-stats"><label for="show-stats">Show Stats</label></div>
                 </div>
             </div>
         </div>
@@ -212,8 +212,12 @@
             });
             const menu = document.getElementById(id);
             if (menu) {
+                const wasOpen = menu.classList.contains('open');
                 menu.classList.toggle('open');
-                if (id === 'stats-menu' && !statsOpened && menu.classList.contains('open')) statsOpened = true;
+                if (id === 'stats-menu' && !wasOpen) {
+                    statsOpened = true;
+                    updateGraph(); // Trigger stats calculation and display
+                }
             }
         }
 
@@ -323,13 +327,13 @@
 
         function calculateFit(x, y) {
             const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y) && !isNaN(d.x));
-            if (pairedData.length < 2) return { type: 'none', params: {}, rSquared: NaN };
+            if (pairedData.length < 2) return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN };
 
             const xNum = pairedData.map(d => d.x);
             const yNum = pairedData.map(d => d.y);
+            const n = pairedData.length;
 
             // Linear fit: y = a + bx
-            const n = pairedData.length;
             const sumX = xNum.reduce((a, b) => a + b, 0);
             const sumY = yNum.reduce((a, b) => a + b, 0);
             const sumXY = pairedData.reduce((sum, d) => sum + d.x * d.y, 0);
@@ -340,6 +344,11 @@
             const ssTot = yNum.reduce((sum, d) => sum + Math.pow(d - sumY / n, 2), 0);
             const ssResLinear = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredLinear[i], 2), 0);
             const rSquaredLinear = ssTot === 0 ? NaN : 1 - (ssResLinear / ssTot);
+            const dfReg = 1, dfRes = n - 2;
+            const msReg = (ssTot - ssResLinear) / dfReg;
+            const msRes = ssResLinear / dfRes;
+            const fValueLinear = msRes === 0 ? NaN : msReg / msRes;
+            const pValueLinear = jStat.ftest(fValueLinear, dfReg, dfRes);
 
             // Exponential fit: y = a * exp(bx)
             const logY = yNum.map(y => Math.log(y)).filter(y => !isNaN(y) && y !== -Infinity);
@@ -354,6 +363,10 @@
             const yPredExp = xNum.map(x => aExp * Math.exp(bExp * x));
             const ssResExp = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredExp[i], 2), 0);
             const rSquaredExp = ssTot === 0 || nExp < 2 ? NaN : 1 - (ssResExp / ssTot);
+            const msRegExp = (ssTot - ssResExp) / dfReg;
+            const msResExp = ssResExp / (nExp - 2);
+            const fValueExp = msResExp === 0 ? NaN : msRegExp / msResExp;
+            const pValueExp = jStat.ftest(fValueExp, dfReg, nExp - 2);
 
             // Quadratic fit: y = a + bx + cx^2
             const x2 = xNum.map(x => x * x);
@@ -368,12 +381,16 @@
             const yPredQuad = xNum.map(x => aQuad + bQuad * x + cQuad * x * x);
             const ssResQuad = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredQuad[i], 2), 0);
             const rSquaredQuad = ssTot === 0 ? NaN : 1 - (ssResQuad / ssTot);
+            const dfRegQuad = 2, dfResQuad = n - 3;
+            const msRegQuad = (ssTot - ssResQuad) / dfRegQuad;
+            const msResQuad = ssResQuad / dfResQuad;
+            const fValueQuad = msResQuad === 0 ? NaN : msRegQuad / msResQuad;
+            const pValueQuad = jStat.ftest(fValueQuad, dfRegQuad, dfResQuad);
 
-            // Select best fit based on R²
             const fits = [
-                { type: 'linear', params: { slope, intercept }, rSquared: rSquaredLinear, yPred: yPredLinear },
-                { type: 'exponential', params: { a: aExp, b: bExp }, rSquared: rSquaredExp, yPred: yPredExp },
-                { type: 'quadratic', params: { a: aQuad, b: bQuad, c: cQuad }, rSquared: rSquaredQuad, yPred: yPredQuad }
+                { type: 'linear', params: { slope, intercept }, rSquared: rSquaredLinear, yPred: yPredLinear, fValue: fValueLinear, pValue: pValueLinear },
+                { type: 'exponential', params: { a: aExp, b: bExp }, rSquared: rSquaredExp, yPred: yPredExp, fValue: fValueExp, pValue: pValueExp },
+                { type: 'quadratic', params: { a: aQuad, b: bQuad, c: cQuad }, rSquared: rSquaredQuad, yPred: yPredQuad, fValue: fValueQuad, pValue: pValueQuad }
             ];
             return fits.reduce((best, current) => isNaN(current.rSquared) || current.rSquared < best.rSquared ? best : current);
         }
@@ -387,12 +404,26 @@
                 if (!isNaN(value)) groups[group].push(value);
             });
             const groupArrays = Object.values(groups).filter(arr => arr.length > 0);
-            if (groupArrays.length < 2) return { fScore: NaN, pValue: NaN };
+            if (groupArrays.length < 2) return { fScore: NaN, pValue: NaN, means: [], groupNames: [] };
             const fScore = jStat.anovafscore(...groupArrays);
             const pValue = jStat.anovaftest(...groupArrays);
             const means = groupArrays.map(arr => jStat.mean(arr));
             const groupNames = Object.keys(groups).filter(key => groups[key].length > 0);
             return { fScore, pValue, means, groupNames };
+        }
+
+        function calculateBoxStats(yValues) {
+            const validY = yValues.filter(y => !isNaN(y));
+            if (validY.length === 0) return { median: NaN, q1: NaN, q3: NaN, iqr: NaN, min: NaN, max: NaN };
+            const median = jStat.median(validY);
+            const q1 = jStat.percentile(validY, 0.25);
+            const q3 = jStat.percentile(validY, 0.75);
+            const iqr = q3 - q1;
+            const lowerBound = q1 - 1.5 * iqr;
+            const upperBound = q3 + 1.5 * iqr;
+            const min = Math.max(Math.min(...validY), lowerBound);
+            const max = Math.min(Math.max(...validY), upperBound);
+            return { median, q1, q3, iqr, min, max };
         }
 
         function aggregateVariables(data) {
@@ -573,7 +604,14 @@
                         fill: chartType === 'area' ? 'tozeroy' : undefined
                     });
 
-                    if (showFit && chartType !== 'box' && xValues.length > 1) {
+                    if (chartType === 'box') {
+                        const boxStats = calculateBoxStats(yValues);
+                        statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Median=${boxStats.median.toFixed(2)}, Q1=${boxStats.q1.toFixed(2)}, Q3=${boxStats.q3.toFixed(2)}, IQR=${boxStats.iqr.toFixed(2)}, Min=${boxStats.min.toFixed(2)}, Max=${boxStats.max.toFixed(2)}`);
+                    } else if (chartType === 'bar') {
+                        const mean = jStat.mean(yValues);
+                        const stdDev = jStat.stdev(yValues);
+                        statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Mean=${mean.toFixed(2)}, SD=${stdDev.toFixed(2)}`);
+                    } else if (['scatter', 'line', 'area'].includes(chartType) && xValues.length > 1) {
                         const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
                         const fit = calculateFit(xNum, yValues);
                         if (fit.type !== 'none') {
@@ -581,18 +619,20 @@
                             const yFit = fit.type === 'linear' ? xFit.map(x => fit.params.intercept + fit.params.slope * x) :
                                         fit.type === 'exponential' ? xFit.map(x => fit.params.a * Math.exp(fit.params.b * x)) :
                                         xFit.map(x => fit.params.a + fit.params.b * x + fit.params.c * x * x);
-                            fitTraces.push({
-                                x: xFit,
-                                y: yFit,
-                                mode: 'lines',
-                                type: 'scattergl',
-                                name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (${fit.type} fit)`,
-                                line: { color: color, width: 2, dash: 'dash' }
-                            });
+                            if (showFit) {
+                                fitTraces.push({
+                                    x: xFit,
+                                    y: yFit,
+                                    mode: 'lines',
+                                    type: 'scattergl',
+                                    name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (${fit.type} fit)`,
+                                    line: { color: color, width: 2, dash: 'dash' }
+                                });
+                            }
                             const eq = fit.type === 'linear' ? `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}x` :
                                       fit.type === 'exponential' ? `y = ${fit.params.a.toFixed(2)}e^(${fit.params.b.toFixed(2)}x)` :
                                       `y = ${fit.params.a.toFixed(2)} + ${fit.params.b.toFixed(2)}x + ${fit.params.c.toFixed(2)}x²`;
-                            statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: ${eq}, R²=${fit.rSquared.toFixed(2)}`);
+                            statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: ${eq}, R²=${fit.rSquared.toFixed(2)}, F=${fit.fValue.toFixed(2)}, p=${fit.pValue.toFixed(4)}`);
                         }
                     }
                 });
@@ -606,7 +646,7 @@
                 return;
             }
 
-            if (statsOpened) document.getElementById('stats-content').innerHTML = statsText.join('<br>');
+            if (statsOpened) document.getElementById('stats-content').innerHTML = statsText.length ? statsText.join('<br>') : 'No stats available';
 
             const xAxisTitle = independent === 'TIMESTAMP' ? 'Time' : 
                               independent === 'CO2_measured' ? 'Measured CO₂ (ppm)' :
@@ -658,7 +698,7 @@
 
             console.log('Plotting traces:', traces);
             graphDiv.innerHTML = '';
-            Plotly.newPlot('graph', showFit && chartType !== 'anova' ? traces.concat(fitTraces) : traces, layout, { responsive: true })
+            Plotly.newPlot('graph', showFit && !['box', 'anova'].includes(chartType) ? traces.concat(fitTraces) : traces, layout, { responsive: true })
                 .then(() => {
                     graphInitialized = true;
                 })
