@@ -166,7 +166,7 @@
                 <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
                 <div class="dropdown-menu" id="stats-menu">
                     <div id="stats-content"></div>
-                    <div id="fit-options" class="fit-options">
+                    <div class="fit-options" id="fit-options">
                         <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-auto" value="auto" checked><label for="fit-auto">Auto (Best Fit)</label></div>
                         <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-linear" value="linear"><label for="fit-linear">Linear</label></div>
                         <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-exponential" value="exponential"><label for="fit-exponential">Exponential</label></div>
@@ -442,8 +442,12 @@
         }
 
         function calculateFit(x, y, fitType = 'auto') {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y) && !isNaN(d.x) && d.x > 0);
-            if (pairedData.length < 2) return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
+            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] }))
+                .filter(d => !isNaN(d.x) && !isNaN(d.y) && d.x !== null && d.y !== null);
+            if (pairedData.length < 2) {
+                console.log('Insufficient data for fit:', pairedData.length);
+                return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
+            }
 
             const xNum = pairedData.map(d => d.x);
             const yNum = pairedData.map(d => d.y);
@@ -455,22 +459,36 @@
                 const sumY = yNum.reduce((a, b) => a + b, 0);
                 const sumXY = pairedData.reduce((sum, d) => sum + d.x * d.y, 0);
                 const sumXX = xNum.reduce((sum, d) => sum + d.x * d.x, 0);
-                const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+                const denominator = n * sumXX - sumX * sumX;
+                if (denominator === 0) {
+                    console.log('Cannot compute slope: all x values are identical');
+                    return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
+                }
+                const slope = (n * sumXY - sumX * sumY) / denominator;
                 const intercept = (sumY - slope * sumX) / n;
                 const yPredLinear = xNum.map(x => slope * x + intercept);
-                const ssTot = yNum.reduce((sum, d) => sum + Math.pow(d - sumY / n, 2), 0);
+                const meanY = sumY / n;
+                const ssTot = yNum.reduce((sum, d) => sum + Math.pow(d - meanY, 2), 0);
                 const ssResLinear = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredLinear[i], 2), 0);
                 const rSquaredLinear = ssTot === 0 ? NaN : 1 - (ssResLinear / ssTot);
                 const dfReg = 1, dfRes = n - 2;
                 const msReg = (ssTot - ssResLinear) / dfReg;
                 const msRes = ssResLinear / dfRes;
                 const fValueLinear = msRes === 0 ? NaN : msReg / msRes;
-                const pValueLinear = jStat.ftest(fValueLinear, dfReg, dfRes);
-                fits.push({ type: 'linear', params: { slope, intercept }, rSquared: rSquaredLinear, fValue: fValueLinear, pValue: pValueLinear, yPred: yPredLinear });
+                const pValueLinear = isNaN(fValueLinear) ? NaN : jStat.ftest(fValueLinear, dfReg, dfRes);
+                fits.push({ 
+                    type: 'linear', 
+                    params: { slope, intercept }, 
+                    rSquared: rSquaredLinear, 
+                    fValue: fValueLinear, 
+                    pValue: pValueLinear, 
+                    yPred: yPredLinear 
+                });
             }
 
             if (fitType === 'auto') {
-                return fits.reduce((best, current) => isNaN(current.rSquared) || current.rSquared < best.rSquared ? best : current, fits[0] || { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] });
+                return fits.reduce((best, current) => isNaN(current.rSquared) || current.rSquared < best.rSquared ? best : current, 
+                    fits[0] || { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] });
             }
             return fits.find(f => f.type === fitType) || { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
         }
@@ -694,10 +712,11 @@
                     } else if (['scatter', 'line', 'area'].includes(chartType) && xValues.length > 1) {
                         const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
                         const fit = calculateFit(xNum, yValues, fitType);
-                        if (fit.type !== 'none' && fit.yPred.length > 0) {
-                            const xFit = [Math.min(...xNum), Math.max(...xNum)];
-                            const yFit = fit.type === 'linear' ? xFit.map(x => fit.params.intercept + fit.params.slope * x) : [];
-                            if (yFit.every(y => !isNaN(y)) && showFit) {
+                        console.log(`Fit for ${dep}:`, fit);
+                        if (fit.type !== 'none' && fit.yPred.length > 0 && showFit) {
+                            const xFit = xNum;
+                            const yFit = fit.yPred;
+                            if (yFit.every(y => !isNaN(y))) {
                                 fitTraces.push({
                                     x: independent === 'TIMESTAMP' ? xFit.map(x => new Date(x)) : xFit,
                                     y: yFit,
@@ -706,10 +725,14 @@
                                     name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (fit)`,
                                     line: { color: color, width: 2, dash: 'dash' }
                                 });
+                            } else {
+                                console.log(`Fit y-values contain NaN for ${dep}:`, yFit);
                             }
-                            const eq = fit.type === 'linear' ? `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}x` : '';
-                            statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: ${eq}, R²=${fit.rSquared.toFixed(2)}, F=${fit.fValue.toFixed(2)}, p=${fit.pValue.toFixed(4)}`);
                         }
+                        const eq = fit.type === 'linear' && !isNaN(fit.params.slope) && !isNaN(fit.params.intercept)
+                            ? `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}x`
+                            : 'Fit not available';
+                        statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: ${eq}, R²=${(fit.rSquared || NaN).toFixed(2)}, F=${(fit.fValue || NaN).toFixed(2)}, p=${(fit.pValue || NaN).toFixed(4)}`);
                     }
                 });
             }
