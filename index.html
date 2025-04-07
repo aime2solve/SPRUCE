@@ -146,685 +146,691 @@
     </div>
 
     <script>
-        let allData = [];
-        const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
-        let startDate = new Date('2015-08-01');
-        let endDate = new Date('2025-04-05');
-        let dataLoaded = false;
-        let legendVisible = true;
-        let cachedData = null;
-        let graphInitialized = false;
-        let statsOpened = false;
+    let allData = [];
+    const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
+    let startDate = new Date('2015-08-01');
+    let endDate = new Date('2025-04-05');
+    let dataLoaded = false;
+    let legendVisible = true;
+    let cachedData = null;
+    let graphInitialized = false;
+    let statsOpened = false;
 
-        const dependentColors = {
-            'TS_0': '#00FFFF', 'TS_5': '#FFFF00', 'TS_10': '#FF00FF', 'TS_20': '#00FF00', 'TS_30': '#FF0000',
-            'TS_40': '#0000FF', 'TS_50': '#FFA500', 'TS_100': '#800080', 'TS_200': '#008080',
-            'TA_2_0': '#FF6347', 'RH_2_0': '#4682B4', 'WD_10': '#6A5ACD', 'PAR_2': '#20B2AA',
-            'PREC_6': '#DAA520', 'CO2_measured': '#FF69B4', 'H2O_measured': '#7FFF00'
-        };
+    const dependentColors = {
+        'TS_0': '#00FFFF', 'TS_5': '#FFFF00', 'TS_10': '#FF00FF', 'TS_20': '#00FF00', 'TS_30': '#FF0000',
+        'TS_40': '#0000FF', 'TS_50': '#FFA500', 'TS_100': '#800080', 'TS_200': '#008080',
+        'TA_2_0': '#FF6347', 'RH_2_0': '#4682B4', 'WD_10': '#6A5ACD', 'PAR_2': '#20B2AA',
+        'PREC_6': '#DAA520', 'CO2_measured': '#FF69B4', 'H2O_measured': '#7FFF00'
+    };
 
-        const controlRanges = {
-            'TS_200': { min: -10, max: 30, defaultMin: -10, defaultMax: 30, label: 'Soil Temp (°C)' },
-            'Soil_Depth': { min: 0, max: 200, defaultMin: 0, defaultMax: 200, label: 'Soil Depth (cm)' },
-            'TA_2_0': { min: -20, max: 40, defaultMin: -20, defaultMax: 40, label: 'Ambient Temp 2m (°C)' },
-            'CO2_measured': { min: 300, max: 1000, defaultMin: 300, defaultMax: 1000, label: 'Measured CO₂ (ppm)' },
-            'H2O_measured': { min: 0, max: 30, defaultMin: 0, defaultMax: 30, label: 'Measured H₂O (mmol/mol)' },
-            'RH_2_0': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Relative Humidity 2m (%)' },
-            'WD_10': { min: 0, max: 360, defaultMin: 0, defaultMax: 360, label: 'Wind Direction 10m (°)' },
-            'PAR_2': { min: 0, max: 2000, defaultMin: 0, defaultMax: 2000, label: 'PAR (µmol/m²s)' },
-            'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' }
-        };
-        let currentRanges = JSON.parse(JSON.stringify(controlRanges));
-        let depthRange = [0, 200];
+    const controlRanges = {
+        'TS_200': { min: -10, max: 30, defaultMin: -10, defaultMax: 30, label: 'Soil Temp (°C)' },
+        'Soil_Depth': { min: 0, max: 200, defaultMin: 0, defaultMax: 200, label: 'Soil Depth (cm)' },
+        'TA_2_0': { min: -20, max: 40, defaultMin: -20, defaultMax: 40, label: 'Ambient Temp 2m (°C)' },
+        'CO2_measured': { min: 300, max: 1000, defaultMin: 300, defaultMax: 1000, label: 'Measured CO₂ (ppm)' },
+        'H2O_measured': { min: 0, max: 30, defaultMin: 0, defaultMax: 30, label: 'Measured H₂O (mmol/mol)' },
+        'RH_2_0': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Relative Humidity 2m (%)' },
+        'WD_10': { min: 0, max: 360, defaultMin: 0, defaultMax: 360, label: 'Wind Direction 10m (°)' },
+        'PAR_2': { min: 0, max: 2000, defaultMin: 0, defaultMax: 2000, label: 'PAR (µmol/m²s)' },
+        'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' }
+    };
+    let currentRanges = JSON.parse(JSON.stringify(controlRanges));
+    let depthRange = [0, 200];
 
-        const unitMap = {
-            'TS_0': '°C', 'TS_5': '°C', 'TS_10': '°C', 'TS_20': '°C', 'TS_30': '°C', 
-            'TS_40': '°C', 'TS_50': '°C', 'TS_100': '°C', 'TS_200': '°C', 'TA_2_0': '°C',
-            'RH_2_0': '%', 'WD_10': '°', 'PAR_2': 'µmol/m²s', 'PREC_6': 'mm',
-            'CO2_measured': 'ppm', 'H2O_measured': 'mmol/mol'
-        };
+    const unitMap = {
+        'TS_0': '°C', 'TS_5': '°C', 'TS_10': '°C', 'TS_20': '°C', 'TS_30': '°C', 
+        'TS_40': '°C', 'TS_50': '°C', 'TS_100': '°C', 'TS_200': '°C', 'TA_2_0': '°C',
+        'RH_2_0': '%', 'WD_10': '°', 'PAR_2': 'µmol/m²s', 'PREC_6': 'mm',
+        'CO2_measured': 'ppm', 'H2O_measured': 'mmol/mol'
+    };
 
-        async function loadData() {
-            try {
-                const response = await fetch(dataUrl);
-                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                allData = await response.json();
-                allData = allData.map(row => {
-                    const year = parseInt(row.Year, 10);
-                    const dfoy = parseFloat(row.DFOY);
-                    const day = Math.floor(dfoy);
-                    const fractionalDay = dfoy - day;
-                    const date = new Date(year, 0);
-                    date.setDate(day);
-                    date.setHours(Math.floor(fractionalDay * 24), Math.floor((fractionalDay * 24 % 1) * 60), 0, 0);
-                    row.TIMESTAMP = date;
-                    return row;
-                }).filter(row => !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date);
-                console.log('Loaded data sample:', allData.slice(0, 5));
-                dataLoaded = true;
-                cachedData = aggregateVariables(allData);
-                console.log('Aggregated data sample:', cachedData.slice(0, 5));
+    async function loadData() {
+        try {
+            const response = await fetch(dataUrl);
+            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+            allData = await response.json();
+            allData = allData.map(row => {
+                const year = parseInt(row.Year, 10);
+                const dfoy = parseFloat(row.DFOY);
+                const day = Math.floor(dfoy);
+                const fractionalDay = dfoy - day;
+                const date = new Date(year, 0);
+                date.setDate(day);
+                date.setHours(Math.floor(fractionalDay * 24), Math.floor((fractionalDay * 24 % 1) * 60), 0, 0);
+                row.TIMESTAMP = date;
+                return row;
+            }).filter(row => !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date);
+            console.log('Raw data sample (checking PAR_2):', allData.slice(0, 5).map(row => ({ TIMESTAMP: row.TIMESTAMP, PAR_2: row.PAR_2 })));
+            dataLoaded = true;
+            cachedData = aggregateVariables(allData);
+            console.log('Aggregated data sample (checking PAR_2):', cachedData.slice(0, 5).map(row => ({ TIMESTAMP: row.TIMESTAMP, PAR_2: row.PAR_2 })));
+            updateGraph();
+        } catch (error) {
+            console.error('Error loading data:', error);
+            resetGraph();
+        }
+    }
+
+    function resetGraph() {
+        const graphDiv = document.getElementById('graph');
+        if (graphInitialized) Plotly.purge(graphDiv);
+        graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
+        graphInitialized = false;
+    }
+
+    function toggleDropdown(id) {
+        const menus = document.querySelectorAll('.dropdown-menu');
+        menus.forEach(menu => {
+            if (menu.id !== id && menu.classList.contains('open')) menu.classList.remove('open');
+        });
+        const menu = document.getElementById(id);
+        if (menu) {
+            const wasOpen = menu.classList.contains('open');
+            menu.classList.toggle('open');
+            if (id === 'stats-menu' && !wasOpen) {
+                statsOpened = true;
+                updateStatsOptions();
                 updateGraph();
-            } catch (error) {
-                console.error('Error loading data:', error);
-                resetGraph();
             }
         }
+    }
 
-        function resetGraph() {
-            const graphDiv = document.getElementById('graph');
-            if (graphInitialized) Plotly.purge(graphDiv);
-            graphDiv.innerHTML = '<div class="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO2 concentrations.<hr>Beginning August 2015</div>';
-            graphInitialized = false;
-        }
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const graphContainer = document.getElementById('graph-container');
+        const tab = document.getElementById('sidebar-tab');
+        sidebar.classList.toggle('collapsed');
+        graphContainer.classList.toggle('full-width');
+        tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
+        if (dataLoaded && graphInitialized) Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
+    }
 
-        function toggleDropdown(id) {
-            const menus = document.querySelectorAll('.dropdown-menu');
-            menus.forEach(menu => {
-                if (menu.id !== id && menu.classList.contains('open')) menu.classList.remove('open');
+    function enforceSingleSelection(groupId, changedId) {
+        const checkboxes = document.querySelectorAll(`#${groupId} input[type="checkbox"]`);
+        checkboxes.forEach(checkbox => {
+            if (checkbox.id !== changedId && checkbox.checked) checkbox.checked = false;
+        });
+    }
+
+    function filterByRanges(data) {
+        return data.filter(row => {
+            return Object.keys(currentRanges).every(key => {
+                if (key === 'Soil_Depth') return true;
+                const value = parseFloat(row[key]);
+                const range = currentRanges[key];
+                return isNaN(value) || (value >= range.defaultMin && value <= range.defaultMax);
             });
-            const menu = document.getElementById(id);
-            if (menu) {
-                const wasOpen = menu.classList.contains('open');
-                menu.classList.toggle('open');
-                if (id === 'stats-menu' && !wasOpen) {
-                    statsOpened = true;
-                    updateStatsOptions();
-                    updateGraph();
-                }
-            }
-        }
+        });
+    }
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const graphContainer = document.getElementById('graph-container');
-            const tab = document.getElementById('sidebar-tab');
-            sidebar.classList.toggle('collapsed');
-            graphContainer.classList.toggle('full-width');
-            tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
-            if (dataLoaded && graphInitialized) Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
-        }
-
-        function enforceSingleSelection(groupId, changedId) {
-            const checkboxes = document.querySelectorAll(`#${groupId} input[type="checkbox"]`);
-            checkboxes.forEach(checkbox => {
-                if (checkbox.id !== changedId && checkbox.checked) checkbox.checked = false;
+    function filterByDepthRange(data) {
+        const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
+        return data.map(row => {
+            const newRow = { ...row };
+            depths.forEach(depth => {
+                if (depth < depthRange[0] || depth > depthRange[1]) newRow[`TS_${depth}`] = null;
             });
-        }
+            return newRow;
+        });
+    }
 
-        function filterByRanges(data) {
-            return data.filter(row => {
-                return Object.keys(currentRanges).every(key => {
-                    if (key === 'Soil_Depth') return true;
-                    const value = parseFloat(row[key]);
-                    const range = currentRanges[key];
-                    return isNaN(value) || (value >= range.defaultMin && value <= range.defaultMax);
-                });
-            });
-        }
+    function toggleControlPanel() {
+        const popup = document.getElementById('control-panel-popup');
+        const content = document.getElementById('control-panel-content');
+        const button = document.getElementById('control-panel-button');
+        const isVisible = popup.style.display === 'block';
+        popup.style.display = isVisible ? 'none' : 'block';
+        button.textContent = isVisible ? 'Show Control Panel' : 'Hide Control Panel';
 
-        function filterByDepthRange(data) {
-            const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
-            return data.map(row => {
-                const newRow = { ...row };
-                depths.forEach(depth => {
-                    if (depth < depthRange[0] || depth > depthRange[1]) newRow[`TS_${depth}`] = null;
-                });
-                return newRow;
-            });
-        }
-
-        function toggleControlPanel() {
-            const popup = document.getElementById('control-panel-popup');
-            const content = document.getElementById('control-panel-content');
-            const button = document.getElementById('control-panel-button');
-            const isVisible = popup.style.display === 'block';
-            popup.style.display = isVisible ? 'none' : 'block';
-            button.textContent = isVisible ? 'Show Control Panel' : 'Hide Control Panel';
-
-            if (!isVisible) {
-                content.innerHTML = Object.keys(controlRanges).map(key => `
-                    <div class="slider-container">
-                        <label>${controlRanges[key].label}</label>
-                        <div class="range-slider">
-                            <div class="range-track" id="${key}-track"></div>
-                            <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMin}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
-                            <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMax}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
-                        </div>
-                        <div class="slider-values">
-                            <span id="${key}-min-value">${currentRanges[key].defaultMin}</span>
-                            <span id="${key}-max-value">${currentRanges[key].defaultMax}</span>
-                        </div>
+        if (!isVisible) {
+            content.innerHTML = Object.keys(controlRanges).map(key => `
+                <div class="slider-container">
+                    <label>${controlRanges[key].label}</label>
+                    <div class="range-slider">
+                        <div class="range-track" id="${key}-track"></div>
+                        <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMin}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
+                        <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMax}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
                     </div>
-                `).join('');
+                    <div class="slider-values">
+                        <span id="${key}-min-value">${currentRanges[key].defaultMin}</span>
+                        <span id="${key}-max-value">${currentRanges[key].defaultMax}</span>
+                    </div>
+                </div>
+            `).join('');
 
-                Object.keys(controlRanges).forEach(key => {
-                    const minSlider = document.getElementById(`${key}-min`);
-                    const maxSlider = document.getElementById(`${key}-max`);
-                    const track = document.getElementById(`${key}-track`);
-                    const minValue = document.getElementById(`${key}-min-value`);
-                    const maxValue = document.getElementById(`${key}-max-value`);
+            Object.keys(controlRanges).forEach(key => {
+                const minSlider = document.getElementById(`${key}-min`);
+                const maxSlider = document.getElementById(`${key}-max`);
+                const track = document.getElementById(`${key}-track`);
+                const minValue = document.getElementById(`${key}-min-value`);
+                const maxValue = document.getElementById(`${key}-max-value`);
 
-                    function updateTrack() {
-                        const min = parseFloat(minSlider.value);
-                        const max = parseFloat(maxSlider.value);
-                        const minPercent = ((min - controlRanges[key].min) / (controlRanges[key].max - controlRanges[key].min)) * 100;
-                        const maxPercent = ((max - controlRanges[key].min) / (controlRanges[key].max - controlRanges[key].min)) * 100;
-                        track.style.left = `${minPercent}%`;
-                        track.style.width = `${maxPercent - minPercent}%`;
-                    }
+                function updateTrack() {
+                    const min = parseFloat(minSlider.value);
+                    const max = parseFloat(maxSlider.value);
+                    const minPercent = ((min - controlRanges[key].min) / (controlRanges[key].max - controlRanges[key].min)) * 100;
+                    const maxPercent = ((max - controlRanges[key].min) / (controlRanges[key].max - controlRanges[key].min)) * 100;
+                    track.style.left = `${minPercent}%`;
+                    track.style.width = `${maxPercent - minPercent}%`;
+                }
 
-                    minSlider.addEventListener('input', () => {
-                        let value = parseFloat(minSlider.value);
-                        if (value > parseFloat(maxSlider.value)) value = parseFloat(maxSlider.value), minSlider.value = value;
-                        currentRanges[key].defaultMin = value;
-                        minValue.textContent = value.toFixed(1);
-                        if (key === 'Soil_Depth') depthRange[0] = value;
-                        updateTrack();
-                        debounceUpdateGraph();
-                    });
-
-                    maxSlider.addEventListener('input', () => {
-                        let value = parseFloat(maxSlider.value);
-                        if (value < parseFloat(minSlider.value)) value = parseFloat(minSlider.value), maxSlider.value = value;
-                        currentRanges[key].defaultMax = value;
-                        maxValue.textContent = value.toFixed(1);
-                        if (key === 'Soil_Depth') depthRange[1] = value;
-                        updateTrack();
-                        debounceUpdateGraph();
-                    });
-
+                minSlider.addEventListener('input', () => {
+                    let value = parseFloat(minSlider.value);
+                    if (value > parseFloat(maxSlider.value)) value = parseFloat(maxSlider.value), minSlider.value = value;
+                    currentRanges[key].defaultMin = value;
+                    minValue.textContent = value.toFixed(1);
+                    if (key === 'Soil_Depth') depthRange[0] = value;
                     updateTrack();
+                    debounceUpdateGraph();
+                });
+
+                maxSlider.addEventListener('input', () => {
+                    let value = parseFloat(maxSlider.value);
+                    if (value < parseFloat(minSlider.value)) value = parseFloat(minSlider.value), maxSlider.value = value;
+                    currentRanges[key].defaultMax = value;
+                    maxValue.textContent = value.toFixed(1);
+                    if (key === 'Soil_Depth') depthRange[1] = value;
+                    updateTrack();
+                    debounceUpdateGraph();
+                });
+
+                updateTrack();
+            });
+        }
+    }
+
+    function calculateFit(x, y, fitType = 'auto') {
+        const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y) && !isNaN(d.x) && d.x > 0);
+        if (pairedData.length < 2) return { type: 'none', params: {}, rSquared: wasOpenNaN, pValue: NaN, fValue: NaN, yPred: [] };
+
+        const xNum = pairedData.map(d => d.x);
+        const yNum = pairedData.map(d => d.y);
+        const n = pairedData.length;
+        const fits = [];
+
+        if (fitType === 'linear' || fitType === 'auto') {
+            const sumX = xNum.reduce((a, b) => a + b, 0);
+            const sumY = yNum.reduce((a, b) => a + b, 0);
+            const sumXY = pairedData.reduce((sum, d) => sum + d.x * d.y, 0);
+            const sumXX = xNum.reduce((sum, d) => sum + d.x * d.x, 0);
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+            const yPredLinear = xNum.map(x => slope * x + intercept);
+            const ssTot = yNum.reduce((sum, d) => sum + Math.pow(d - sumY / n, 2), 0);
+            const ssResLinear = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredLinear[i], 2), 0);
+            const rSquaredLinear = ssTot === 0 ? NaN : 1 - (ssResLinear / ssTot);
+            const dfReg = 1, dfRes = n - 2;
+            const msReg = (ssTot - ssResLinear) / dfReg;
+            const msRes = ssResLinear / dfRes;
+            const fValueLinear = msRes === 0 ? NaN : msReg / msRes;
+            const pValueLinear = jStat.ftest(fValueLinear, dfReg, dfRes);
+            fits.push({ type: 'linear', params: { slope, intercept }, rSquared: rSquaredLinear, fValue: fValueLinear, pValue: pValueLinear, yPred: yPredLinear });
+        }
+
+        if (fitType === 'exponential' || fitType === 'auto') {
+            const logY = yNum.map(y => Math.log(y)).filter(y => !isNaN(y) && y !== -Infinity);
+            const xExp = xNum.slice(0, logY.length);
+            if (xExp.length >= 2) {
+                const sumXExp = xExp.reduce((a, b) => a + b, 0);
+                const sumLogY = logY.reduce((a, b) => a + b, 0);
+                const sumXLogY = xExp.reduce((sum, xi, i) => sum + xi * logY[i], 0);
+                const sumXXExp = xExp.reduce((sum, xi) => sum + xi * xi, 0);
+                const nExp = logY.length;
+                const bExp = (nExp * sumXLogY - sumXExp * sumLogY) / (nExp * sumXXExp - sumXExp * sumXExp);
+                const aExp = Math.exp((sumLogY - bExp * sumXExp) / nExp);
+                const yPredExp = xNum.map(x => aExp * Math.exp(bExp * x));
+                const ssTotExp = yNum.reduce((sum, d) => sum + Math.pow(d - jStat.mean(yNum), 2), 0);
+                const ssResExp = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredExp[i], 2), 0);
+                const rSquaredExp = ssTotExp === 0 ? NaN : 1 - (ssResExp / ssTotExp);
+                const msRegExp = (ssTotExp - ssResExp) / 1;
+                const msResExp = ssResExp / (nExp - 2);
+                const fValueExp = msResExp === 0 ? NaN : msRegExp / msResExp;
+                const pValueExp = jStat.ftest(fValueExp, 1, nExp - 2);
+                fits.push({ type: 'exponential', params: { a: aExp, b: bExp }, rSquared: rSquaredExp, fValue: fValueExp, pValue: pValueExp, yPred: yPredExp });
+            }
+        }
+
+        if (fitType === 'polynomial' || fitType === 'auto') {
+            const x2 = xNum.map(x => x * x);
+            const sumX = xNum.reduce((a, b) => a + b, 0);
+            const sumY = yNum.reduce((a, b) => a + b, 0);
+            const sumXY = pairedData.reduce((sum, d) => sum + d.x * d.y, 0);
+            const sumXX = xNum.reduce((sum, d) => sum + d.x * d.x, 0);
+            const sumX2 = x2.reduce((a, b) => a + b, 0);
+            const sumX2X = x2.reduce((sum, x2i, i) => sum + x2i * xNum[i], 0);
+            const sumX2Y = x2.reduce((sum, x2i, i) => sum + x2i * yNum[i], 0);
+            const sumX2X2 = x2.reduce((sum, x2i) => sum + x2i * x2i, 0);
+            const denom = n * sumXX * sumX2X2 + 2 * sumX * sumX2 * sumX2X - sumXX * sumX2 * sumX2 - n * sumX2X2 * sumX2 - sumX * sumX * sumX2X2;
+            const cQuad = ((n * sumXX * sumX2Y + sumX * sumX2 * sumXY - sumXX * sumX2 * sumY - n * sumX2X * sumXY - sumX * sumX * sumX2Y) / denom);
+            const bQuad = ((sumX2X * sumX2 * sumY + sumX * sumX2Y * sumX2 - sumX2X * sumX2X * sumY - sumX * sumX * sumX2Y - sumX2 * sumX2 * sumXY) / denom);
+            const aQuad = (sumY - bQuad * sumX - cQuad * sumX2) / n;
+            const yPredQuad = xNum.map(x => aQuad + bQuad * x + cQuad * x * x);
+            const ssTotQuad = yNum.reduce((sum, d) => sum + Math.pow(d - sumY / n, 2), 0);
+            const ssResQuad = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredQuad[i], 2), 0);
+            const rSquaredQuad = ssTotQuad === 0 ? NaN : 1 - (ssResQuad / ssTotQuad);
+            const dfRegQuad = 2, dfResQuad = n - 3;
+            const msRegQuad = (ssTotQuad - ssResQuad) / dfRegQuad;
+            const msResQuad = ssResQuad / dfResQuad;
+            const fValueQuad = msResQuad === 0 ? NaN : msRegQuad / msResQuad;
+            const pValueQuad = jStat.ftest(fValueQuad, dfRegQuad, dfResQuad);
+            fits.push({ type: 'polynomial', params: { a: aQuad, b: bQuad, c: cQuad }, rSquared: rSquaredQuad, fValue: fValueQuad, pValue: pValueQuad, yPred: yPredQuad });
+        }
+
+        if (fitType === 'logarithmic' || fitType === 'auto') {
+            const lnX = xNum.map(x => Math.log(x)).filter(ln => !isNaN(ln) && ln !== -Infinity && ln !== Infinity);
+            const yLog = yNum.slice(0, lnX.length);
+            if (lnX.length >= 2) {
+                const sumLnX = lnX.reduce((a, b) => a + b, 0);
+                const sumYLog = yLog.reduce((a, b) => a + b, 0);
+                const sumLnXY = lnX.reduce((sum, lnx, i) => sum + lnx * yLog[i], 0);
+                const sumLnXLnX = lnX.reduce((sum, lnx) => sum + lnx * lnx, 0);
+                const nLog = lnX.length;
+                const bLog = (nLog * sumLnXY - sumLnX * sumYLog) / (nLog * sumLnXLnX - sumLnX * sumLnX);
+                const aLog = (sumYLog - bLog * sumLnX) / nLog;
+                const yPredLog = xNum.map(x => aLog + bLog * Math.log(x));
+                const ssTotLog = yNum.reduce((sum, d) => sum + Math.pow(d - jStat.mean(yNum), 2), 0);
+                const ssResLog = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredLog[i], 2), 0);
+                const rSquaredLog = ssTotLog === 0 ? NaN : 1 - (ssResLog / ssTotLog);
+                const msRegLog = (ssTotLog - ssResLog) / 1;
+                const msResLog = ssResLog / (nLog - 2);
+                const fValueLog = msResLog === 0 ? NaN : msRegLog / msResLog;
+                const pValueLog = jStat.ftest(fValueLog, 1, nLog - 2);
+                fits.push({ type: 'logarithmic', params: { a: aLog, b: bLog }, rSquared: rSquaredLog, fValue: fValueLog, pValue: pValueLog, yPred: yPredLog });
+            }
+        }
+
+        if (fitType === 'auto') {
+            return fits.reduce((best, current) => isNaN(current.rSquared) || current.rSquared < best.rSquared ? best : current, fits[0] || { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] });
+        }
+        return fits.find(f => f.type === fitType) || { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
+    }
+
+    function calculateANOVA(data, independent, dependent) {
+        const groups = {};
+        data.forEach(row => {
+            const group = row[independent];
+            if (!groups[group]) groups[group] = [];
+            const value = parseFloat(row[dependent]);
+            if (!isNaN(value)) groups[group].push(value);
+        });
+        const groupArrays = Object.values(groups).filter(arr => arr.length > 0);
+        if (groupArrays.length < 2) return { fScore: NaN, pValue: NaN, means: [], groupNames: [] };
+        const fScore = jStat.anovafscore(...groupArrays);
+        const pValue = jStat.anovaftest(...groupArrays);
+        const means = groupArrays.map(arr => jStat.mean(arr));
+        const groupNames = Object.keys(groups).filter(key => groups[key].length > 0);
+        return { fScore, pValue, means, groupNames };
+    }
+
+    function calculateBoxStats(yValues) {
+        const validY = yValues.filter(y => !isNaN(y));
+        if (validY.length === 0) return { median: NaN, q1: NaN, q3: NaN, iqr: NaN, min: NaN, max: NaN };
+        const median = jStat.median(validY);
+        const q1 = jStat.percentile(validY, 0.25);
+        const q3 = jStat.percentile(validY, 0.75);
+        const iqr = q3 - q1;
+        const lowerBound = q1 - 1.5 * iqr;
+        const upperBound = q3 + 1.5 * iqr;
+        const min = Math.max(Math.min(...validY), lowerBound);
+        const max = Math.min(Math.max(...validY), upperBound);
+        return { median, q1, q3, iqr, min, max };
+    }
+
+    function aggregateVariables(data) {
+        const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
+        const zones = ['A', 'B', 'C'];
+        return data.map(row => {
+            const newRow = { ...row };
+            depths.forEach(depth => {
+                const suffix = depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 : depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9;
+                const keys = zones.map(zone => `TS_${depth}_${zone}${suffix}`);
+                const values = keys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
+                newRow[`TS_${depth}`] = values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
+            });
+            const taKeys = ['TA_2_0_1', 'TA_2_0_2'];
+            const taValues = taKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
+            newRow['TA_2_0'] = taValues.length > 0 ? taValues.reduce((sum, v) => sum + v, 0) / taValues.length : null;
+            const rhKeys = ['RH_2_0_1', 'RH_2_0_2'];
+            const rhValues = rhKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
+            newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + v, 0) / rhValues.length : null;
+            ['CO2_measured', 'H2O_measured', 'WD_10', 'PAR_2', 'PREC_6'].forEach(key => {
+                newRow[key] = parseFloat(row[key]) || null;
+            });
+            return newRow;
+        });
+    }
+
+    function getWeeklyTimestamps(data, start, end) {
+        const weeklyData = {};
+        data.forEach(row => {
+            const date = row.TIMESTAMP;
+            if ((!start || date >= start) && (!end || date <= new Date(end.getTime() + 24 * 60 * 60 * 1000 - 1))) {
+                const weekStart = new Date(date);
+                weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                weekStart.setHours(0, 0, 0, 0);
+                const key = weekStart.toISOString().split('T')[0];
+                if (!weeklyData[key]) weeklyData[key] = { TIMESTAMP: weekStart, values: {} };
+                Object.keys(row).forEach(k => {
+                    if (k !== 'TIMESTAMP') {
+                        weeklyData[key].values[k] = weeklyData[key].values[k] || [];
+                        const value = parseFloat(row[k]);
+                        if (!isNaN(value)) weeklyData[key].values[k].push(value);
+                    }
                 });
             }
+        });
+        return Object.values(weeklyData).map(w => ({
+            TIMESTAMP: w.TIMESTAMP,
+            ...Object.keys(w.values).reduce((acc, k) => ({
+                ...acc,
+                [k]: w.values[k].length > 0 ? w.values[k].reduce((sum, v) => sum + v, 0) / w.values[k].length : null
+            }), {})
+        }));
+    }
+
+    function calculateGraphWidth() { return document.getElementById('graph-container').clientWidth; }
+    function calculateGraphHeight() { return document.getElementById('graph-container').clientHeight; }
+
+    function toggleLegend() {
+        if (dataLoaded && graphInitialized) {
+            legendVisible = !legendVisible;
+            Plotly.relayout('graph', { showlegend: legendVisible });
+            document.getElementById('legend-tab').textContent = legendVisible ? 'Hide Legend' : 'Show Legend';
+        }
+    }
+
+    function filterOutliers(x, y) {
+        const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
+        if (pairedData.length < 2) return { x: x, y: y };
+        const yValues = pairedData.map(d => d.y);
+        const q1 = jStat.percentile(yValues, 0.25);
+        const q3 = jStat.percentile(yValues, 0.75);
+        const iqr = q3 - q1;
+        const lowerBound = q1 - 1.5 * iqr;
+        const upperBound = q3 + 1.5 * iqr;
+        const filtered = pairedData.filter(d => d.y >= lowerBound && d.y <= upperBound);
+        return { x: filtered.map(d => d.x), y: filtered.map(d => d.y) };
+    }
+
+    function updateStatsOptions() {
+        const chartType = document.querySelector('#chart-type-menu input:checked').value;
+        const fitOptions = document.getElementById('fit-options');
+        fitOptions.style.display = ['scatter', 'line', 'area'].includes(chartType) ? 'block' : 'none';
+    }
+
+    let debounceTimeout;
+    function debounceUpdateGraph() {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(updateGraph, 300);
+    }
+
+    function updateGraph() {
+        const graphDiv = document.getElementById('graph');
+        if (!dataLoaded || typeof Plotly === 'undefined') {
+            resetGraph();
+            return;
         }
 
-        function calculateFit(x, y, fitType = 'auto') {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y) && !isNaN(d.x) && d.x > 0); // Ensure x > 0 for logarithmic
-            if (pairedData.length < 2) return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
+        const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || null;
+        const allDependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
+        const chartType = document.querySelector('#chart-type-menu input:checked').value;
+        const fitType = document.querySelector('#fit-options input:checked')?.value || 'auto';
+        const showStats = document.getElementById('show-stats').checked;
 
-            const xNum = pairedData.map(d => d.x);
-            const yNum = pairedData.map(d => d.y);
-            const n = pairedData.length;
-            const fits = [];
+        document.getElementById('independent-toggle').textContent = independent ? document.querySelector(`label[for="${independent}"]`)?.textContent || 'Select Independent' : 'Select Independent';
+        document.getElementById('dependent-toggle').innerHTML = allDependents.length ? allDependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent}</span>`).join('<br>') : 'Select Dependent';
 
-            // Linear fit: y = a + bx
-            if (fitType === 'linear' || fitType === 'auto') {
-                const sumX = xNum.reduce((a, b) => a + b, 0);
-                const sumY = yNum.reduce((a, b) => a + b, 0);
-                const sumXY = pairedData.reduce((sum, d) => sum + d.x * d.y, 0);
-                const sumXX = xNum.reduce((sum, d) => sum + d.x * d.x, 0);
-                const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-                const intercept = (sumY - slope * sumX) / n;
-                const yPredLinear = xNum.map(x => slope * x + intercept);
-                const ssTot = yNum.reduce((sum, d) => sum + Math.pow(d - sumY / n, 2), 0);
-                const ssResLinear = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredLinear[i], 2), 0);
-                const rSquaredLinear = ssTot === 0 ? NaN : 1 - (ssResLinear / ssTot);
-                const dfReg = 1, dfRes = n - 2;
-                const msReg = (ssTot - ssResLinear) / dfReg;
-                const msRes = ssResLinear / dfRes;
-                const fValueLinear = msRes === 0 ? NaN : msReg / msRes;
-                const pValueLinear = jStat.ftest(fValueLinear, dfReg, dfRes);
-                fits.push({ type: 'linear', params: { slope, intercept }, rSquared: rSquaredLinear, fValue: fValueLinear, pValue: pValueLinear, yPred: yPredLinear });
-            }
-
-            // Exponential fit: y = a * exp(bx)
-            if (fitType === 'exponential' || fitType === 'auto') {
-                const logY = yNum.map(y => Math.log(y)).filter(y => !isNaN(y) && y !== -Infinity);
-                const xExp = xNum.slice(0, logY.length);
-                if (xExp.length >= 2) {
-                    const sumXExp = xExp.reduce((a, b) => a + b, 0);
-                    const sumLogY = logY.reduce((a, b) => a + b, 0);
-                    const sumXLogY = xExp.reduce((sum, xi, i) => sum + xi * logY[i], 0);
-                    const sumXXExp = xExp.reduce((sum, xi) => sum + xi * xi, 0);
-                    const nExp = logY.length;
-                    const bExp = (nExp * sumXLogY - sumXExp * sumLogY) / (nExp * sumXXExp - sumXExp * sumXExp);
-                    const aExp = Math.exp((sumLogY - bExp * sumXExp) / nExp);
-                    const yPredExp = xNum.map(x => aExp * Math.exp(bExp * x));
-                    const ssTotExp = yNum.reduce((sum, d) => sum + Math.pow(d - jStat.mean(yNum), 2), 0);
-                    const ssResExp = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredExp[i], 2), 0);
-                    const rSquaredExp = ssTotExp === 0 ? NaN : 1 - (ssResExp / ssTotExp);
-                    const msRegExp = (ssTotExp - ssResExp) / 1;
-                    const msResExp = ssResExp / (nExp - 2);
-                    const fValueExp = msResExp === 0 ? NaN : msRegExp / msResExp;
-                    const pValueExp = jStat.ftest(fValueExp, 1, nExp - 2);
-                    fits.push({ type: 'exponential', params: { a: aExp, b: bExp }, rSquared: rSquaredExp, fValue: fValueExp, pValue: pValueExp, yPred: yPredExp });
-                }
-            }
-
-            // Polynomial (Quadratic) fit: y = a + bx + cx^2
-            if (fitType === 'polynomial' || fitType === 'auto') {
-                const x2 = xNum.map(x => x * x);
-                const sumX = xNum.reduce((a, b) => a + b, 0);
-                const sumY = yNum.reduce((a, b) => a + b, 0);
-                const sumXY = pairedData.reduce((sum, d) => sum + d.x * d.y, 0);
-                const sumXX = xNum.reduce((sum, d) => sum + d.x * d.x, 0);
-                const sumX2 = x2.reduce((a, b) => a + b, 0);
-                const sumX2X = x2.reduce((sum, x2i, i) => sum + x2i * xNum[i], 0);
-                const sumX2Y = x2.reduce((sum, x2i, i) => sum + x2i * yNum[i], 0);
-                const sumX2X2 = x2.reduce((sum, x2i) => sum + x2i * x2i, 0);
-                const denom = n * sumXX * sumX2X2 + 2 * sumX * sumX2 * sumX2X - sumXX * sumX2 * sumX2 - n * sumX2X2 * sumX2 - sumX * sumX * sumX2X2;
-                const cQuad = ((n * sumXX * sumX2Y + sumX * sumX2 * sumXY - sumXX * sumX2 * sumY - n * sumX2X * sumXY - sumX * sumX * sumX2Y) / denom);
-                const bQuad = ((sumX2X * sumX2 * sumY + sumX * sumX2Y * sumX2 - sumX2X * sumX2X * sumY - sumX * sumX * sumX2Y - sumX2 * sumX2 * sumXY) / denom);
-                const aQuad = (sumY - bQuad * sumX - cQuad * sumX2) / n;
-                const yPredQuad = xNum.map(x => aQuad + bQuad * x + cQuad * x * x);
-                const ssTotQuad = yNum.reduce((sum, d) => sum + Math.pow(d - sumY / n, 2), 0);
-                const ssResQuad = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredQuad[i], 2), 0);
-                const rSquaredQuad = ssTotQuad === 0 ? NaN : 1 - (ssResQuad / ssTotQuad);
-                const dfRegQuad = 2, dfResQuad = n - 3;
-                const msRegQuad = (ssTotQuad - ssResQuad) / dfRegQuad;
-                const msResQuad = ssResQuad / dfResQuad;
-                const fValueQuad = msResQuad === 0 ? NaN : msRegQuad / msResQuad;
-                const pValueQuad = jStat.ftest(fValueQuad, dfRegQuad, dfResQuad);
-                fits.push({ type: 'polynomial', params: { a: aQuad, b: bQuad, c: cQuad }, rSquared: rSquaredQuad, fValue: fValueQuad, pValue: pValueQuad, yPred: yPredQuad });
-            }
-
-            // Logarithmic fit: y = a + b * ln(x)
-            if (fitType === 'logarithmic' || fitType === 'auto') {
-                const lnX = xNum.map(x => Math.log(x)).filter(ln => !isNaN(ln) && ln !== -Infinity && ln !== Infinity);
-                const yLog = yNum.slice(0, lnX.length);
-                if (lnX.length >= 2) {
-                    const sumLnX = lnX.reduce((a, b) => a + b, 0);
-                    const sumYLog = yLog.reduce((a, b) => a + b, 0);
-                    const sumLnXY = lnX.reduce((sum, lnx, i) => sum + lnx * yLog[i], 0);
-                    const sumLnXLnX = lnX.reduce((sum, lnx) => sum + lnx * lnx, 0);
-                    const nLog = lnX.length;
-                    const bLog = (nLog * sumLnXY - sumLnX * sumYLog) / (nLog * sumLnXLnX - sumLnX * sumLnX);
-                    const aLog = (sumYLog - bLog * sumLnX) / nLog;
-                    const yPredLog = xNum.map(x => aLog + bLog * Math.log(x));
-                    const ssTotLog = yNum.reduce((sum, d) => sum + Math.pow(d - jStat.mean(yNum), 2), 0);
-                    const ssResLog = pairedData.reduce((sum, d, i) => sum + Math.pow(d.y - yPredLog[i], 2), 0);
-                    const rSquaredLog = ssTotLog === 0 ? NaN : 1 - (ssResLog / ssTotLog);
-                    const msRegLog = (ssTotLog - ssResLog) / 1;
-                    const msResLog = ssResLog / (nLog - 2);
-                    const fValueLog = msResLog === 0 ? NaN : msRegLog / msResLog;
-                    const pValueLog = jStat.ftest(fValueLog, 1, nLog - 2);
-                    fits.push({ type: 'logarithmic', params: { a: aLog, b: bLog }, rSquared: rSquaredLog, fValue: fValueLog, pValue: pValueLog, yPred: yPredLog });
-                }
-            }
-
-            if (fitType === 'auto') {
-                return fits.reduce((best, current) => isNaN(current.rSquared) || current.rSquared < best.rSquared ? best : current, fits[0] || { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] });
-            }
-            return fits.find(f => f.type === fitType) || { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
+        if (!allDependents.length || !independent) {
+            resetGraph();
+            return;
         }
 
-        function calculateANOVA(data, independent, dependent) {
-            const groups = {};
-            data.forEach(row => {
-                const group = row[independent];
-                if (!groups[group]) groups[group] = [];
-                const value = parseFloat(row[dependent]);
-                if (!isNaN(value)) groups[group].push(value);
-            });
-            const groupArrays = Object.values(groups).filter(arr => arr.length > 0);
-            if (groupArrays.length < 2) return { fScore: NaN, pValue: NaN, means: [], groupNames: [] };
-            const fScore = jStat.anovafscore(...groupArrays);
-            const pValue = jStat.anovaftest(...groupArrays);
-            const means = groupArrays.map(arr => jStat.mean(arr));
-            const groupNames = Object.keys(groups).filter(key => groups[key].length > 0);
-            return { fScore, pValue, means, groupNames };
+        let workingData = filterByRanges(cachedData);
+        workingData = filterByDepthRange(workingData);
+        workingData = workingData.filter(row => {
+            const rowDate = row.TIMESTAMP;
+            return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1));
+        });
+        if (independent === 'TIMESTAMP') workingData = getWeeklyTimestamps(workingData, startDate, endDate);
+
+        console.log('Filtered data sample (checking PAR_2):', workingData.slice(0, 5).map(row => ({ TIMESTAMP: row.TIMESTAMP, PAR_2: row.PAR_2 })));
+
+        const units = allDependents.map(dep => unitMap[dep]);
+        const commonUnit = units[0];
+        const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
+        if (!dependents.length || !workingData.length) {
+            resetGraph();
+            return;
         }
 
-        function calculateBoxStats(yValues) {
-            const validY = yValues.filter(y => !isNaN(y));
-            if (validY.length === 0) return { median: NaN, q1: NaN, q3: NaN, iqr: NaN, min: NaN, max: NaN };
-            const median = jStat.median(validY);
-            const q1 = jStat.percentile(validY, 0.25);
-            const q3 = jStat.percentile(validY, 0.75);
-            const iqr = q3 - q1;
-            const lowerBound = q1 - 1.5 * iqr;
-            const upperBound = q3 + 1.5 * iqr;
-            const min = Math.max(Math.min(...validY), lowerBound);
-            const max = Math.min(Math.max(...validY), upperBound);
-            return { median, q1, q3, iqr, min, max };
-        }
+        const traces = [];
+        const fitTraces = [];
+        let invalidTraces = [];
+        const statsText = [];
 
-        function aggregateVariables(data) {
-            const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
-            const zones = ['A', 'B', 'C'];
-            return data.map(row => {
-                const newRow = { ...row };
-                depths.forEach(depth => {
-                    const suffix = depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 : depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9;
-                    const keys = zones.map(zone => `TS_${depth}_${zone}${suffix}`);
-                    const values = keys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
-                    newRow[`TS_${depth}`] = values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
-                });
-                const taKeys = ['TA_2_0_1', 'TA_2_0_2'];
-                const taValues = taKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
-                newRow['TA_2_0'] = taValues.length > 0 ? taValues.reduce((sum, v) => sum + v, 0) / taValues.length : null;
-                const rhKeys = ['RH_2_0_1', 'RH_2_0_2'];
-                const rhValues = rhKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
-                newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + v, 0) / rhValues.length : null;
-                ['CO2_measured', 'H2O_measured', 'WD_10', 'PAR_2', 'PREC_6'].forEach(key => {
-                    newRow[key] = parseFloat(row[key]) || null;
-                });
-                return newRow;
-            });
-        }
-
-        function getWeeklyTimestamps(data, start, end) {
-            const weeklyData = {};
-            data.forEach(row => {
-                const date = row.TIMESTAMP;
-                if ((!start || date >= start) && (!end || date <= new Date(end.getTime() + 24 * 60 * 60 * 1000 - 1))) {
-                    const weekStart = new Date(date);
-                    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-                    weekStart.setHours(0, 0, 0, 0);
-                    const key = weekStart.toISOString().split('T')[0];
-                    if (!weeklyData[key]) weeklyData[key] = { TIMESTAMP: weekStart, values: {} };
-                    Object.keys(row).forEach(k => {
-                        if (k !== 'TIMESTAMP') {
-                            weeklyData[key].values[k] = weeklyData[key].values[k] || [];
-                            const value = parseFloat(row[k]);
-                            if (!isNaN(value)) weeklyData[key].values[k].push(value);
-                        }
-                    });
-                }
-            });
-            return Object.values(weeklyData).map(w => ({
-                TIMESTAMP: w.TIMESTAMP,
-                ...Object.keys(w.values).reduce((acc, k) => ({
-                    ...acc,
-                    [k]: w.values[k].length > 0 ? w.values[k].reduce((sum, v) => sum + v, 0) / w.values[k].length : null
-                }), {})
-            }));
-        }
-
-        function calculateGraphWidth() { return document.getElementById('graph-container').clientWidth; }
-        function calculateGraphHeight() { return document.getElementById('graph-container').clientHeight; }
-
-        function toggleLegend() {
-            if (dataLoaded && graphInitialized) {
-                legendVisible = !legendVisible;
-                Plotly.relayout('graph', { showlegend: legendVisible });
-                document.getElementById('legend-tab').textContent = legendVisible ? 'Hide Legend' : 'Show Legend';
-            }
-        }
-
-        function filterOutliers(x, y) {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
-            if (pairedData.length < 2) return { x: x, y: y };
-            const yValues = pairedData.map(d => d.y);
-            const q1 = jStat.percentile(yValues, 0.25);
-            const q3 = jStat.percentile(yValues, 0.75);
-            const iqr = q3 - q1;
-            const lowerBound = q1 - 1.5 * iqr;
-            const upperBound = q3 + 1.5 * iqr;
-            const filtered = pairedData.filter(d => d.y >= lowerBound && d.y <= upperBound);
-            return { x: filtered.map(d => d.x), y: filtered.map(d => d.y) };
-        }
-
-        function updateStatsOptions() {
-            const chartType = document.querySelector('#chart-type-menu input:checked').value;
-            const fitOptions = document.getElementById('fit-options');
-            fitOptions.style.display = ['scatter', 'line', 'area'].includes(chartType) ? 'block' : 'none';
-        }
-
-        let debounceTimeout;
-        function debounceUpdateGraph() {
-            clearTimeout(debounceTimeout);
-            debounceTimeout = setTimeout(updateGraph, 300);
-        }
-
-        function updateGraph() {
-            const graphDiv = document.getElementById('graph');
-            if (!dataLoaded || typeof Plotly === 'undefined') {
-                resetGraph();
+        if (chartType === 'anova' && dependents.length === 1) {
+            const anovaResults = calculateANOVA(workingData, independent, dependents[0]);
+            if (isNaN(anovaResults.fScore)) {
+                graphDiv.innerHTML = '<div class="warning-message">Insufficient data for ANOVA</div>';
+                graphInitialized = false;
                 return;
             }
-
-            const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || null;
-            const allDependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
-            const chartType = document.querySelector('#chart-type-menu input:checked').value;
-            const fitType = document.querySelector('#fit-options input:checked')?.value || 'auto';
-            const showStats = document.getElementById('show-stats').checked;
-
-            document.getElementById('independent-toggle').textContent = independent ? document.querySelector(`label[for="${independent}"]`)?.textContent || 'Select Independent' : 'Select Independent';
-            document.getElementById('dependent-toggle').innerHTML = allDependents.length ? allDependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent}</span>`).join('<br>') : 'Select Dependent';
-
-            if (!allDependents.length || !independent) {
-                resetGraph();
-                return;
-            }
-
-            let workingData = filterByRanges(cachedData);
-            workingData = filterByDepthRange(workingData);
-            workingData = workingData.filter(row => {
-                const rowDate = row.TIMESTAMP;
-                return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1));
+            traces.push({
+                x: anovaResults.groupNames,
+                y: anovaResults.means,
+                type: 'bar',
+                name: `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means`,
+                marker: { color: dependentColors[dependents[0]] || '#00FFFF' }
             });
-            if (independent === 'TIMESTAMP') workingData = getWeeklyTimestamps(workingData, startDate, endDate);
-
-            console.log('Filtered data sample:', workingData.slice(0, 5));
-
-            const units = allDependents.map(dep => unitMap[dep]);
-            const commonUnit = units[0];
-            const dependents = allDependents.filter(dep => unitMap[dep] === commonUnit);
-            if (!dependents.length || !workingData.length) {
-                resetGraph();
-                return;
-            }
-
-            const traces = [];
-            const fitTraces = [];
-            let invalidTraces = [];
-            const statsText = [];
-
-            if (chartType === 'anova' && dependents.length === 1) {
-                const anovaResults = calculateANOVA(workingData, independent, dependents[0]);
-                if (isNaN(anovaResults.fScore)) {
-                    graphDiv.innerHTML = '<div class="warning-message">Insufficient data for ANOVA</div>';
-                    graphInitialized = false;
+            statsText.push(`${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]}: F=${anovaResults.fScore.toFixed(2)}, p=${anovaResults.pValue.toFixed(4)}`);
+        } else {
+            dependents.forEach(dep => {
+                const pairedData = workingData
+                    .map(row => ({
+                        x: independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent]),
+                        y: parseFloat(row[dep])
+                    }))
+                    .filter(d => d.x !== null && !isNaN(d.x) && d.y !== null && !isNaN(d.y));
+                
+                if (pairedData.length === 0) {
+                    console.warn(`No valid data for ${dep} vs ${independent}: pairedData length=0`);
+                    invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has no valid data`);
                     return;
                 }
+
+                let xValues = pairedData.map(d => d.x);
+                let yValues = pairedData.map(d => d.y);
+
+                const filtered = filterOutliers(xValues, yValues);
+                xValues = filtered.x;
+                yValues = filtered.y;
+
+                const color = dependentColors[dep] || '#FFFFFF';
                 traces.push({
-                    x: anovaResults.groupNames,
-                    y: anovaResults.means,
-                    type: 'bar',
-                    name: `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means`,
-                    marker: { color: dependentColors[dependents[0]] || '#00FFFF' }
+                    x: xValues,
+                    y: yValues,
+                    mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
+                    type: chartType === 'scatter' ? 'scattergl' : chartType === 'area' ? 'scattergl' : chartType,
+                    name: document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep,
+                    marker: { color: color, size: 8 },
+                    line: (chartType === 'line' || chartType === 'area') ? { color: color, width: 2 } : undefined,
+                    fill: chartType === 'area' ? 'tozeroy' : undefined
                 });
-                statsText.push(`${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]}: F=${anovaResults.fScore.toFixed(2)}, p=${anovaResults.pValue.toFixed(4)}`);
-            } else {
-                dependents.forEach(dep => {
-                    const pairedData = workingData
-                        .map(row => ({
-                            x: independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent]),
-                            y: parseFloat(row[dep])
-                        }))
-                        .filter(d => d.x !== null && !isNaN(d.x) && d.y !== null && !isNaN(d.y));
-                    
-                    if (pairedData.length === 0) {
-                        console.warn(`No valid data for ${dep} vs ${independent}: pairedData length=0`);
-                        invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has no valid data`);
-                        return;
+
+                if (chartType === 'box') {
+                    const boxStats = calculateBoxStats(yValues);
+                    statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Median=${boxStats.median.toFixed(2)}, Q1=${boxStats.q1.toFixed(2)}, Q3=${boxStats.q3.toFixed(2)}, IQR=${boxStats.iqr.toFixed(2)}, Min=${boxStats.min.toFixed(2)}, Max=${boxStats.max.toFixed(2)}`);
+                } else if (chartType === 'bar') {
+                    const mean = jStat.mean(yValues);
+                    const stdDev = jStat.stdev(yValues);
+                    statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Mean=${mean.toFixed(2)}, SD=${stdDev.toFixed(2)}`);
+                } else if (['scatter', 'line', 'area'].includes(chartType) && xValues.length > 1) {
+                    const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
+                    const fit = calculateFit(xNum, yValues, fitType);
+                    if (fit.type !== 'none') {
+                        const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Math.max(...xNum)];
+                        const yFit = fit.type === 'linear' ? xFit.map(x => fit.params.intercept + fit.params.slope * x) :
+                                    fit.type === 'exponential' ? xFit.map(x => fit.params.a * Math.exp(fit.params.b * x)) :
+                                    fit.type === 'polynomial' ? xFit.map(x => fit.params.a + fit.params.b * x + fit.params.c * x * x) :
+                                    fit.type === 'logarithmic' ? xFit.map(x => fit.params.a + fit.params.b * Math.log(x)) : [];
+                        fitTraces.push({
+                            x: xFit,
+                            y: yFit,
+                            mode: 'lines',
+                            type: 'scattergl',
+                            name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (${fit.type} fit)`,
+                            line: { color: color, width: 2, dash: 'dash' }
+                        });
+                        const eq = fit.type === 'linear' ? `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}x` :
+                                  fit.type === 'exponential' ? `y = ${fit.params.a.toFixed(2)}e^(${fit.params.b.toFixed(2)}x)` :
+                                  fit.type === 'polynomial' ? `y = ${fit.params.a.toFixed(2)} + ${fit.params.b.toFixed(2)}x + ${fit.params.c.toFixed(2)}x²` :
+                                  fit.type === 'logarithmic' ? `y = ${fit.params.a.toFixed(2)} + ${fit.params.b.toFixed(2)}ln(x)` : '';
+                        statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: ${eq}, R²=${fit.rSquared.toFixed(2)}, F=${fit.fValue.toFixed(2)}, p=${fit.pValue.toFixed(4)}`);
                     }
-
-                    let xValues = pairedData.map(d => d.x);
-                    let yValues = pairedData.map(d => d.y);
-
-                    const filtered = filterOutliers(xValues, yValues);
-                    xValues = filtered.x;
-                    yValues = filtered.y;
-
-                    const color = dependentColors[dep] || '#FFFFFF';
-                    traces.push({
-                        x: xValues,
-                        y: yValues,
-                        mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
-                        type: chartType === 'scatter' ? 'scattergl' : chartType === 'area' ? 'scattergl' : chartType,
-                        name: document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep,
-                        marker: { color: color, size: 8 },
-                        line: (chartType === 'line' || chartType === 'area') ? { color: color, width: 2 } : undefined,
-                        fill: chartType === 'area' ? 'tozeroy' : undefined
-                    });
-
-                    if (chartType === 'box') {
-                        const boxStats = calculateBoxStats(yValues);
-                        statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Median=${boxStats.median.toFixed(2)}, Q1=${boxStats.q1.toFixed(2)}, Q3=${boxStats.q3.toFixed(2)}, IQR=${boxStats.iqr.toFixed(2)}, Min=${boxStats.min.toFixed(2)}, Max=${boxStats.max.toFixed(2)}`);
-                    } else if (chartType === 'bar') {
-                        const mean = jStat.mean(yValues);
-                        const stdDev = jStat.stdev(yValues);
-                        statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Mean=${mean.toFixed(2)}, SD=${stdDev.toFixed(2)}`);
-                    } else if (['scatter', 'line', 'area'].includes(chartType) && xValues.length > 1) {
-                        const xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
-                        const fit = calculateFit(xNum, yValues, fitType);
-                        if (fit.type !== 'none') {
-                            const xFit = independent === 'TIMESTAMP' ? [new Date(Math.min(...xNum)), new Date(Math.max(...xNum))] : [Math.min(...xNum), Math.max(...xNum)];
-                            const yFit = fit.type === 'linear' ? xFit.map(x => fit.params.intercept + fit.params.slope * x) :
-                                        fit.type === 'exponential' ? xFit.map(x => fit.params.a * Math.exp(fit.params.b * x)) :
-                                        fit.type === 'polynomial' ? xFit.map(x => fit.params.a + fit.params.b * x + fit.params.c * x * x) :
-                                        fit.type === 'logarithmic' ? xFit.map(x => fit.params.a + fit.params.b * Math.log(x)) : [];
-                            fitTraces.push({
-                                x: xFit,
-                                y: yFit,
-                                mode: 'lines',
-                                type: 'scattergl',
-                                name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (${fit.type} fit)`,
-                                line: { color: color, width: 2, dash: 'dash' }
-                            });
-                            const eq = fit.type === 'linear' ? `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}x` :
-                                      fit.type === 'exponential' ? `y = ${fit.params.a.toFixed(2)}e^(${fit.params.b.toFixed(2)}x)` :
-                                      fit.type === 'polynomial' ? `y = ${fit.params.a.toFixed(2)} + ${fit.params.b.toFixed(2)}x + ${fit.params.c.toFixed(2)}x²` :
-                                      fit.type === 'logarithmic' ? `y = ${fit.params.a.toFixed(2)} + ${fit.params.b.toFixed(2)}ln(x)` : '';
-                            statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: ${eq}, R²=${fit.rSquared.toFixed(2)}, F=${fit.fValue.toFixed(2)}, p=${fit.pValue.toFixed(4)}`);
-                        }
-                    }
-                });
-            }
-
-            if (!traces.length) {
-                console.warn('No valid traces to plot:', invalidTraces);
-                resetGraph();
-                if (invalidTraces.length) graphDiv.innerHTML += `<div class="warning-message">${invalidTraces.join('<br>')}</div>`;
-                return;
-            }
-
-            if (statsOpened) document.getElementById('stats-content').innerHTML = statsText.length ? statsText.join('<br>') : 'No stats available';
-
-            const xAxisTitle = independent === 'TIMESTAMP' ? 'Time' : 
-                              independent === 'CO2_measured' ? 'Measured CO₂ (ppm)' :
-                              independent === 'H2O_measured' ? 'Measured H₂O (mmol/mol)' :
-                              document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
-            const isAllSoilTemp = dependents.every(dep => dep.startsWith('TS_'));
-            const yAxisTitle = chartType === 'anova' ? `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means` :
-                              dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent :
-                              isAllSoilTemp ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit})`;
-
-            const annotations = showStats && statsText.length ? [{
-                x: 0.02,
-                y: 0.98,
-                xref: 'paper',
-                yref: 'paper',
-                text: statsText.join('<br>'),
-                showarrow: false,
-                font: { color: '#00FF00', family: 'Lato', size: 14 },
-                bgcolor: 'rgba(26, 26, 26, 0.7)',
-                bordercolor: 'transparent',
-                borderwidth: 0,
-                borderpad: 4,
-                opacity: 0.9,
-                align: 'left'
-            }] : [];
-
-            const layout = {
-                width: calculateGraphWidth(),
-                height: calculateGraphHeight(),
-                plot_bgcolor: '#1A1A1A',
-                paper_bgcolor: '#1A1A1A',
-                font: { color: '#FFFFFF', size: 12 },
-                title: { text: `${yAxisTitle} vs. ${xAxisTitle}`, font: { size: 16 }, x: 0.5, xanchor: 'center', y: 0.95, yanchor: 'top' },
-                xaxis: {
-                    title: { text: xAxisTitle, font: { size: 14 } },
-                    gridcolor: '#444',
-                    zerolinecolor: '#444',
-                    type: independent === 'TIMESTAMP' ? 'date' : chartType === 'anova' ? 'category' : 'linear',
-                    automargin: true,
-                    tickfont: { size: 12 }
-                },
-                yaxis: { title: { text: yAxisTitle, font: { size: 14 } }, gridcolor: '#444', zerolinecolor: '#444', automargin: true },
-                margin: { t: 80, b: 120, l: 100, r: 40 },
-                showlegend: legendVisible,
-                legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.7)', bordercolor: 'transparent', borderwidth: 0, font: { color: '#FFFFFF', size: 12 }, traceorder: 'normal', orientation: 'v' },
-                annotations: annotations,
-                hovermode: 'closest'
-            };
-
-            const data = ['scatter', 'line', 'area'].includes(chartType) && fitTraces.length ? traces.concat(fitTraces) : traces;
-            console.log('Plotting traces:', data);
-
-            if (!graphInitialized) {
-                Plotly.newPlot(graphDiv, data, layout, { responsive: true })
-                    .then(() => graphInitialized = true)
-                    .catch(err => {
-                        console.error('Plotly newPlot error:', err);
-                        resetGraph();
-                    });
-            } else {
-                Plotly.react(graphDiv, data, layout)
-                    .catch(err => {
-                        console.error('Plotly react error:', err);
-                        Plotly.newPlot(graphDiv, data, layout, { responsive: true })
-                            .then(() => graphInitialized = true)
-                            .catch(err => {
-                                console.error('Plotly fallback newPlot error:', err);
-                                resetGraph();
-                            });
-                    });
-            }
+                }
+            });
         }
 
-        document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
-        document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
-        document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
-        document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
-        document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
-        document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
-        document.getElementById('legend-tab').addEventListener('click', toggleLegend);
-        document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
-        document.getElementById('show-stats').addEventListener('change', debounceUpdateGraph);
+        if (!traces.length) {
+            console.warn('No valid traces to plot:', invalidTraces);
+            resetGraph();
+            if (invalidTraces.length) graphDiv.innerHTML += `<div class="warning-message">${invalidTraces.join('<br>')}</div>`;
+            return;
+        }
 
-        document.querySelectorAll('#independent-menu input').forEach(input => {
-            input.addEventListener('change', () => {
-                enforceSingleSelection('independent-menu', input.id);
-                debounceUpdateGraph();
-            });
+        if (statsOpened) document.getElementById('stats-content').innerHTML = statsText.length ? statsText.join('<br>') : 'No stats available';
+
+        const xAxisTitle = independent === 'TIMESTAMP' ? 'Time' : 
+                          independent === 'CO2_measured' ? 'Measured CO₂ (ppm)' :
+                          independent === 'H2O_measured' ? 'Measured H₂O (mmol/mol)' :
+                          document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
+        const isAllSoilTemp = dependents.every(dep => dep.startsWith('TS_'));
+        const yAxisTitle = chartType === 'anova' ? `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means` :
+                          dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent :
+                          isAllSoilTemp ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit})`;
+
+        const annotations = showStats && statsText.length ? [{
+            x: 0.02,
+            y: 0.98,
+            xref: 'paper',
+            yref: 'paper',
+            text: statsText.join('<br>'),
+            showarrow: false,
+            font: { color: '#00FF00', family: 'Lato', size: 14 },
+            bgcolor: 'rgba(26, 26, 26, 0.7)',
+            bordercolor: 'transparent',
+            borderwidth: 0,
+            borderpad: 4,
+            opacity: 0.9,
+            align: 'left'
+        }] : [];
+
+        const layout = {
+            width: calculateGraphWidth(),
+            height: calculateGraphHeight(),
+            plot_bgcolor: '#1A1A1A',
+            paper_bgcolor: '#1A1A1A',
+            font: { color: '#FFFFFF', size: 12 },
+            title: { text: `${yAxisTitle} vs. ${xAxisTitle}`, font: { size: 16 }, x: 0.5, xanchor: 'center', y: 0.95, yanchor: 'top' },
+            xaxis: {
+                title: { text: xAxisTitle, font: { size: 14 } },
+                gridcolor: '#444',
+                zerolinecolor: '#444',
+                type: independent === 'TIMESTAMP' ? 'date' : chartType === 'anova' ? 'category' : 'linear',
+                automargin: true,
+                tickfont: { size: 12 }
+            },
+            yaxis: { title: { text: yAxisTitle, font: { size: 14 } }, gridcolor: '#444', zerolinecolor: '#444', automargin: true },
+            margin: { t: 80, b: 120, l: 100, r: 40 },
+            showlegend: legendVisible,
+            legend: { x: 1, y: 1, xanchor: 'right', yanchor: 'top', bgcolor: 'rgba(26, 26, 26, 0.7)', bordercolor: 'transparent', borderwidth: 0, font: { color: '#FFFFFF', size: 12 }, traceorder: 'normal', orientation: 'v' },
+            annotations: annotations,
+            hovermode: 'closest'
+        };
+
+        const data = ['scatter', 'line', 'area'].includes(chartType) && fitTraces.length ? traces.concat(fitTraces) : traces;
+        console.log('Plotting traces:', data);
+
+        if (!graphInitialized) {
+            Plotly.newPlot(graphDiv, data, layout, { responsive: true })
+                .then(() => graphInitialized = true)
+                .catch(err => {
+                    console.error('Plotly newPlot error:', err);
+                    resetGraph();
+                });
+        } else {
+            Plotly.react(graphDiv, data, layout)
+                .catch(err => {
+                    console.error('Plotly react error:', err);
+                    Plotly.newPlot(graphDiv, data, layout, { responsive: true })
+                        .then(() => graphInitialized = true)
+                        .catch(err => {
+                            console.error('Plotly fallback newPlot error:', err);
+                            resetGraph();
+                        });
+                });
+        }
+    }
+
+    document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
+    document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
+    document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
+    document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
+    document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
+    document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
+    document.getElementById('legend-tab').addEventListener('click', toggleLegend);
+    document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
+    document.getElementById('show-stats').addEventListener('change', debounceUpdateGraph);
+
+    document.querySelectorAll('#independent-menu input').forEach(input => {
+        input.addEventListener('change', () => {
+            enforceSingleSelection('independent-menu', input.id);
+            debounceUpdateGraph();
         });
+    });
 
-        document.querySelectorAll('#dependent-menu input').forEach(input => {
-            input.addEventListener('change', debounceUpdateGraph);
+    document.querySelectorAll('#dependent-menu input').forEach(input => {
+        input.addEventListener('change', debounceUpdateGraph);
+    });
+
+    document.querySelectorAll('#chart-type-menu input').forEach(input => {
+        input.addEventListener('change', () => {
+            document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+            updateStatsOptions();
+            debounceUpdateGraph();
         });
+    });
 
-        document.querySelectorAll('#chart-type-menu input').forEach(input => {
-            input.addEventListener('change', () => {
-                document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
-                updateStatsOptions();
-                debounceUpdateGraph();
-            });
-        });
+    document.querySelectorAll('#fit-options input').forEach(input => {
+        input.addEventListener('change', debounceUpdateGraph);
+    });
 
-        document.querySelectorAll('#fit-options input').forEach(input => {
-            input.addEventListener('change', debounceUpdateGraph);
-        });
+    flatpickr('#start-date', {
+        dateFormat: 'Y-m-d',
+        defaultDate: '2015-08-01',
+        onChange: (selectedDates) => {
+            startDate = selectedDates[0];
+            document.getElementById('time-range-toggle').textContent = `${startDate.toISOString().split('T')[0]} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+            debounceUpdateGraph();
+        }
+    });
 
-        flatpickr('#start-date', {
-            dateFormat: 'Y-m-d',
-            defaultDate: '2015-08-01',
-            onChange: (selectedDates) => {
-                startDate = selectedDates[0];
-                document.getElementById('time-range-toggle').textContent = `${startDate.toISOString().split('T')[0]} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
-                debounceUpdateGraph();
-            }
-        });
+    flatpickr('#end-date', {
+        dateFormat: 'Y-m-d',
+        defaultDate: '2025-04-05',
+        onChange: (selectedDates) => {
+            endDate = selectedDates[0];
+            document.getElementById('time-range-toggle').textContent = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate.toISOString().split('T')[0]}`;
+            debounceUpdateGraph();
+        }
+    });
 
-        flatpickr('#end-date', {
-            dateFormat: 'Y-m-d',
-            defaultDate: '2025-04-05',
-            onChange: (selectedDates) => {
-                endDate = selectedDates[0];
-                document.getElementById('time-range-toggle').textContent = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate.toISOString().split('T')[0]}`;
+    window.addEventListener('resize', () => {
+        if (dataLoaded && graphInitialized) Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
+    });
+
+    loadData();
+</script>          document.getElementById('time-range-toggle').textContent = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate.toISOString().split('T')[0]}`;
                 debounceUpdateGraph();
             }
         });
