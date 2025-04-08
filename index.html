@@ -44,7 +44,7 @@
         .welcome-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00FF00; font-family: 'VT323', monospace; font-size: 20px; text-align: center; text-shadow: 0 0 10px #00FF00; z-index: 2; }
         .welcome-message img { display: block; margin: 0 auto; max-width: 300px; height: auto; }
         .welcome-message hr { border: 1px solid #00FFFF; width: 80%; margin: 10px auto; }
-        .legend-tab { position: absolute; top: 50px; right: 1vw; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 5px; color: #00FFFF; padding: 5px 10px; cursor: pointer; z-index: 5; font-size: calc(10px + 0.5vw); white-space: nowrap; }
+       
         .controls-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; padding: 15px; color: #00FFFF; font-size: 13px; z-index: 20; display: none; width: 400px; max-height: 80vh; overflow-y: auto; }
         .controls-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .controls-header h3 { margin: 0; color: #DAA520; font-family: 'Exo 2', sans-serif; font-size: 18px; flex-grow: 1; text-align: left; }
@@ -186,7 +186,6 @@
                     <hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO₂ concentrations.<hr>Beginning August 2015
                 </div>
             </div>
-            <div class="legend-tab" id="legend-tab">Show Legend</div>
         </div>
     </div>
 
@@ -662,13 +661,7 @@
         return window.innerHeight - headerHeight;
     }
 
-    function toggleLegend() {
-        if (dataLoaded && graphInitialized) {
-            legendVisible = !legendVisible;
-            Plotly.relayout('graph', { showlegend: legendVisible });
-            document.getElementById('legend-tab').textContent = legendVisible ? 'Hide Legend' : 'Show Legend';
-        }
-    }
+
 
     function filterOutliers(x, y) {
         const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
@@ -879,42 +872,42 @@
 }] : [];
 
         const layout = {
-            width: calculateGraphWidth(),
-            height: calculateGraphHeight(),
-            plot_bgcolor: '#1A1A1A',
-            paper_bgcolor: '#1A1A1A',
-            font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 },
-            title: { text: `${yAxisTitle} vs. ${xAxisTitle}`, font: { size: window.innerWidth <= 480 ? 14 : 16 } },
-            xaxis: {
-                title: xAxisTitle,
-                gridcolor: '#444',
-                zerolinecolor: '#444',
-                type: independent === 'TIMESTAMP' ? 'date' : chartType === 'anova' ? 'category' : 'linear'
-            },
-            yaxis: { 
-                title: yAxisTitle, 
-                gridcolor: '#444', 
-                zerolinecolor: '#444' 
-            },
-            margin: { 
-                t: window.innerWidth <= 480 ? 50 : 60, 
-                b: window.innerWidth <= 480 ? 80 : 100, 
-                l: window.innerWidth <= 480 ? 80 : 100, 
-                r: window.innerWidth <= 480 ? 20 : 30 
-            },
-            showlegend: legendVisible,
-            legend: { 
-                x: 1, 
-                y: 0.95, 
-                xanchor: 'right', 
-                yanchor: 'top', 
-                bgcolor: 'rgba(26, 26, 26, 0.7)', 
-                bordercolor: 'transparent', 
-                font: { size: window.innerWidth <= 480 ? 10 : 12 } 
-            },
-            annotations: annotations,
-            hovermode: 'closest'
-        };
+    width: calculateGraphWidth(),
+    height: calculateGraphHeight(),
+    plot_bgcolor: '#1A1A1A',
+    paper_bgcolor: '#1A1A1A',
+    font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 },
+    title: { text: `${yAxisTitle} vs. ${xAxisTitle}`, font: { size: window.innerWidth <= 480 ? 14 : 16 } },
+    xaxis: {
+        title: xAxisTitle,
+        gridcolor: '#444',
+        zerolinecolor: '#444',
+        type: independent === 'TIMESTAMP' ? 'date' : chartType === 'anova' ? 'category' : 'linear'
+    },
+    yaxis: { 
+        title: yAxisTitle, 
+        gridcolor: '#444', 
+        zerolinecolor: '#444' 
+    },
+    margin: { 
+        t: window.innerWidth <= 480 ? 50 : 60, 
+        b: window.innerWidth <= 480 ? 80 : 100, 
+        l: window.innerWidth <= 480 ? 80 : 100, 
+        r: window.innerWidth <= 480 ? 20 : 30 
+    },
+    showlegend: true, // Always show legend
+    legend: { 
+        x: 1, 
+        y: 0.95, 
+        xanchor: 'right', 
+        yanchor: 'top', 
+        bgcolor: 'rgba(26, 26, 26, 0.7)', 
+        bordercolor: 'transparent', 
+        font: { size: window.innerWidth <= 480 ? 10 : 12 } 
+    },
+    annotations: annotations,
+    hovermode: 'closest'
+};
 
         const data = traces.concat(fitTraces);
 
@@ -948,7 +941,6 @@
     document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
     document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
     document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
-    document.getElementById('legend-tab').addEventListener('click', toggleLegend);
     document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
     document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu'));
     document.getElementById('show-fit').addEventListener('change', updateGraph);
