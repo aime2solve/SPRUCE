@@ -47,9 +47,15 @@
         .legend-tab { position: absolute; top: 50px; right: 1vw; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 5px; color: #00FFFF; padding: 5px 10px; cursor: pointer; z-index: 5; font-size: calc(10px + 0.5vw); white-space: nowrap; }
 	.legend {
     position: absolute !important;
-    top: 60px; /* Adjust to position below the legend-tab */
+    top: 90px; /* Moved down to avoid overlap with legend-tab */
     right: 1vw;
-    z-index: 10; /* Ensures it’s above the plot */
+    z-index: 10;
+    background: rgba(26, 26, 26, 0.7); /* Match your theme */
+    border: 2px solid #00FFFF;
+    border-radius: 5px;
+    padding: 5px;
+    max-height: 80%; /* Prevent overflow */
+    overflow-y: auto; /* Scroll if too many items */
 }
         .controls-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; padding: 15px; color: #00FFFF; font-size: 13px; z-index: 20; display: none; width: 400px; max-height: 80vh; overflow-y: auto; }
         .controls-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -855,25 +861,27 @@
         }
 
         if (statsOpened) {
-            document.getElementById('stats-content').innerHTML = statsText.length ? statsText.join('<br>') : 'No stats available';
-        }
+    document.getElementById('stats-content').innerHTML = statsText.length ? 
+        statsText.map((text, i) => `<span style="color: ${dependentColors[dependents[i]] || '#FFFFFF'}">${text}</span>`).join('<br>') : 
+        'No stats available';
+}
 
         const xAxisTitle = independent === 'TIMESTAMP' ? 'Time' : document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
         const yAxisTitle = dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent : 
                           dependents.every(dep => dep.startsWith('TS_')) ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit || 'Mixed Units'})`;
 
-        const annotations = showOnChart && statsText.length ? [{
-            x: 0.02,
-            y: 0.98,
-            xref: 'paper',
-            yref: 'paper',
-            text: statsText.slice(0, 5).join('<br>') + (statsText.length > 5 ? '<br>(Truncated, see Stats menu)' : ''),
-            showarrow: false,
-            font: { color: '#00FF00', family: 'Lato', size: window.innerWidth <= 480 ? 10 : 12 },
-            bgcolor: 'rgba(26, 26, 26, 0.7)',
-            bordercolor: 'transparent',
-            borderpad: 4
-        }] : [];
+        const annotations = showOnChart && statsText.length ? dependents.map((dep, i) => ({
+    x: 0.02,
+    y: 0.98 - i * 0.05, // Stack vertically
+    xref: 'paper',
+    yref: 'paper',
+    text: statsText[i],
+    showarrow: false,
+    font: { color: dependentColors[dep] || '#FFFFFF', family: 'Lato', size: window.innerWidth <= 480 ? 10 : 12 },
+    bgcolor: 'rgba(26, 26, 26, 0.7)',
+    bordercolor: 'transparent',
+    borderpad: 4
+})).slice(0, 5) : [];
 
        const layout = {
     width: calculateGraphWidth(),
@@ -906,13 +914,9 @@
     },
     showlegend: legendVisible,
     legend: { 
-        x: 1, 
-        y: 0.95, 
-        xanchor: 'right', 
-        yanchor: 'top', 
-        bgcolor: 'rgba(26, 26, 26, 0.7)', 
-        bordercolor: 'transparent', 
+        orientation: 'v', // Vertical legend
         font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 } // White legend text
+        // Removed x, y, xanchor, yanchor, bgcolor, bordercolor to let CSS handle positioning
     },
     annotations: annotations,
     hovermode: 'closest'
