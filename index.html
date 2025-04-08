@@ -47,15 +47,22 @@
         .legend-tab { position: absolute; top: 50px; right: 1vw; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 5px; color: #00FFFF; padding: 5px 10px; cursor: pointer; z-index: 5; font-size: calc(10px + 0.5vw); white-space: nowrap; }
 	.legend {
     position: absolute !important;
-    top: 90px; /* Moved down to avoid overlap with legend-tab */
+    top: 90px; /* Below legend-tab */
     right: 1vw;
     z-index: 10;
-    background: rgba(26, 26, 26, 0.7); /* Match your theme */
+    background: rgba(26, 26, 26, 0.7);
     border: 2px solid #00FFFF;
     border-radius: 5px;
     padding: 5px;
-    max-height: 80%; /* Prevent overflow */
-    overflow-y: auto; /* Scroll if too many items */
+    max-height: 80%;
+    overflow-y: auto;
+    width: auto; /* Let it size naturally */
+    pointer-events: none; /* Prevent interaction blocking plot */
+}
+.legend .caption, .legend .legendtitletext, .legend .legendtext {
+    color: #FFFFFF !important; /* Ensure white text */
+    font-size: 12px !important; /* Match your theme */
+    font-family: 'Lato', sans-serif !important;
 }
         .controls-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; padding: 15px; color: #00FFFF; font-size: 13px; z-index: 20; display: none; width: 400px; max-height: 80vh; overflow-y: auto; }
         .controls-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -888,35 +895,39 @@
     height: calculateGraphHeight(),
     plot_bgcolor: '#1A1A1A',
     paper_bgcolor: '#1A1A1A',
-    font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 }, // White text for all graph elements
+    font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 },
     title: { 
         text: `${yAxisTitle} vs. ${xAxisTitle}`, 
-        font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 14 : 16 } // White title
+        font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 14 : 16 }
     },
     xaxis: {
-        title: { text: xAxisTitle, font: { color: '#FFFFFF' } }, // White axis title
+        title: { text: xAxisTitle, font: { color: '#FFFFFF' } },
         gridcolor: '#444',
         zerolinecolor: '#444',
-        tickfont: { color: '#FFFFFF' }, // White tick labels
+        tickfont: { color: '#FFFFFF' },
         type: independent === 'TIMESTAMP' ? 'date' : chartType === 'anova' ? 'category' : 'linear'
     },
     yaxis: { 
-        title: { text: yAxisTitle, font: { color: '#FFFFFF' } }, // White axis title
+        title: { text: yAxisTitle, font: { color: '#FFFFFF' } },
         gridcolor: '#444', 
         zerolinecolor: '#444',
-        tickfont: { color: '#FFFFFF' } // White tick labels
+        tickfont: { color: '#FFFFFF' }
     },
     margin: { 
         t: window.innerWidth <= 480 ? 50 : 60, 
         b: window.innerWidth <= 480 ? 80 : 100, 
         l: window.innerWidth <= 480 ? 80 : 100, 
-        r: window.innerWidth <= 480 ? 20 : 30 
+        r: window.innerWidth <= 480 ? 80 : 100  // Increased right margin to reserve space
     },
     showlegend: legendVisible,
     legend: { 
-        orientation: 'v', // Vertical legend
-        font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 } // White legend text
-        // Removed x, y, xanchor, yanchor, bgcolor, bordercolor to let CSS handle positioning
+        orientation: 'v',
+        x: 1.05, // Position slightly outside plot area
+        y: 1,    // Top-aligned
+        xanchor: 'left', // Anchor to the left of x position
+        yanchor: 'top',  // Anchor to top
+        traceorder: 'normal',
+        font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 }
     },
     annotations: annotations,
     hovermode: 'closest'
