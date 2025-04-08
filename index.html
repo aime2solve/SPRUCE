@@ -240,19 +240,19 @@
     };
 
     const plotConditions = {
-        4: { temp: '+9.0°C', co2: 'Ambient', chamber: 'Enclosed' },
-        6: { temp: '+0.0°C', co2: 'Ambient', chamber: 'Enclosed' },
-        7: { temp: 'Ambient', co2: 'Ambient', chamber: 'Open' },
-        8: { temp: '+6.75°C', co2: 'Ambient', chamber: 'Enclosed' },
-        10: { temp: '+4.5°C', co2: 'Ambient', chamber: 'Enclosed' },
-        11: { temp: '+0.0°C', co2: '~900 ppm', chamber: 'Enclosed' },
-        13: { temp: '+2.25°C', co2: 'Ambient', chamber: 'Enclosed' },
-        14: { temp: 'Ambient', co2: 'Ambient', chamber: 'Open' },
-        16: { temp: '+6.75°C', co2: '~900 ppm', chamber: 'Enclosed' },
-        17: { temp: '+4.5°C', co2: '~900 ppm', chamber: 'Enclosed' },
-        19: { temp: '+9.0°C', co2: '~900 ppm', chamber: 'Enclosed' },
-        20: { temp: '+2.25°C', co2: '~900 ppm', chamber: 'Enclosed' },
-        21: { temp: 'Ambient', co2: 'Ambient', chamber: 'Open' }
+        4: { temp: '+9°C', co2: 'Amb', chamber: 'Enc' },
+        6: { temp: '+0°C', co2: 'Amb', chamber: 'Enc' },
+        7: { temp: 'Amb', co2: 'Amb', chamber: 'Open' },
+        8: { temp: '+6.8°C', co2: 'Amb', chamber: 'Enc' },
+        10: { temp: '+4.5°C', co2: 'Amb', chamber: 'Enc' },
+        11: { temp: '+0°C', co2: '900', chamber: 'Enc' },
+        13: { temp: '+2.3°C', co2: 'Amb', chamber: 'Enc' },
+        14: { temp: 'Amb', co2: 'Amb', chamber: 'Open' },
+        16: { temp: '+6.8°C', co2: '900', chamber: 'Enc' },
+        17: { temp: '+4.5°C', co2: '900', chamber: 'Enc' },
+        19: { temp: '+9°C', co2: '900', chamber: 'Enc' },
+        20: { temp: '+2.3°C', co2: '900', chamber: 'Enc' },
+        21: { temp: 'Amb', co2: 'Amb', chamber: 'Open' }
     };
 
     async function loadData() {
@@ -941,6 +941,7 @@
     document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
     document.getElementById('legend-tab').addEventListener('click', toggleLegend);
     document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
+    document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu')); // Added
     document.getElementById('show-fit').addEventListener('change', updateGraph);
     document.getElementById('show-on-chart').addEventListener('change', updateGraph);
 
@@ -965,6 +966,18 @@
 
     document.querySelectorAll('#fit-options input').forEach(input => {
         input.addEventListener('change', updateGraph);
+    });
+
+    // Added: Event listener for plot selection
+    document.querySelectorAll('#plot-number-menu input').forEach(input => {
+        input.addEventListener('change', () => {
+            selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked'))
+                .map(input => Number(input.value));
+            const totalPlots = Object.keys(plotConditions).length;
+            document.getElementById('plot-number-toggle').textContent = 
+                selectedPlots.length === totalPlots ? 'Plot # (all)' : `Plot # (${selectedPlots.length})`;
+            updateGraph();
+        });
     });
 
     flatpickr('#start-date', {
