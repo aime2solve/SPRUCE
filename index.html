@@ -22,7 +22,7 @@
         .container { display: flex; flex-grow: 1; overflow: hidden; height: calc(100vh - 4vh); position: relative; }
         .sidebar { width: 250px; background: rgba(26, 26, 26, 0.8); border-right: 2px solid #00FFFF; padding: 15px; display: flex; flex-direction: column; gap: 15px; position: absolute; top: 0; left: 0; height: 100%; transition: transform 0.3s ease; z-index: 10; }
         .sidebar.collapsed { transform: translateX(-250px); }
-        .sidebar-tab { position: absolute; top: 0; right: -40px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-left: none; border-radius: 0 10px 10px 0; color: #00FFFF; font-size: 19px; line-height: 36px; text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; z-index: 11; }
+        .sidebar-tab { position: absolute; top: 0; right: -40px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-left: none; border-radius: 0 10px 10px 0; color: #00FFFF; font-size: 19px; line-height: 36  { margin: 0; padding: 0; height: 100vh; width: 100vw; background-color: #000000; font-family: 'Lato', sans-serif; overflow: hidden; display: flex; flex-direction: column; }
         .sidebar-title { font-family: 'Exo 2', sans-serif; font-size: 26px; color: #DAA520; text-align: center; text-shadow: 0 0 10px #DAA520; line-height: 1.2; margin-top: 0; }
         .sidebar-title span { display: block; font-size: 18px; }
         .button-container { display: flex; align-items: center; width: 100%; position: relative; }
@@ -45,25 +45,10 @@
         .welcome-message img { display: block; margin: 0 auto; max-width: 300px; height: auto; }
         .welcome-message hr { border: 1px solid #00FFFF; width: 80%; margin: 10px auto; }
         .legend-tab { position: absolute; top: 50px; right: 1vw; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 5px; color: #00FFFF; padding: 5px 10px; cursor: pointer; z-index: 5; font-size: calc(10px + 0.5vw); white-space: nowrap; }
-	.legend {
-    position: absolute !important;
-    top: 90px; /* Below legend-tab */
-    right: 1vw;
-    z-index: 10;
-    background: rgba(26, 26, 26, 0.7);
-    border: 2px solid #00FFFF;
-    border-radius: 5px;
-    padding: 5px;
-    max-height: 80%;
-    overflow-y: auto;
-    width: auto; /* Let it size naturally */
-    pointer-events: none; /* Prevent interaction blocking plot */
-}
-.legend .caption, .legend .legendtitletext, .legend .legendtext {
-    color: #FFFFFF !important; /* Ensure white text */
-    font-size: 12px !important; /* Match your theme */
-    font-family: 'Lato', sans-serif !important;
-}
+        .custom-legend-panel { position: absolute; top: 80px; right: 1vw; width: 250px; background: rgba(26, 26, 26, 0.7); color: #00FFFF; font-family: 'Lato', sans-serif; font-size: 12px; padding: 10px; z-index: 6; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-in-out; transform-origin: top right; }
+        .custom-legend-panel.open { max-height: 300px; overflow-y: auto; }
+        .legend-item { display: flex; align-items: center; margin-bottom: 8px; }
+        .legend-color { width: 12px; height: 12px; margin-right: 8px; display: inline-block; }
         .controls-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; padding: 15px; color: #00FFFF; font-size: 13px; z-index: 20; display: none; width: 400px; max-height: 80vh; overflow-y: auto; }
         .controls-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .controls-header h3 { margin: 0; color: #DAA520; font-family: 'Exo 2', sans-serif; font-size: 18px; flex-grow: 1; text-align: left; }
@@ -84,6 +69,7 @@
             .graph-container { width: calc(100vw - 200px); }
             .graph-container.full-width { width: 100vw; }
             .legend-tab { top: 40px; right: 1vw; padding: 4px 8px; font-size: 12px; }
+            .custom-legend-panel { top: 75px; width: 200px; font-size: 11px; }
             .controls-popup { width: 300px; font-size: 11px; }
             .sidebar-title { font-size: 20px; }
             .sidebar-title span { font-size: 14px; }
@@ -98,6 +84,7 @@
             .graph-container { width: calc(100vw - 150px); }
             .graph-container.full-width { width: 100vw; }
             .legend-tab { top: 50px; right: 1vw; padding: 3px 6px; font-size: 10px; }
+            .custom-legend-panel { top: 70px; width: 180px; font-size: 10px; }
             .controls-popup { width: 90vw; padding: 10px; }
             .sidebar-title { font-size: 18px; }
             .sidebar-title span { font-size: 12px; }
@@ -206,6 +193,7 @@
                 </div>
             </div>
             <div class="legend-tab" id="legend-tab">Show Legend</div>
+            <div class="custom-legend-panel" id="custom-legend-panel"></div>
         </div>
     </div>
 
@@ -219,13 +207,13 @@
     </div>
     <div class="mobile-sidebar-button" id="mobile-sidebar-button">></div>
 
-   <script>
+    <script>
     let allData = [];
     const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
     let startDate = new Date('2015-08-01');
     let endDate = new Date('2025-04-05');
     let dataLoaded = false;
-    let legendVisible = true;
+    let legendVisible = false;
     let cachedData = null;
     let graphInitialized = false;
     let statsOpened = false;
@@ -682,11 +670,55 @@
     }
 
     function toggleLegend() {
-        if (dataLoaded && graphInitialized) {
-            legendVisible = !legendVisible;
-            Plotly.relayout('graph', { showlegend: legendVisible });
-            document.getElementById('legend-tab').textContent = legendVisible ? 'Hide Legend' : 'Show Legend';
+        const legendPanel = document.getElementById('custom-legend-panel');
+        const legendTab = document.getElementById('legend-tab');
+        legendVisible = !legendVisible;
+        if (legendVisible) {
+            legendPanel.classList.add('open');
+            legendTab.textContent = 'Hide Legend';
+            updateLegendPanel();
+        } else {
+            legendPanel.classList.remove('open');
+            legendTab.textContent = 'Show Legend';
         }
+    }
+
+    function updateLegendPanel() {
+        const legendPanel = document.getElementById('custom-legend-panel');
+        if (!dataLoaded || !graphInitialized) {
+            legendPanel.innerHTML = '<div>No data loaded</div>';
+            return;
+        }
+
+        const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || null;
+        const dependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
+        const chartType = document.querySelector('#chart-type-menu input:checked').value;
+        const showFit = document.getElementById('show-fit').checked;
+
+        if (!dependents.length || !independent) {
+            legendPanel.innerHTML = '<div>Select variables to display legend</div>';
+            return;
+        }
+
+        let legendItems = [];
+        dependents.forEach(dep => {
+            const name = document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep;
+            const color = dependentColors[dep] || '#FFFFFF';
+            legendItems.push(`<div class="legend-item"><span class="legend-color" style="background-color: ${color};"></span>${name}</div>`);
+
+            if (['scatter', 'line', 'area'].includes(chartType) && showFit) {
+                const fitName = `${name} (fit)`;
+                legendItems.push(`<div class="legend-item"><span class="legend-color" style="background-color: ${color}; border: 1px dashed #FFFFFF;"></span>${fitName}</div>`);
+            }
+        });
+
+        if (chartType === 'anova' && dependents.length === 1) {
+            const name = `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means`;
+            const color = dependentColors[dependents[0]] || '#00FFFF';
+            legendItems = [`<div class="legend-item"><span class="legend-color" style="background-color: ${color};"></span>${name}</div>`];
+        }
+
+        legendPanel.innerHTML = legendItems.join('');
     }
 
     function filterOutliers(x, y) {
@@ -868,70 +900,54 @@
         }
 
         if (statsOpened) {
-    document.getElementById('stats-content').innerHTML = statsText.length ? 
-        statsText.map((text, i) => `<span style="color: ${dependentColors[dependents[i]] || '#FFFFFF'}">${text}</span>`).join('<br>') : 
-        'No stats available';
-}
+            document.getElementById('stats-content').innerHTML = statsText.length ? statsText.join('<br>') : 'No stats available';
+        }
 
         const xAxisTitle = independent === 'TIMESTAMP' ? 'Time' : document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
         const yAxisTitle = dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent : 
                           dependents.every(dep => dep.startsWith('TS_')) ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit || 'Mixed Units'})`;
 
-        const annotations = showOnChart && statsText.length ? dependents.map((dep, i) => ({
-    x: 0.02,
-    y: 0.98 - i * 0.05, // Stack vertically
-    xref: 'paper',
-    yref: 'paper',
-    text: statsText[i],
-    showarrow: false,
-    font: { color: dependentColors[dep] || '#FFFFFF', family: 'Lato', size: window.innerWidth <= 480 ? 10 : 12 },
-    bgcolor: 'rgba(26, 26, 26, 0.7)',
-    bordercolor: 'transparent',
-    borderpad: 4
-})).slice(0, 5) : [];
+        const annotations = showOnChart && statsText.length ? [{
+            x: 0.02,
+            y: 0.98,
+            xref: 'paper',
+            yref: 'paper',
+            text: statsText.slice(0, 5).join('<br>') + (statsText.length > 5 ? '<br>(Truncated, see Stats menu)' : ''),
+            showarrow: false,
+            font: { color: '#00FF00', family: 'Lato', size: window.innerWidth <= 480 ? 10 : 12 },
+            bgcolor: 'rgba(26, 26, 26, 0.7)',
+            bordercolor: 'transparent',
+            borderpad: 4
+        }] : [];
 
-       const layout = {
-    width: calculateGraphWidth(),
-    height: calculateGraphHeight(),
-    plot_bgcolor: '#1A1A1A',
-    paper_bgcolor: '#1A1A1A',
-    font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 },
-    title: { 
-        text: `${yAxisTitle} vs. ${xAxisTitle}`, 
-        font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 14 : 16 }
-    },
-    xaxis: {
-        title: { text: xAxisTitle, font: { color: '#FFFFFF' } },
-        gridcolor: '#444',
-        zerolinecolor: '#444',
-        tickfont: { color: '#FFFFFF' },
-        type: independent === 'TIMESTAMP' ? 'date' : chartType === 'anova' ? 'category' : 'linear'
-    },
-    yaxis: { 
-        title: { text: yAxisTitle, font: { color: '#FFFFFF' } },
-        gridcolor: '#444', 
-        zerolinecolor: '#444',
-        tickfont: { color: '#FFFFFF' }
-    },
-    margin: { 
-        t: window.innerWidth <= 480 ? 50 : 60, 
-        b: window.innerWidth <= 480 ? 80 : 100, 
-        l: window.innerWidth <= 480 ? 80 : 100, 
-        r: window.innerWidth <= 480 ? 80 : 100  // Increased right margin to reserve space
-    },
-    showlegend: legendVisible,
-    legend: { 
-        orientation: 'v',
-        x: 1.05, // Position slightly outside plot area
-        y: 1,    // Top-aligned
-        xanchor: 'left', // Anchor to the left of x position
-        yanchor: 'top',  // Anchor to top
-        traceorder: 'normal',
-        font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 }
-    },
-    annotations: annotations,
-    hovermode: 'closest'
-};
+        const layout = {
+            width: calculateGraphWidth(),
+            height: calculateGraphHeight(),
+            plot_bgcolor: '#1A1A1A',
+            paper_bgcolor: '#1A1A1A',
+            font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 },
+            title: { text: `${yAxisTitle} vs. ${xAxisTitle}`, font: { size: window.innerWidth <= 480 ? 14 : 16 } },
+            xaxis: {
+                title: xAxisTitle,
+                gridcolor: '#444',
+                zerolinecolor: '#444',
+                type: independent === 'TIMESTAMP' ? 'date' : chartType === 'anova' ? 'category' : 'linear'
+            },
+            yaxis: { 
+                title: yAxisTitle, 
+                gridcolor: '#444', 
+                zerolinecolor: '#444' 
+            },
+            margin: { 
+                t: window.innerWidth <= 480 ? 50 : 60, 
+                b: window.innerWidth <= 480 ? 80 : 100, 
+                l: window.innerWidth <= 480 ? 80 : 100, 
+                r: window.innerWidth <= 480 ? 20 : 30 
+            },
+            showlegend: false,
+            annotations: annotations,
+            hovermode: 'closest'
+        };
 
         const data = traces.concat(fitTraces);
 
@@ -956,6 +972,8 @@
                         .catch(err => console.error('Fallback newPlot error:', err));
                 });
         }
+
+        if (legendVisible) updateLegendPanel();
     }
 
     document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
@@ -982,7 +1000,7 @@
         input.addEventListener('change', updateGraph);
     });
 
-    document.querySelectorAll('#chart-type-menu input').forEach(input => {
+       document.querySelectorAll('#chart-type-menu input').forEach(input => {
         input.addEventListener('change', () => {
             document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
             updateStatsOptions();
@@ -1033,8 +1051,7 @@
                 r: window.innerWidth <= 480 ? 20 : 30 
             },
             font: { size: window.innerWidth <= 480 ? 10 : 12 },
-            title: { font: { size: window.innerWidth <= 480 ? 14 : 16 } },
-            legend: { font: { size: window.innerWidth <= 480 ? 10 : 12 } }
+            title: { font: { size: window.innerWidth <= 480 ? 14 : 16 } }
         });
         const sidebar = document.getElementById('sidebar');
         const mobileButton = document.getElementById('mobile-sidebar-button');
@@ -1052,3 +1069,4 @@
 </script>
 </body>
 </html>
+       
