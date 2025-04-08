@@ -607,7 +607,7 @@
         return data.map(row => {
             const newRow = { ...row };
             depths.forEach(depth => {
-                const suffix = depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 situações depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9;
+                const suffix = depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 : depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9;
                 const keys = zones.map(zone => `TS_${depth}_${zone}${suffix}`);
                 const values = keys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
                 newRow[`TS_${depth}`] = values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
