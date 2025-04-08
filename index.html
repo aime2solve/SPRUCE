@@ -809,7 +809,6 @@
                             xFit = xNum.map(x => new Date(originalXMin + x * 1000 * 60 * 60 * 24));
                             yFit = fit.yPred;
                         } else {
-                            // Generate a smooth X-range for non-time variables
                             const xMin = Math.min(...xNum);
                             const xMax = Math.max(...xNum);
                             xFit = Array.from({ length: 100 }, (_, i) => xMin + (xMax - xMin) * i / 99);
@@ -1000,7 +999,7 @@
             },
             font: { size: window.innerWidth <= 480 ? 10 : 12 },
             title: { font: { size: window.innerWidth <= 480 ? 14 : 16 } },
-            legend: { font: { size: window.innerWidth (<= 480 ? 10 : 12 } }
+            legend: { font: { size: window.innerWidth <= 480 ? 10 : 12 } }
         });
         const sidebar = document.getElementById('sidebar');
         const mobileButton = document.getElementById('mobile-sidebar-button');
