@@ -281,7 +281,7 @@
             ).join('');
 
             selectedPlots = Object.keys(plotConditions).map(Number);
-            document.getElementById('plot-number-toggle').textContent = 'Plot # (all)';
+            document.getElementById('plot-number-toggle').textContent = 'Plot #'; // Static text
 
             dataLoaded = true;
             cachedData = aggregateVariables(allData);
@@ -607,7 +607,7 @@
         return data.map(row => {
             const newRow = { ...row };
             depths.forEach(depth => {
-                const suffix = depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 : depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9;
+                const suffix = depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 situações depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9;
                 const keys = zones.map(zone => `TS_${depth}_${zone}${suffix}`);
                 const values = keys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
                 newRow[`TS_${depth}`] = values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
@@ -941,7 +941,7 @@
     document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
     document.getElementById('legend-tab').addEventListener('click', toggleLegend);
     document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
-    document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu')); // Added
+    document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu'));
     document.getElementById('show-fit').addEventListener('change', updateGraph);
     document.getElementById('show-on-chart').addEventListener('change', updateGraph);
 
@@ -968,15 +968,11 @@
         input.addEventListener('change', updateGraph);
     });
 
-    // Added: Event listener for plot selection
     document.querySelectorAll('#plot-number-menu input').forEach(input => {
         input.addEventListener('change', () => {
             selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked'))
                 .map(input => Number(input.value));
-            const totalPlots = Object.keys(plotConditions).length;
-            document.getElementById('plot-number-toggle').textContent = 
-                selectedPlots.length === totalPlots ? 'Plot # (all)' : `Plot # (${selectedPlots.length})`;
-            updateGraph();
+            updateGraph(); // No toggle text update
         });
     });
 
