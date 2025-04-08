@@ -281,7 +281,7 @@
             ).join('');
 
             selectedPlots = Object.keys(plotConditions).map(Number);
-            document.getElementById('plot-number-toggle').textContent = 'Plot # (all)';
+            document.getElementById('plot-number-toggle').textContent = 'Plot #'; // Static text
 
             dataLoaded = true;
             cachedData = aggregateVariables(allData);
@@ -857,17 +857,26 @@
                           dependents.every(dep => dep.startsWith('TS_')) ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit || 'Mixed Units'})`;
 
         const annotations = showOnChart && statsText.length ? [{
-            x: 0.02,
-            y: 0.98,
-            xref: 'paper',
-            yref: 'paper',
-            text: statsText.slice(0, 5).join('<br>') + (statsText.length > 5 ? '<br>(Truncated, see Stats menu)' : ''),
-            showarrow: false,
-            font: { color: '#00FF00', family: 'Lato', size: window.innerWidth <= 480 ? 10 : 12 },
-            bgcolor: 'rgba(26, 26, 26, 0.7)',
-            bordercolor: 'transparent',
-            borderpad: 4
-        }] : [];
+    x: 0.02,
+    y: 0.98,
+    xref: 'paper',
+    yref: 'paper',
+    text: statsText.slice(0, 5).map((text, i) => {
+        const depMatch = text.match(/^([^:]+):/); // Extract dependent variable label
+        if (!depMatch) return text; // Fallback if no match
+        const depLabel = depMatch[1].trim();
+        const depKey = dependents.find(d => 
+            (document.querySelector(`label[for="${d}"], label[for="${d}_dep"]`)?.textContent || d).includes(depLabel)
+        );
+        const color = depKey ? dependentColors[depKey] : '#FFFFFF'; // Default to white if no match
+        return `<span style="color:${color}">${text}</span>`;
+    }).join('<br>') + (statsText.length > 5 ? '<br><span style="color:#FFFFFF">(Truncated, see Stats menu)</span>' : ''),
+    showarrow: false,
+    font: { family: 'Lato', size: window.innerWidth <= 480 ? 10 : 12 }, // Remove color here
+    bgcolor: 'rgba(26, 26, 26, 0.7)',
+    bordercolor: 'transparent',
+    borderpad: 4
+}] : [];
 
         const layout = {
             width: calculateGraphWidth(),
@@ -941,7 +950,7 @@
     document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
     document.getElementById('legend-tab').addEventListener('click', toggleLegend);
     document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
-    document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu')); // Added
+    document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu'));
     document.getElementById('show-fit').addEventListener('change', updateGraph);
     document.getElementById('show-on-chart').addEventListener('change', updateGraph);
 
@@ -968,15 +977,11 @@
         input.addEventListener('change', updateGraph);
     });
 
-    // Added: Event listener for plot selection
     document.querySelectorAll('#plot-number-menu input').forEach(input => {
         input.addEventListener('change', () => {
             selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked'))
                 .map(input => Number(input.value));
-            const totalPlots = Object.keys(plotConditions).length;
-            document.getElementById('plot-number-toggle').textContent = 
-                selectedPlots.length === totalPlots ? 'Plot # (all)' : `Plot # (${selectedPlots.length})`;
-            updateGraph();
+            updateGraph(); // No toggle text update
         });
     });
 
