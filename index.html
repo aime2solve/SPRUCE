@@ -3,1101 +3,1031 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPRUCE Data Viewer</title>
-    <!-- Dependencies -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>Comparative Biospheromics Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
     <style>
-        body {
-            background-color: #1A1A1A;
-            color: #FFFFFF;
-            font-family: 'Lato', sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
+        @font-face {
+            font-family: 'Nasalization';
+            src: url('https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Nasalization.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
         }
-        #container {
-            display: flex;
-            height: 100vh;
-            width: 100vw;
+        body, html { margin: 0; padding: 0; height: 100vh; width: 100vw; background-color: #000000; font-family: 'Lato', sans-serif; overflow: hidden; display: flex; flex-direction: column; }
+        h1 { color: #00FFFF; text-align: center; padding: 2vh; font-family: 'Nasalization', sans-serif; font-size: calc(16px + 1.5vw); margin: 0; text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; flex-shrink: 0; z-index: 11; line-height: 1.5; text-transform: uppercase; }
+        @keyframes glowBreathe { 0%, 100% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; } 25%, 75% { text-shadow: 2px 2px 5px #00CC66, -2px -2px 5px #00CC66, 0 0 12px #00FFFF; } 50% { text-shadow: 2px 2px 4.5px #00CC66, -2px -2px 4.5px #00CC66, 0 0 11px #00FFFF; } }
+        .container { display: flex; flex-grow: 1; overflow: hidden; height: calc(100vh - 4vh); position: relative; }
+        .sidebar { width: 250px; background: rgba(26, 26, 26, 0.8); border-right: 2px solid #00FFFF; padding: 15px; display: flex; flex-direction: column; gap: 15px; position: absolute; top: 0; left: 0; height: 100%; transition: transform 0.3s ease; z-index: 10; }
+        .sidebar.collapsed { transform: translateX(-250px); }
+        .sidebar-tab { position: absolute; top: 0; right: -40px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-left: none; border-radius: 0 10px 10px 0; color: #00FFFF; font-size: 19px; line-height: 36px; text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; z-index: 11; }
+        .sidebar-title { font-family: 'Exo 2', sans-serif; font-size: 26px; color: #DAA520; text-align: center; text-shadow: 0 0 10px #DAA520; line-height: 1.2; margin-top: 0; }
+        .sidebar-title span { display: block; font-size: 18px; }
+        .button-container { display: flex; align-items: center; width: 100%; position: relative; }
+        .button-label { color: #FFFF00; font-size: 13px; margin-right: 10px; width: 100px; text-align: right; padding-left: 10px; }
+        .dropdown-toggle, #control-panel-button { background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 11px; padding: 4px 8px; width: calc(100% - 120px); text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; }
+        #time-range-toggle { font-size: 10px; white-space: nowrap; }
+        .dropdown-menu { position: absolute; top: 100%; left: 110px; width: calc(100% - 120px); max-height: 200px; overflow-y: auto; background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 11px; padding: 8px; z-index: 100; display: none; }
+        .dropdown-menu.open { display: block; }
+        .dropdown-item { display: flex; align-items: center; margin-bottom: 3px; }
+        #dependent-menu .dropdown-item label, #independent-menu .dropdown-item label, #plot-number-menu .dropdown-item label { margin-left: 5px; }
+        #time-range-menu { padding: 10px; }
+        #time-range-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 10px; }
+        #time-range-menu input[type="text"] { width: 100%; background: rgba(26, 26, 26, 0.8); border: 1px solid #00FFFF; color: #00FFFF; padding: 4px; margin-top: 5px; font-size: 11px; }
+        #stats-menu { color: #00FF00; font-family: 'VT323', monospace; font-size: 15px; }
+        #plot-number-menu { width: 300px; left: auto; right: -10px; top: 40px; }
+        .graph-container { position: absolute; right: 0; width: calc(100vw - 250px); background-color: #1A1A1A; height: calc(100vh - 4vh); transition: width 0.3s ease, left 0.3s ease; z-index: 1; overflow: hidden; }
+        .graph-container.full-width { width: 100vw; left: 0; }
+        #graph { width: 100%; height: 100%; min-width: 320px; min-height: 240px; position: relative; }
+        .welcome-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00FF00; font-family: 'VT323', monospace; font-size: 20px; text-align: center; text-shadow: 0 0 10px #00FF00; z-index: 2; }
+        .welcome-message img { display: block; margin: 0 auto; max-width: 300px; height: auto; }
+        .welcome-message hr { border: 1px solid #00FFFF; width: 80%; margin: 10px auto; }
+        .legend-tab { position: absolute; top: 50px; right: 1vw; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 5px; color: #00FFFF; padding: 5px 10px; cursor: pointer; z-index: 5; font-size: calc(10px + 0.5vw); white-space: nowrap; }
+        .controls-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; padding: 15px; color: #00FFFF; font-size: 13px; z-index: 20; display: none; width: 400px; max-height: 80vh; overflow-y: auto; }
+        .controls-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .controls-header h3 { margin: 0; color: #DAA520; font-family: 'Exo 2', sans-serif; font-size: 18px; flex-grow: 1; text-align: left; }
+        .slider-container { margin: 10px 0; position: relative; }
+        .slider-container label { display: block; margin-bottom: 5px; }
+        .range-slider { position: relative; width: 100%; height: 5px; background: #444; border-radius: 5px; pointer-events: none; }
+        .range-track { position: absolute; height: 5px; background: #00FFFF; z-index: 1; }
+        .range-slider input[type="range"] { position: absolute; width: 100%; height: 5px; top: -5px; background: none; -webkit-appearance: none; pointer-events: none; }
+        .range-slider input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; background: #00FFFF; border-radius: 50%; cursor: pointer; pointer-events: auto; box-shadow: 0 0 5px #00FFFF; }
+        .range-slider input[type="range"]::-webkit-slider-runnable-track { background: transparent; }
+        .slider-values { display: flex; justify-content: space-between; font-size: 11px; color: #00FF00; margin-top: 5px; pointer-events: none; }
+        .warning-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #FF4500; font-family: 'VT323', monospace; font-size: 17px; text-align: center; text-shadow: 0 0 5px #FF4500; z-index: 5; }
+        .mobile-sidebar-button { display: none; position: absolute; top: 10px; left: 10px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 19px; line-height: 36px; text-align: center; cursor: pointer; z-index: 12; }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .sidebar { width: 200px; }
+            .graph-container { width: calc(100vw - 200px); }
+            .graph-container.full-width { width: 100vw; }
+            .legend-tab { top: 40px; right: 1vw; padding: 4px 8px; font-size: 12px; }
+            .controls-popup { width: 300px; font-size: 11px; }
+            .sidebar-title { font-size: 20px; }
+            .sidebar-title span { font-size: 14px; }
+            .button-label { font-size: 11px; width: 80px; }
+            .dropdown-toggle, #control-panel-button { font-size: 10px; width: calc(100% - 90px); }
+            .dropdown-menu { left: 90px; width: calc(100% - 90px); font-size: 10px; }
+            #plot-number-menu { width: 250px; }
+            h1 { font-size: calc(14px + 1vw); }
         }
-        #sidebar {
-            width: 250px;
-            background-color: #2A2A2A;
-            padding: 10px;
-            transition: width 0.3s;
-            overflow-y: auto;
-        }
-        #sidebar.collapsed {
-            width: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-        #sidebar-tab {
-            position: absolute;
-            top: 50%;
-            left: 250px;
-            background-color: #2A2A2A;
-            color: #FFFFFF;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            z-index: 10;
-        }
-        #sidebar.collapsed #sidebar-tab {
-            left: 0;
-        }
-        #graph-container {
-            flex-grow: 1;
-            transition: width 0.3s;
-        }
-        #graph-container.full-width {
-            width: 100%;
-        }
-        #graph {
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
-        .dropdown {
-            margin: 10px 0;
-            position: relative;
-        }
-        .dropdown button {
-            background-color: #333;
-            color: #FFFFFF;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            width: 100%;
-            text-align: left;
-        }
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            background-color: #333;
-            color: #FFFFFF;
-            z-index: 1000;
-            padding: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            width: 100%;
-        }
-        .dropdown-item {
-            margin: 5px 0;
-        }
-        .legend {
-            position: absolute !important;
-            z-index: 10;
-        }
-        #legend-tab {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #333;
-            color: #FFFFFF;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            z-index: 20;
-        }
-        #control-panel-button {
-            background-color: #333;
-            color: #FFFFFF;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            width: 100%;
-        }
-        #control-panel-popup {
-            display: none;
-            position: absolute;
-            background-color: #333;
-            padding: 10px;
-            z-index: 1000;
-            width: 230px;
-        }
-        .slider-container {
-            margin: 10px 0;
-        }
-        .range-slider {
-            position: relative;
-            height: 20px;
-        }
-        .range-track {
-            position: absolute;
-            height: 5px;
-            background-color: #00FF00;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        input[type="range"] {
-            width: 100%;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            margin: 0;
-            pointer-events: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            pointer-events: all;
-        }
-        .slider-values {
-            display: flex;
-            justify-content: space-between;
-        }
-        #mobile-sidebar-button {
-            display: none;
-            position: fixed;
-            bottom: 10px;
-            left: 10px;
-            background-color: #333;
-            color: #FFFFFF;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            z-index: 20;
-        }
-        @media screen and (max-width: 480px) {
-            #sidebar {
-                width: 200px;
-            }
-            #sidebar.collapsed {
-                width: 0;
-            }
-            #sidebar-tab {
-                left: 200px;
-            }
-            #sidebar.collapsed #sidebar-tab {
-                left: 0;
-            }
-            #mobile-sidebar-button {
-                display: none;
-            }
-            #sidebar.collapsed ~ #mobile-sidebar-button {
-                display: block;
-            }
-            .legend {
-                font-size: 10px !important;
-            }
+        @media (max-width: 480px) {
+            .sidebar { width: 150px; }
+            .graph-container { width: calc(100vw - 150px); }
+            .graph-container.full-width { width: 100vw; }
+            .legend-tab { top: 50px; right: 1vw; padding: 3px 6px; font-size: 10px; }
+            .controls-popup { width: 90vw; padding: 10px; }
+            .sidebar-title { font-size: 18px; }
+            .sidebar-title span { font-size: 12px; }
+            .button-label { font-size: 10px; width: 70px; }
+            .dropdown-toggle, #control-panel-button { font-size: 9px; width: calc(100% - 80px); }
+            .dropdown-menu { left: 80px; width: calc(100% - 80px); font-size: 9px; }
+            #plot-number-menu { width: 200px; top: 35px; }
+            h1 { font-size: calc(12px + 1vw); }
+            .mobile-sidebar-button { display: block; }
         }
     </style>
 </head>
 <body>
-    <div id="container">
-        <div id="sidebar">
-            <button id="sidebar-tab"><</button>
-            <div class="dropdown">
-                <button id="independent-toggle">Select Independent</button>
-                <div id="independent-menu" class="dropdown-menu">
-                    <div class="dropdown-item"><input type="checkbox" id="TIMESTAMP" value="TIMESTAMP"><label for="TIMESTAMP">Time</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="Plot" value="Plot"><label for="Plot">Plot Number</label></div>
+    <h1>Comparative Biospheromics Dashboard</h1>
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-tab" id="sidebar-tab"><</div>
+            <div class="sidebar-title">SPRUCE<br><span>Data Explorer</span></div>
+
+            <div class="button-container">
+                <span class="button-label">Control Panel:</span>
+                <div id="control-panel-button">Show Control Panel</div>
+            </div>
+
+            <div class="button-container">
+                <span class="button-label">X-Axis:</span>
+                <div class="dropdown-toggle" id="independent-toggle">Time</div>
+                <div class="dropdown-menu" id="independent-menu">
+                    <div class="dropdown-item"><input type="checkbox" id="TIMESTAMP" value="TIMESTAMP" checked><label for="TIMESTAMP">Time</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0" value="TA_2_0"><label for="TA_2_0">Ambient Temp 2m (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0">Relative Humidity 2m (%)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction 10m (°)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="CO2_measured" value="CO2_measured"><label for="CO2_measured">Measured CO₂ (ppm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="H2O_measured" value="H2O_measured"><label for="H2O_measured">Measured H₂O (mmol/mol)</label></div>
                 </div>
             </div>
-            <div class="dropdown">
-                <button id="dependent-toggle">Select Dependent</button>
-                <div id="dependent-menu" class="dropdown-menu">
-                    <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0"><label for="TS_0">Soil Temp 0cm</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_5" value="TS_5"><label for="TS_5">Soil Temp 5cm</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_10" value="TS_10"><label for="TS_10">Soil Temp 10cm</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_20" value="TS_20"><label for="TS_20">Soil Temp 20cm</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_30" value="TS_30"><label for="TS_30">Soil Temp 30cm</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_40" value="TS_40"><label for="TS_40">Soil Temp 40cm</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_50" value="TS_50"><label for="TS_50">Soil Temp 50cm</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_100" value="TS_100"><label for="TS_100">Soil Temp 100cm</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_200" value="TS_200"><label for="TS_200">Soil Temp 200cm</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0" value="TA_2_0"><label for="TA_2_0">Ambient Temp 2m</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0">Relative Humidity 2m</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction 10m</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="CO2_measured" value="CO2_measured"><label for="CO2_measured">CO₂ Measured</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="H2O_measured" value="H2O_measured"><label for="H2O_measured">H₂O Measured</label></div>
+
+            <div class="button-container">
+                <span class="button-label">Y-Axis:</span>
+                <div class="dropdown-toggle" id="dependent-toggle">Select Dependent</div>
+                <div class="dropdown-menu" id="dependent-menu">
+                    <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0"><label for="TS_0" style="color: #00FFFF;">Soil Temp 0 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_5" value="TS_5"><label for="TS_5" style="color: #FFFF00;">Soil Temp 5 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_10" value="TS_10"><label for="TS_10" style="color: #FF00FF;">Soil Temp 10 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_20" value="TS_20"><label for="TS_20" style="color: #00FF00;">Soil Temp 20 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_30" value="TS_30"><label for="TS_30" style="color: #FF0000;">Soil Temp 30 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_40" value="TS_40"><label for="TS_40" style="color: #0000FF;">Soil Temp 40 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_50" value="TS_50"><label for="TS_50" style="color: #FFA500;">Soil Temp 50 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_100" value="TS_100"><label for="TS_100" style="color: #800080;">Soil Temp 100 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_200" value="TS_200"><label for="TS_200" style="color: #008080;">Soil Temp 200 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0_dep" value="TA_2_0"><label for="TA_2_0_dep" style="color: #FF6347;">Ambient Temp 2m (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0_dep" value="RH_2_0"><label for="RH_2_0_dep" style="color: #4682B4;">Relative Humidity 2m (%)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10_dep" value="WD_10"><label for="WD_10_dep" style="color: #6A5ACD;">Wind Direction 10m (°)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PRECC_6"><label for="PREC_6_dep" style="color: #DAA520;">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="CO2_measured_dep" value="CO2_measured"><label for="CO2_measured_dep" style="color: #FF69B4;">Measured CO₂ (ppm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="H2O_measured_dep" value="H2O_measured"><label for="H2O_measured_dep" style="color: #7FFF00;">Measured H₂O (mmol/mol)</label></div>
                 </div>
             </div>
-            <div class="dropdown">
-                <button id="time-range-toggle">2015-08-01 - 2025-04-05</button>
-                <div id="time-range-menu" class="dropdown-menu">
-                    <div class="dropdown-item"><label>Start Date: <input type="text" id="start-date"></label></div>
-                    <div class="dropdown-item"><label>End Date: <input type="text" id="end-date"></label></div>
+
+            <div class="button-container">
+                <span class="button-label">Time Range:</span>
+                <div class="dropdown-toggle" id="time-range-toggle">2015-08-01 - 2025-04-05</div>
+                <div class="dropdown-menu" id="time-range-menu">
+                    <div class="dropdown-item"><label for="start-date">Start Date:</label><input type="text" id="start-date" value="2015-08-01"></div>
+                    <div class="dropdown-item"><label for="end-date">End Date:</label><input type="text" id="end-date" value="2025-04-05"></div>
                 </div>
             </div>
-            <div class="dropdown">
-                <button id="chart-type-toggle">Scatter</button>
-                <div id="chart-type-menu" class="dropdown-menu">
-                    <div class="dropdown-item"><input type="radio" id="scatter" name="chart-type" value="scatter" checked><label for="scatter">Scatter</label></div>
-                    <div class="dropdown-item"><input type="radio" id="line" name="chart-type" value="line"><label for="line">Line</label></div>
-                    <div class="dropdown-item"><input type="radio" id="area" name="chart-type" value="area"><label for="area">Area</label></div>
-                    <div class="dropdown-item"><input type="radio" id="box" name="chart-type" value="box"><label for="box">Box</label></div>
-                    <div class="dropdown-item"><input type="radio" id="bar" name="chart-type" value="bar"><label for="bar">Bar</label></div>
-                    <div class="dropdown-item"><input type="radio" id="anova" name="chart-type" value="anova"><label for="anova">ANOVA</label></div>
+
+            <div class="button-container">
+                <span class="button-label">Chart Type:</span>
+                <div class="dropdown-toggle" id="chart-type-toggle">Scatter</div>
+                <div class="dropdown-menu" id="chart-type-menu">
+                    <div class="dropdown-item"><input type="radio" name="chart-type" id="scatter" value="scatter" checked><label for="scatter">Scatter</label></div>
+                    <div class="dropdown-item"><input type="radio" name="chart-type" id="line" value="line"><label for="line">Line</label></div>
+                    <div class="dropdown-item"><input type="radio" name="chart-type" id="bar" value="bar"><label for="bar">Bar</label></div>
+                    <div class="dropdown-item"><input type="radio" name="chart-type" id="area" value="area"><label for="area">Area</label></div>
+                    <div class="dropdown-item"><input type="radio" name="chart-type" id="box" value="box"><label for="box">Box</label></div>
+                    <div class="dropdown-item"><input type="radio" name="chart-type" id="anova" value="anova"><label for="anova">ANOVA</label></div>
                 </div>
             </div>
-            <div class="dropdown">
-                <button id="stats-toggle">Stats</button>
-                <div id="stats-menu" class="dropdown-menu">
-                    <div id="fit-options">
-                        <div class="dropdown-item"><input type="radio" id="fit-auto" name="fit-type" value="auto" checked><label for="fit-auto">Auto (Best Fit)</label></div>
-                        <div class="dropdown-item"><input type="radio" id="fit-linear" name="fit-type" value="linear"><label for="fit-linear">Linear</label></div>
-                        <div class="dropdown-item"><input type="radio" id="fit-exponential" name="fit-type" value="exponential"><label for="fit-exponential">Exponential</label></div>
-                        <div class="dropdown-item"><input type="radio" id="fit-polynomial" name="fit-type" value="polynomial"><label for="fit-polynomial">Polynomial</label></div>
-                        <div class="dropdown-item"><input type="radio" id="fit-logarithmic" name="fit-type" value="logarithmic"><label for="fit-logarithmic">Logarithmic</label></div>
-                        <div class="dropdown-item"><input type="checkbox" id="show-fit" checked><label for="show-fit">Show Fit</label></div>
-                        <div class="dropdown-item"><input type="checkbox" id="show-on-chart"><label for="show-on-chart">Show on Chart</label></div>
-                    </div>
+
+            <div class="button-container">
+                <span class="button-label">Stats:</span>
+                <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
+                <div class="dropdown-menu" id="stats-menu">
                     <div id="stats-content"></div>
-                </div>
-            </div>
-            <div class="dropdown">
-                <button id="plot-number-toggle">Plot #</button>
-                <div id="plot-number-menu" class="dropdown-menu">
-                    <!-- Populated dynamically by script -->
-                </div>
-            </div>
-            <div class="dropdown">
-                <button id="control-panel-button">Show Control Panel</button>
-                <div id="control-panel-popup">
-                    <div id="control-panel-content"></div>
+                    <div class="fit-options" id="fit-options">
+                        <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-auto" value="auto" checked><label for="fit-auto">Auto (Best Fit)</label></div>
+                        <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-linear" value="linear"><label for="fit-linear">Linear</label></div>
+                        <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-exponential" value="exponential"><label for="fit-exponential">Exponential</label></div>
+                        <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-polynomial" value="polynomial"><label for="fit-polynomial">Polynomial</label></div>
+                        <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-logarithmic" value="logarithmic"><label for="fit-logarithmic">Logarithmic</label></div>
+                    </div>
+                    <div class="dropdown-item"><input type="checkbox" id="show-fit" checked><label for="show-fit">Show Fit</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="show-on-chart"><label for="show-on-chart">Show on Chart</label></div>
                 </div>
             </div>
         </div>
-        <button id="mobile-sidebar-button">☰</button>
-        <div id="graph-container">
-            <button id="legend-tab">Show Legend</button>
-            <div id="graph"></div>
+
+        <div class="graph-container" id="graph-container">
+            <div id="graph">
+                <div class="welcome-message" id="welcome-message">
+                    <a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a>
+                    <hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO₂ concentrations.<hr>Beginning August 2015
+                </div>
+            </div>
+            <div class="legend-tab" id="legend-tab">Show Legend</div>
         </div>
     </div>
 
-    <script>
-        let allData = [];
-        const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
-        let startDate = new Date('2015-08-01');
-        let endDate = new Date('2025-04-05');
-        let dataLoaded = false;
-        let legendVisible = false;
-        let cachedData = null;
-        let graphInitialized = false;
-        let statsOpened = false;
-        let selectedPlots = [];
+    <div class="controls-popup" id="control-panel-popup">
+        <div class="controls-header">
+            <h3 style="flex-grow: 1; text-align: left;">Control Panel</h3>
+            <div class="dropdown-toggle" id="plot-number-toggle" style="width: 80px;">Plot # (all)</div>
+            <div class="dropdown-menu" id="plot-number-menu"></div>
+        </div>
+        <div id="control-panel-content"></div>
+    </div>
+    <div class="mobile-sidebar-button" id="mobile-sidebar-button">></div>
 
-        const dependentColors = {
-            'TS_0': '#00FFFF', 'TS_5': '#FFFF00', 'TS_10': '#FF00FF', 'TS_20': '#00FF00', 'TS_30': '#FF0000',
-            'TS_40': '#0000FF', 'TS_50': '#FFA500', 'TS_100': '#800080', 'TS_200': '#008080',
-            'TA_2_0': '#FF6347', 'RH_2_0': '#4682B4', 'WD_10': '#6A5ACD',
-            'PREC_6': '#DAA520', 'CO2_measured': '#FF69B4', 'H2O_measured': '#7FFF00'
-        };
+   <script>
+    let allData = [];
+    const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
+    let startDate = new Date('2015-08-01');
+    let endDate = new Date('2025-04-05');
+    let dataLoaded = false;
+    let legendVisible = false; // Start with legend hidden
+    let cachedData = null;
+    let graphInitialized = false;
+    let statsOpened = false;
+    let selectedPlots = [];
 
-        const controlRanges = {
-            'TS_200': { min: -10, max: 30, defaultMin: -10, defaultMax: 30, label: 'Soil Temp (°C)' },
-            'Soil_Depth': { min: 0, max: 200, defaultMin: 0, defaultMax: 200, label: 'Soil Depth (cm)' },
-            'TA_2_0': { min: -20, max: 40, defaultMin: -20, defaultMax: 40, label: 'Ambient Temp 2m (°C)' },
-            'CO2_measured': { min: 300, max: 1000, defaultMin: 300, defaultMax: 1000, label: 'Measured CO₂ (ppm)' },
-            'H2O_measured': { min: 0, max: 30, defaultMin: 0, defaultMax: 30, label: 'Measured H₂O (mmol/mol)' },
-            'RH_2_0': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Relative Humidity 2m (%)' },
-            'WD_10': { min: 0, max: 360, defaultMin: 0, defaultMax: 360, label: 'Wind Direction 10m (°)' },
-            'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' }
-        };
-        let currentRanges = JSON.parse(JSON.stringify(controlRanges));
-        let depthRange = [0, 200];
+    const dependentColors = {
+        'TS_0': '#00FFFF', 'TS_5': '#FFFF00', 'TS_10': '#FF00FF', 'TS_20': '#00FF00', 'TS_30': '#FF0000',
+        'TS_40': '#0000FF', 'TS_50': '#FFA500', 'TS_100': '#800080', 'TS_200': '#008080',
+        'TA_2_0': '#FF6347', 'RH_2_0': '#4682B4', 'WD_10': '#6A5ACD',
+        'PREC_6': '#DAA520', 'CO2_measured': '#FF69B4', 'H2O_measured': '#7FFF00'
+    };
 
-        const unitMap = {
-            'TS_0': '°C', 'TS_5': '°C', 'TS_10': '°C', 'TS_20': '°C', 'TS_30': '°C', 
-            'TS_40': '°C', 'TS_50': '°C', 'TS_100': '°C', 'TS_200': '°C', 'TA_2_0': '°C',
-            'RH_2_0': '%', 'WD_10': '°', 'PREC_6': 'mm',
-            'CO2_measured': 'ppm', 'H2O_measured': 'mmol/mol'
-        };
+    const controlRanges = {
+        'TS_200': { min: -10, max: 30, defaultMin: -10, defaultMax: 30, label: 'Soil Temp (°C)' },
+        'Soil_Depth': { min: 0, max: 200, defaultMin: 0, defaultMax: 200, label: 'Soil Depth (cm)' },
+        'TA_2_0': { min: -20, max: 40, defaultMin: -20, defaultMax: 40, label: 'Ambient Temp 2m (°C)' },
+        'CO2_measured': { min: 300, max: 1000, defaultMin: 300, defaultMax: 1000, label: 'Measured CO₂ (ppm)' },
+        'H2O_measured': { min: 0, max: 30, defaultMin: 0, defaultMax: 30, label: 'Measured H₂O (mmol/mol)' },
+        'RH_2_0': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Relative Humidity 2m (%)' },
+        'WD_10': { min: 0, max: 360, defaultMin: 0, defaultMax: 360, label: 'Wind Direction 10m (°)' },
+        'PREC_6': { min: 0, max: 100, defaultMin: 0, defaultMax: 100, label: 'Precipitation (mm)' }
+    };
+    let currentRanges = JSON.parse(JSON.stringify(controlRanges));
+    let depthRange = [0, 200];
 
-        const plotConditions = {
-            4: { temp: '+9°C', co2: 'Amb', chamber: 'Enc' },
-            6: { temp: '+0°C', co2: 'Amb', chamber: 'Enc' },
-            7: { temp: 'Amb', co2: 'Amb', chamber: 'Open' },
-            8: { temp: '+6.8°C', co2: 'Amb', chamber: 'Enc' },
-            10: { temp: '+4.5°C', co2: 'Amb', chamber: 'Enc' },
-            11: { temp: '+0°C', co2: '900', chamber: 'Enc' },
-            13: { temp: '+2.3°C', co2: 'Amb', chamber: 'Enc' },
-            14: { temp: 'Amb', co2: 'Amb', chamber: 'Open' },
-            16: { temp: '+6.8°C', co2: '900', chamber: 'Enc' },
-            17: { temp: '+4.5°C', co2: '900', chamber: 'Enc' },
-            19: { temp: '+9°C', co2: '900', chamber: 'Enc' },
-            20: { temp: '+2.3°C', co2: '900', chamber: 'Enc' },
-            21: { temp: 'Amb', co2: 'Amb', chamber: 'Open' }
-        };
+    const unitMap = {
+        'TS_0': '°C', 'TS_5': '°C', 'TS_10': '°C', 'TS_20': '°C', 'TS_30': '°C', 
+        'TS_40': '°C', 'TS_50': '°C', 'TS_100': '°C', 'TS_200': '°C', 'TA_2_0': '°C',
+        'RH_2_0': '%', 'WD_10': '°', 'PREC_6': 'mm',
+        'CO2_measured': 'ppm', 'H2O_measured': 'mmol/mol'
+    };
 
-        async function loadData() {
-            const graphDiv = document.getElementById('graph');
-            graphDiv.innerHTML = '<div class="welcome-message" id="welcome-message">Loading data...</div>';
-            try {
-                const response = await fetch(dataUrl);
-                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-                allData = await response.json();
-                allData = allData.map(row => {
-                    const year = parseInt(row.Year, 10);
-                    const dfoy = parseFloat(row.DFOY);
-                    const day = Math.floor(dfoy);
-                    const fractionalDay = dfoy - day;
-                    const date = new Date(year, 0);
-                    date.setDate(day);
-                    date.setHours(Math.floor(fractionalDay * 24), Math.floor((fractionalDay * 24 % 1) * 60), 0, 0);
-                    row.TIMESTAMP = date;
-                    row.Plot = Number(row.Plot);
-                    return row;
-                }).filter(row => !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date && !isNaN(row.Plot));
+    const plotConditions = {
+        4: { temp: '+9°C', co2: 'Amb', chamber: 'Enc' },
+        6: { temp: '+0°C', co2: 'Amb', chamber: 'Enc' },
+        7: { temp: 'Amb', co2: 'Amb', chamber: 'Open' },
+        8: { temp: '+6.8°C', co2: 'Amb', chamber: 'Enc' },
+        10: { temp: '+4.5°C', co2: 'Amb', chamber: 'Enc' },
+        11: { temp: '+0°C', co2: '900', chamber: 'Enc' },
+        13: { temp: '+2.3°C', co2: 'Amb', chamber: 'Enc' },
+        14: { temp: 'Amb', co2: 'Amb', chamber: 'Open' },
+        16: { temp: '+6.8°C', co2: '900', chamber: 'Enc' },
+        17: { temp: '+4.5°C', co2: '900', chamber: 'Enc' },
+        19: { temp: '+9°C', co2: '900', chamber: 'Enc' },
+        20: { temp: '+2.3°C', co2: '900', chamber: 'Enc' },
+        21: { temp: 'Amb', co2: 'Amb', chamber: 'Open' }
+    };
 
-                const plotMenu BUTTONS = document.getElementById('plot-number-menu');
-                plotMenu.innerHTML = Object.entries(plotConditions).map(([plot, cond]) =>
-                    `<div class="dropdown-item"><input type="checkbox" id="plot-${plot}" value="${plot}" checked><label for="plot-${plot}">Plot ${plot} (${cond.temp}, ${cond.co2}, ${cond.chamber})</label></div>`
-                ).join('');
+    async function loadData() {
+        const graphDiv = document.getElementById('graph');
+        graphDiv.innerHTML = '<div class="welcome-message" id="welcome-message">Loading data...</div>';
+        try {
+            const response = await fetch(dataUrl);
+            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+            allData = await response.json();
+            allData = allData.map(row => {
+                const year = parseInt(row.Year, 10);
+                const dfoy = parseFloat(row.DFOY);
+                const day = Math.floor(dfoy);
+                const fractionalDay = dfoy - day;
+                const date = new Date(year, 0);
+                date.setDate(day);
+                date.setHours(Math.floor(fractionalDay * 24), Math.floor((fractionalDay * 24 % 1) * 60), 0, 0);
+                row.TIMESTAMP = date;
+                row.Plot = Number(row.Plot);
+                return row;
+            }).filter(row => !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date && !isNaN(row.Plot));
 
-                selectedPlots = Object.keys(plotConditions).map(Number);
-                document.getElementById('plot-number-toggle').textContent = 'Plot #';
+            const plotMenu = document.getElementById('plot-number-menu');
+            plotMenu.innerHTML = Object.entries(plotConditions).map(([plot, cond]) =>
+                `<div class="dropdown-item"><input type="checkbox" id="plot-${plot}" value="${plot}" checked><label for="plot-${plot}">Plot ${plot} (${cond.temp}, ${cond.co2}, ${cond.chamber})</label></div>`
+            ).join('');
 
-                dataLoaded = true;
-                cachedData = aggregateVariables(allData);
-                updateGraph();
-            } catch (error) {
-                console.error('Error loading data:', error);
-                graphDiv.innerHTML = '<div class="warning-message">Failed to load data. Check the console for details.</div>';
-            }
+            selectedPlots = Object.keys(plotConditions).map(Number);
+            document.getElementById('plot-number-toggle').textContent = 'Plot #';
+
+            dataLoaded = true;
+            cachedData = aggregateVariables(allData);
+            updateGraph();
+        } catch (error) {
+            console.error('Error loading data:', error);
+            graphDiv.innerHTML = '<div class="warning-message">Failed to load data. Check the console for details.</div>';
         }
+    }
 
-        function resetGraph() {
-            const graphDiv = document.getElementById('graph');
-            if (graphInitialized) Plotly.purge(graphDiv);
-            graphDiv.innerHTML = '<div class="welcome-message" id="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO₂ concentrations.<hr>Beginning August 2015</div>';
-            graphInitialized = false;
-        }
+    function resetGraph() {
+        const graphDiv = document.getElementById('graph');
+        if (graphInitialized) Plotly.purge(graphDiv);
+        graphDiv.innerHTML = '<div class="welcome-message" id="welcome-message"><a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a><hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO₂ concentrations.<hr>Beginning August 2015</div>';
+        graphInitialized = false;
+    }
 
-        function toggleDropdown(id) {
-            const menus = document.querySelectorAll('.dropdown-menu');
-            menus.forEach(menu => {
-                if (menu.id !== id && menu.style.display === 'block') menu.style.display = 'none';
-            });
-            const menu = document.getElementById(id);
-            if (menu) {
-                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-                console.log(`Toggled dropdown: ${id}, now ${menu.style.display === 'block' ? 'open' : 'closed'}`);
-                if (id === 'stats-menu' && menu.style.display === 'block') {
-                    statsOpened = true;
-                    updateStatsOptions();
-                    updateGraph();
-                }
-            }
-        }
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const graphContainer = document.getElementById('graph-container');
-            const tab = document.getElementById('sidebar-tab');
-            const mobileButton = document.getElementById('mobile-sidebar-button');
-            sidebar.classList.toggle('collapsed');
-            graphContainer.classList.toggle('full-width');
-            tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
-            mobileButton.style.display = sidebar.classList.contains('collapsed') && window.innerWidth <= 480 ? 'block' : 'none';
-            if (dataLoaded && graphInitialized) Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
-        }
-
-        function enforceSingleSelection(groupId, changedId) {
-            const checkboxes = document.querySelectorAll(`#${groupId} input[type="checkbox"]`);
-            checkboxes.forEach(checkbox => {
-                if (checkbox.id !== changedId && checkbox.checked) checkbox.checked = false;
-            });
-        }
-
-        function filterByRanges(data) {
-            return data.filter(row => {
-                return Object.keys(currentRanges).every(key => {
-                    if (key === 'Soil_Depth') return true;
-                    const value = parseFloat(row[key]);
-                    const range = currentRanges[key];
-                    return isNaN(value) || (value >= range.defaultMin && value <= range.defaultMax);
-                });
-            });
-        }
-
-        function filterByDepthRange(data) {
-            const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
-            return data.map(row => {
-                const newRow = { ...row };
-                depths.forEach(depth => {
-                    if (depth < depthRange[0] || depth > depthRange[1]) newRow[`TS_${depth}`] = null;
-                });
-                return newRow;
-            });
-        }
-
-        function toggleControlPanel() {
-            const popup = document.getElementById('control-panel-popup');
-            const content = document.getElementById('control-panel-content');
-            const button = document.getElementById('control-panel-button');
-            const isVisible = popup.style.display === 'block';
-            popup.style.display = isVisible ? 'none' : 'block';
-            button.textContent = isVisible ? 'Show Control Panel' : 'Hide Control Panel';
-
-            if (!isVisible) {
-                content.innerHTML = Object.keys(controlRanges).map(key => `
-                    <div class="slider-container">
-                        <label>${controlRanges[key].label}</label>
-                        <div class="range-slider">
-                            <div class="range-track" id="${key}-track"></div>
-                            <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMin}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
-                            <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMax}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
-                        </div>
-                        <div class="slider-values">
-                            <span id="${key}-min-value">${currentRanges[key].defaultMin}</span>
-                            <span id="${key}-max-value">${currentRanges[key].defaultMax}</span>
-                        </div>
-                    </div>
-                `).join('');
-
-                Object.keys(controlRanges).forEach(key => {
-                    const minSlider = document.getElementById(`${key}-min`);
-                    const maxSlider = document.getElementById(`${key}-max`);
-                    const track = document.getElementById(`${key}-track`);
-                    const minValue = document.getElementById(`${key}-min-value`);
-                    const maxValue = document.getElementById(`${key}-max-value`);
-
-                    function updateTrack() {
-                        const min = parseFloat(minSlider.value);
-                        const max = parseFloat(maxSlider.value);
-                        const minPercent = ((min - controlRanges[key].min) / (controlRanges[key].max - controlRanges[key].min)) * 100;
-                        const maxPercent = ((max - controlRanges[key].min) / (controlRanges[key].max - controlRanges[key].min)) * 100;
-                        track.style.left = `${minPercent}%`;
-                        track.style.width = `${maxPercent - minPercent}%`;
-                    }
-
-                    let isDragging = false;
-
-                    minSlider.addEventListener('mousedown', () => isDragging = true);
-                    maxSlider.addEventListener('mousedown', () => isDragging = true);
-                    document.addEventListener('mouseup', () => {
-                        if (isDragging) {
-                            isDragging = false;
-                            updateGraph();
-                        }
-                    });
-                    document.addEventListener('mousemove', (e) => {
-                        if (!isDragging) return;
-                        let min = parseFloat(minSlider.value);
-                        let max = parseFloat(maxSlider.value);
-                        if (e.target === minSlider) {
-                            min = Math.min(max, parseFloat(minSlider.value));
-                            minSlider.value = min;
-                            currentRanges[key].defaultMin = min;
-                            minValue.textContent = min.toFixed(1);
-                            if (key === 'Soil_Depth') depthRange[0] = min;
-                        } else if (e.target === maxSlider) {
-                            max = Math.max(min, parseFloat(maxSlider.value));
-                            maxSlider.value = max;
-                            currentRanges[key].defaultMax = max;
-                            maxValue.textContent = max.toFixed(1);
-                            if (key === 'Soil_Depth') depthRange[1] = max;
-                        }
-                        updateTrack();
-                    });
-
-                    updateTrack();
-                });
-            }
-        }
-
-        function calculateFit(x, y, fitType) {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] }))
-                .filter(d => !isNaN(d.x) && !isNaN(d.y) && d.x !== null && d.y !== null && d.x > 0);
-            if (pairedData.length < 2) {
-                console.log('Insufficient data for fit:', pairedData.length);
-                return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
-            }
-
-            const xNum = pairedData.map(d => d.x);
-            const yNum = pairedData.map(d => d.y);
-            const n = pairedData.length;
-
-            console.log('Fit inputs:', { xNum: xNum.slice(0, 5), yNum: yNum.slice(0, 5), total: n, fitType });
-            console.log('xNum variation:', { min: Math.min(...xNum), max: Math.max(...xNum) });
-
-            const fits = {};
-            const defaultResult = { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
-
-            const linearFit = () => {
-                const sumX = xNum.reduce((a, b) => a + b, 0);
-                const sumY = yNum.reduce((a, b) => a + b, 0);
-                const sumXY = pairedData.reduce((sum, d) => sum + d.x * d.y, 0);
-                const sumXX = xNum.reduce((sum, d) => sum + d * d, 0);
-                const denominator = n * sumXX - sumX * sumX;
-                if (!isFinite(denominator) || denominator === 0) return null;
-                const slope = (n * sumXY - sumX * sumY) / denominator;
-                const intercept = (sumY - slope * sumX) / n;
-                if (!isFinite(slope) || !isFinite(intercept)) return null;
-                const yPred = xNum.map(x => slope * x + intercept);
-                return calculateStats(xNum, yNum, yPred, 'linear', { slope, intercept });
-            };
-
-            const logFit = () => {
-                const logX = xNum.map(x => Math.log(x));
-                const sumLogX = logX.reduce((a, b) => a + b, 0);
-                const sumY = yNum.reduce((a, b) => a + b, 0);
-                const sumLogXY = pairedData.reduce((sum, d) => sum + Math.log(d.x) * d.y, 0);
-                const sumLogXLogX = logX.reduce((sum, d) => sum + d * d, 0);
-                const denominator = n * sumLogXLogX - sumLogX * sumLogX;
-                if (!isFinite(denominator) || denominator === 0) return null;
-                const slope = (n * sumLogXY - sumLogX * sumY) / denominator;
-                const intercept = (sumY - slope * sumLogX) / n;
-                if (!isFinite(slope) || !isFinite(intercept)) return null;
-                const yPred = xNum.map(x => slope * Math.log(x) + intercept);
-                return calculateStats(xNum, yNum, yPred, 'logarithmic', { slope, intercept });
-            };
-
-            const expFit = () => {
-                const validPairs = pairedData.filter(d => d.y > 0);
-                if (validPairs.length < 2) return null;
-                const xExp = validPairs.map(d => d.x);
-                const logY = validPairs.map(d => Math.log(d.y));
-                const sumX = xExp.reduce((a, b) => a + b, 0);
-                const sumLogY = logY.reduce((a, b) => a + b, 0);
-                const sumXLogY = validPairs.reduce((sum, d) => sum + d.x * Math.log(d.y), 0);
-                const sumXX = xExp.reduce((sum, d) => sum + d * d, 0);
-                const denominator = n * sumXX - sumX * sumX;
-                if (!isFinite(denominator) || denominator === 0) return null;
-                const slope = (n * sumXLogY - sumX * sumLogY) / denominator;
-                const intercept = (sumLogY - slope * sumX) / n;
-                const a = Math.exp(intercept);
-                const b = slope;
-                if (!isFinite(a) || !isFinite(b)) return null;
-                const yPred = xNum.map(x => a * Math.exp(b * x));
-                return calculateStats(xNum, yNum, yPred, 'exponential', { a, b });
-            };
-
-            const polyFit = () => {
-                if (typeof math === 'undefined' || !math.lusolve) return null;
-                const X = xNum.map(x => [1, x, x * x]);
-                const Y = yNum;
-                try {
-                    const XtX = math.multiply(math.transpose(X), X);
-                    const XtY = math.multiply(math.transpose(X), Y);
-                    console.log('Polynomial intermediates:', { XtX, XtY });
-                    const det = math.det(XtX);
-                    if (Math.abs(det) < 1e-10) {
-                        console.log('Singular matrix in polynomial fit, det:', det);
-                        return null;
-                    }
-                    const coeffs = math.lusolve(XtX, XtY);
-                    if (!coeffs || !coeffs._data || coeffs._data.length < 3) {
-                        console.log('Invalid coeffs from lusolve:', coeffs);
-                        return null;
-                    }
-                    const c = coeffs._data[0][0], b = coeffs._data[1][0], a = coeffs._data[2][0];
-                    if (!isFinite(a) || !isFinite(b) || !isFinite(c)) return null;
-                    const yPred = xNum.map(x => a * x * x + b * x + c);
-                    return calculateStats(xNum, yNum, yPred, 'polynomial', { a, b, c });
-                } catch (e) {
-                    console.error('Polynomial fit failed:', e.message);
-                    return null;
-                }
-            };
-
-            if (fitType === 'auto') {
-                fits.linear = linearFit();
-                fits.logarithmic = logFit();
-                fits.exponential = expFit();
-                fits.polynomial = polyFit();
-
-                const validFits = Object.entries(fits)
-                    .filter(([_, fit]) => fit && !isNaN(fit.rSquared))
-                    .map(([type, fit]) => ({ type, ...fit }));
-                if (validFits.length === 0) return defaultResult;
-                const bestFit = validFits.reduce((best, current) => 
-                    (best.rSquared > current.rSquared) ? best : current
-                );
-                console.log('Auto best fit:', bestFit.type, 'R²:', bestFit.rSquared);
-                return bestFit;
-            } else {
-                switch (fitType) {
-                    case 'linear': return linearFit() || defaultResult;
-                    case 'logarithmic': return logFit() || defaultResult;
-                    case 'exponential': return expFit() || defaultResult;
-                    case 'polynomial': return polyFit() || defaultResult;
-                    default: return defaultResult;
-                }
-            }
-        }
-
-        function calculateStats(xNum, yNum, yPred, type, params) {
-            const n = xNum.length;
-            const meanY = yNum.reduce((a, b) => a + b, 0) / n;
-            const ssTot = yNum.reduce((sum, d) => sum + Math.pow(d - meanY, 2), 0);
-            const ssRes = xNum.reduce((sum, _, i) => sum + Math.pow(yNum[i] - yPred[i], 2), 0);
-            const rSquared = ssTot === 0 ? NaN : 1 - (ssRes / ssTot);
-            const dfReg = (type === 'polynomial' ? 2 : 1);
-            const dfRes = n - (dfReg + 1);
-            const msReg = (ssTot - ssRes) / dfReg;
-            const msRes = ssRes / dfRes;
-            const fValue = msRes === 0 ? NaN : msReg / msRes;
-            const pValue = isNaN(fValue) ? NaN : jStat.ftest(fValue, dfReg, dfRes);
-
-            if (yPred.some(y => !isFinite(y))) return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
-            return { type, params, rSquared, fValue, pValue, yPred };
-        }
-
-        function calculateANOVA(data, independent, dependent) {
-            const groups = {};
-            data.forEach(row => {
-                const group = row[independent];
-                if (!groups[group]) groups[group] = [];
-                const value = parseFloat(row[dependent]);
-                if (!isNaN(value)) groups[group].push(value);
-            });
-            const groupArrays = Object.values(groups).filter(arr => arr.length > 0);
-            if (groupArrays.length < 2) return { fScore: NaN, pValue: NaN, means: [], groupNames: [] };
-            const fScore = jStat.anovafscore(...groupArrays);
-            const pValue = jStat.anovaftest(...groupArrays);
-            const means = groupArrays.map(arr => jStat.mean(arr));
-            const groupNames = Object.keys(groups).filter(key => groups[key].length > 0);
-            return { fScore, pValue, means, groupNames };
-        }
-
-        function calculateBoxStats(yValues) {
-            const validY = yValues.filter(y => !isNaN(y));
-            if (validY.length === 0) return { median: NaN, q1: NaN, q3: NaN, iqr: NaN, min: NaN, max: NaN };
-            const median = jStat.median(validY);
-            const q1 = jStat.percentile(validY, 0.25);
-            const q3 = jStat.percentile(validY, 0.75);
-            const iqr = q3 - q1;
-            const lowerBound = q1 - 1.5 * iqr;
-            const upperBound = q3 + 1.5 * iqr;
-            const min = Math.max(Math.min(...validY), lowerBound);
-            const max = Math.min(Math.max(...validY), upperBound);
-            return { median, q1, q3, iqr, min, max };
-        }
-
-        function aggregateVariables(data) {
-            const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
-            const zones = ['A', 'B', 'C'];
-            return data.map(row => {
-                const newRow = { ...row };
-                depths.forEach(depth => {
-                    const suffix = depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 : depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9;
-                    const keys = zones.map(zone => `TS_${depth}_${zone}${suffix}`);
-                    const values = keys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
-                    newRow[`TS_${depth}`] = values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
-                });
-                const taKeys = ['TA_2_0_1', 'TA_2_0_2'];
-                const taValues = taKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
-                newRow['TA_2_0'] = taValues.length > 0 ? taValues.reduce((sum, v) => sum + v, 0) / taValues.length : null;
-                const rhKeys = ['RH_2_0_1', 'RH_2_0_2'];
-                const rhValues = rhKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
-                newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + v, 0) / rhValues.length : null;
-                ['CO2_measured', 'H2O_measured', 'WD_10', 'PREC_6'].forEach(key => {
-                    const value = parseFloat(row[key]);
-                    newRow[key] = isNaN(value) ? null : value;
-                });
-                return newRow;
-            });
-        }
-
-        function getWeeklyTimestamps(data, start, end) {
-            const weeklyData = {};
-            data.forEach(row => {
-                const date = row.TIMESTAMP;
-                if ((!start || date >= start) && (!end || date <= new Date(end.getTime() + 24 * 60 * 60 * 1000 - 1))) {
-                    const weekStart = new Date(date);
-                    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-                    weekStart.setHours(0, 0, 0, 0);
-                    const key = weekStart.getTime();
-                    if (!weeklyData[key]) weeklyData[key] = { TIMESTAMP: weekStart, values: {} };
-                    Object.keys(row).forEach(k => {
-                        if (k !== 'TIMESTAMP') {
-                            weeklyData[key].values[k] = weeklyData[key].values[k] || [];
-                            const value = parseFloat(row[k]);
-                            if (!isNaN(value)) weeklyData[key].values[k].push(value);
-                        }
-                    });
-                }
-            });
-            const result = Object.values(weeklyData).map(w => ({
-                TIMESTAMP: w.TIMESTAMP,
-                ...Object.keys(w.values).reduce((acc, k) => ({
-                    ...acc,
-                    [k]: w.values[k].length > 0 ? w.values[k].reduce((sum, v) => sum + v, 0) / w.values[k].length : null
-                }), {})
-            }));
-            console.log('Weekly timestamps sample:', result.slice(0, 5).map(d => d.TIMESTAMP));
-            return result;
-        }
-
-        function calculateGraphWidth() { return document.getElementById('graph-container').clientWidth; }
-        function calculateGraphHeight() { 
-            const headerHeight = document.querySelector('h1')?.offsetHeight || 60;
-            return window.innerHeight - headerHeight;
-        }
-
-        function toggleLegend() {
-            if (dataLoaded && graphInitialized) {
-                legendVisible = !legendVisible;
-                Plotly.relayout('graph', { showlegend: legendVisible });
-                document.getElementById('legend-tab').textContent = legendVisible ? 'Hide Legend' : 'Show Legend';
-            }
-        }
-
-        function filterOutliers(x, y) {
-            const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
-            if (pairedData.length < 2) return { x: x, y: y };
-            const yValues = pairedData.map(d => d.y);
-            const q1 = jStat.percentile(yValues, 0.25);
-            const q3 = jStat.percentile(yValues, 0.75);
-            const iqr = q3 - q1;
-            const lowerBound = q1 - 1.5 * iqr;
-            const upperBound = q3 + 1.5 * iqr;
-            const filtered = pairedData.filter(d => d.y >= lowerBound && d.y <= upperBound);
-            return { x: filtered.map(d => d.x), y: filtered.map(d => d.y) };
-        }
-
-        function updateStatsOptions() {
-            const chartType = document.querySelector('#chart-type-menu input:checked').value;
-            const fitOptions = document.getElementById('fit-options');
-            fitOptions.style.display = ['scatter', 'line', 'area'].includes(chartType) ? 'block' : 'none';
-        }
-
-        function updateGraph() {
-            const graphDiv = document.getElementById('graph');
-            if (!dataLoaded || typeof Plotly === 'undefined') {
-                resetGraph();
-                return;
-            }
-
-            const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || null;
-            const allDependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
-            const chartType = document.querySelector('#chart-type-menu input:checked').value;
-            const fitType = document.querySelector('#fit-options input:checked')?.value || 'auto';
-            const showFit = document.getElementById('show-fit').checked;
-            const showOnChart = document.getElementById('show-on-chart').checked;
-
-            document.getElementById('independent-toggle').textContent = independent ? document.querySelector(`label[for="${independent}"]`)?.textContent || 'Select Independent' : 'Select Independent';
-            document.getElementById('dependent-toggle').innerHTML = allDependents.length ? allDependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent}</span>`).join('<br>') : 'Select Dependent';
-
-            if (!allDependents.length || !independent) {
-                resetGraph();
-                return;
-            }
-
-            let workingData = filterByRanges(cachedData);
-            workingData = filterByDepthRange(workingData);
-            workingData = workingData.filter(row => {
-                const rowDate = row.TIMESTAMP;
-                return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1)) &&
-                       (selectedPlots.length === 0 || selectedPlots.includes(row.Plot));
-            });
-            console.log(`Filtered data length: ${workingData.length}, Selected Plots: ${selectedPlots.length ? selectedPlots.join(', ') : 'None'}`);
-
-            if (independent === 'TIMESTAMP' && ['scatter', 'line', 'area'].includes(chartType)) {
-                workingData = getWeeklyTimestamps(workingData, startDate, endDate);
-            }
-
-            const units = allDependents.map(dep => unitMap[dep]);
-            const commonUnit = units.every(u => u === units[0]) ? units[0] : null;
-            const dependents = commonUnit ? allDependents.filter(dep => unitMap[dep] === commonUnit) : allDependents;
-            if (!dependents.length || !workingData.length) {
-                resetGraph();
-                console.warn('No valid data after filtering');
-                return;
-            }
-
-            const traces = [];
-            const fitTraces = [];
-            let invalidTraces = [];
-            const statsText = [];
-
-            if (chartType === 'anova' && dependents.length === 1) {
-                const anovaResults = calculateANOVA(workingData, independent, dependents[0]);
-                if (isNaN(anovaResults.fScore)) {
-                    graphDiv.innerHTML = '<div class="warning-message">Insufficient data for ANOVA</div>';
-                    graphInitialized = false;
-                    return;
-                }
-                traces.push({
-                    x: anovaResults.groupNames,
-                    y: anovaResults.means,
-                    type: 'bar',
-                    name: `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means`,
-                    marker: { color: dependentColors[dependents[0]] || '#00FFFF' }
-                });
-                statsText.push(`${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]}: F-Score=${anovaResults.fScore.toFixed(2)}, p-value=${anovaResults.pValue.toFixed(4)}`);
-            } else {
-                dependents.forEach(dep => {
-                    const pairedData = workingData
-                        .map(row => ({
-                            x: independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent]),
-                            y: parseFloat(row[dep])
-                        }))
-                        .filter(d => d.x !== null && !isNaN(d.x) && d.y !== null && !isNaN(d.y));
-
-                    if (pairedData.length === 0) {
-                        console.warn(`No valid data for ${dep} vs ${independent}: pairedData length=0`);
-                        invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has no valid data`);
-                        return;
-                    }
-
-                    let xValues = pairedData.map(d => d.x);
-                    let yValues = pairedData.map(d => d.y);
-
-                    const filtered = filterOutliers(xValues, yValues);
-                    xValues = filtered.x;
-                    yValues = filtered.y;
-
-                    const color = dependentColors[dep] || '#FFFFFF';
-                    traces.push({
-                        x: xValues,
-                        y: yValues,
-                        mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
-                        type: chartType === 'scatter' ? 'scattergl' : chartType === 'area' ? 'scattergl' : chartType,
-                        name: document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep,
-                        marker: { color: color, size: 8 },
-                        line: (chartType === 'line' || chartType === 'area') ? { color: color, width: 2 } : undefined,
-                        fill: chartType === 'area' ? 'tozeroy' : undefined
-                    });
-
-                    if (chartType === 'box') {
-                        const boxStats = calculateBoxStats(yValues);
-                        statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Median=${boxStats.median.toFixed(2)}, Q1=${boxStats.q1.toFixed(2)}, Q3=${boxStats.q3.toFixed(2)}, IQR=${boxStats.iqr.toFixed(2)}, Min=${boxStats.min.toFixed(2)}, Max=${boxStats.max.toFixed(2)}`);
-                    } else if (chartType === 'bar') {
-                        const mean = jStat.mean(yValues);
-                        const stdDev = jStat.stdev(yValues);
-                        statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Mean=${mean.toFixed(2)}, StdDev=${stdDev.toFixed(2)}`);
-                    } else if (['scatter', 'line', 'area'].includes(chartType) && xValues.length > 1 && showFit) {
-                        let xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
-                        let originalXMin = 0;
-                        if (independent === 'TIMESTAMP') {
-                            originalXMin = Math.min(...xNum);
-                            xNum = xNum.map(x => (x - originalXMin) / (1000 * 60 * 60 * 24));
-                        }
-                        const fit = calculateFit(xNum, yValues, fitType);
-                        console.log(`Fit for ${dep}:`, fit);
-                        if (fit.type !== 'none' && fit.yPred.length > 0) {
-                            let xFit, yFit;
-                            if (independent === 'TIMESTAMP') {
-                                xFit = xNum.map(x => new Date(originalXMin + x * 1000 * 60 * 60 * 24));
-                                yFit = fit.yPred;
-                            } else {
-                                const xMin = Math.min(...xNum);
-                                const xMax = Math.max(...xNum);
-                                xFit = Array.from({ length: 100 }, (_, i) => xMin + (xMax - xMin) * i / 99);
-                                yFit = xFit.map(x => {
-                                    if (fit.type === 'linear') return fit.params.slope * x + fit.params.intercept;
-                                    if (fit.type === 'logarithmic') return fit.params.slope * Math.log(x) + fit.params.intercept;
-                                    if (fit.type === 'exponential') return fit.params.a * Math.exp(fit.params.b * x);
-                                    if (fit.type === 'polynomial') return fit.params.a * x * x + fit.params.b * x + fit.params.c;
-                                    return NaN;
-                                });
-                            }
-                            if (yFit.every(y => isFinite(y))) {
-                                fitTraces.push({
-                                    x: xFit,
-                                    y: yFit,
-                                    mode: 'lines',
-                                    type: 'scattergl',
-                                    name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (${fit.type} fit)`,
-                                    line: { color: color, width: 2, dash: 'dash' }
-                                });
-                            }
-                        }
-                        let eq = 'Fit not available';
-                        if (fit.type === 'linear') eq = `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}x`;
-                        else if (fit.type === 'logarithmic') eq = `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}ln(x)`;
-                        else if (fit.type === 'exponential') eq = `y = ${fit.params.a.toFixed(2)}e^(${fit.params.b.toFixed(2)}x)`;
-                        else if (fit.type === 'polynomial') eq = `y = ${fit.params.a.toFixed(2)}x² + ${fit.params.b.toFixed(2)}x + ${fit.params.c.toFixed(2)}`;
-                        statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: ${eq}, R²=${(fit.rSquared || NaN).toFixed(2)}, F=${(fit.fValue || NaN).toFixed(2)}, p=${(fit.pValue || NaN).toFixed(4)}`);
-                    }
-                });
-            }
-
-            if (!traces.length) {
-                console.warn('No valid traces to plot:', invalidTraces);
-                resetGraph();
-                if (invalidTraces.length) graphDiv.innerHTML = `<div class="warning-message">${invalidTraces.join('<br>')}<br>Check the data source or variable selection.</div>`;
-                return;
-            }
-
-            if (statsOpened) {
-                document.getElementById('stats-content').innerHTML = `<span style="color: #00FF00">${statsText.join('<br>')}</span>`;
-            }
-
-            const xAxisTitle = independent === 'TIMESTAMP' ? 'Time' : document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
-            const yAxisTitle = dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent : 
-                              dependents.every(dep => dep.startsWith('TS_')) ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit || 'Mixed Units'})`;
-
-            const annotations = showOnChart && statsText.length ? dependents.map((dep, i) => ({
-                x: 0.02,
-                y: 0.98 - i * 0.05,
-                xref: 'paper',
-                yref: 'paper',
-                text: statsText[i],
-                showarrow: false,
-                font: { 
-                    color: dependentColors[dep] || '#FFFFFF', 
-                    family: 'Lato', 
-                    size: window.innerWidth <= 480 ? 10 : 12 
-                },
-                bgcolor: 'rgba(26, 26, 26, 0.7)',
-                bordercolor: 'transparent',
-                borderpad: 4
-            })).slice(0, 5) : [];
-
-            const layout = {
-                width: calculateGraphWidth(),
-                height: calculateGraphHeight(),
-                plot_bgcolor: '#1A1A1A',
-                paper_bgcolor: '#1A1A1A',
-                font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 },
-                title: { text: `${yAxisTitle} vs. ${xAxisTitle}`, font: { size: window.innerWidth <= 480 ? 14 : 16 } },
-                xaxis: {
-                    title: xAxisTitle,
-                    gridcolor: '#444',
-                    zerolinecolor: '#444',
-                    type: independent === 'TIMESTAMP' ? 'date' : chartType === 'anova' ? 'category' : 'linear'
-                },
-                yaxis: { 
-                    title: yAxisTitle, 
-                    gridcolor: '#444', 
-                    zerolinecolor: '#444' 
-                },
-                margin: { 
-                    t: window.innerWidth <= 480 ? 50 : 60, 
-                    b: window.innerWidth <= 480 ? 80 : 100, 
-                    l: window.innerWidth <= 480 ? 80 : 100, 
-                    r: window.innerWidth <= 480 ? 20 : 30 
-                },
-                showlegend: legendVisible,
-                legend: { 
-                    x: 1, 
-                    y: 1, 
-                    xanchor: 'right', 
-                    yanchor: 'top', 
-                    bgcolor: 'rgba(26, 26, 26, 0.7)', 
-                    bordercolor: 'transparent', 
-                    font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 },
-                    traceorder: 'normal'
-                },
-                annotations: annotations,
-                hovermode: 'closest'
-            };
-
-            const data = traces.concat(fitTraces);
-
-            console.log('Traces:', traces.length, 'Fit Traces:', fitTraces.length, 'Annotations:', annotations.length);
-
-            const welcomeMessage = document.getElementById('welcome-message');
-            if (welcomeMessage) welcomeMessage.style.display = 'none';
-
-            if (!graphInitialized) {
-                Plotly.newPlot(graphDiv, data, layout, { responsive: true })
-                    .then(() => {
-                        graphInitialized = true;
-                        console.log('Graph initialized');
-                    })
-                    .catch(err => console.error('Plotly newPlot error:', err));
-            } else {
-                Plotly.react(graphDiv, data, layout)
-                    .catch(err => {
-                        console.error('Plotly react error:', err);
-                        Plotly.newPlot(graphDiv, data, layout, { responsive: true })
-                            .then(() => graphInitialized = true)
-                            .catch(err => console.error('Fallback newPlot error:', err));
-                    });
-            }
-        }
-
-        document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
-        document.getElementById('mobile-sidebar-button').addEventListener('click', toggleSidebar);
-        document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
-        document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
-        document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
-        document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
-        document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
-        document.getElementById('legend-tab').addEventListener('click', toggleLegend);
-        document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
-        document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu'));
-        document.getElementById('show-fit').addEventListener('change', updateGraph);
-        document.getElementById('show-on-chart').addEventListener('change', updateGraph);
-
-        document.querySelectorAll('#independent-menu input').forEach(input => {
-            input.addEventListener('change', () => {
-                enforceSingleSelection('independent-menu', input.id);
-                updateGraph();
-            });
+    function toggleDropdown(id) {
+        const menus = document.querySelectorAll('.dropdown-menu');
+        menus.forEach(menu => {
+            if (menu.id !== id && menu.style.display === 'block') menu.style.display = 'none';
         });
-
-        document.querySelectorAll('#dependent-menu input').forEach(input => {
-            input.addEventListener('change', updateGraph);
-        });
-
-        document.querySelectorAll('#chart-type-menu input').forEach(input => {
-            input.addEventListener('change', () => {
-                document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+        const menu = document.getElementById(id);
+        if (menu) {
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            console.log(`Toggled dropdown: ${id}, now ${menu.style.display === 'block' ? 'open' : 'closed'}`);
+            if (id === 'stats-menu' && menu.style.display === 'block') {
+                statsOpened = true;
                 updateStatsOptions();
                 updateGraph();
-            });
-        });
-
-        document.querySelectorAll('#fit-options input').forEach(input => {
-            input.addEventListener('change', updateGraph);
-        });
-
-        document.querySelectorAll('#plot-number-menu input').forEach(input => {
-            input.addEventListener('change', () => {
-                selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked'))
-                    .map(input => Number(input.value));
-                updateGraph();
-            });
-        });
-
-        flatpickr('#start-date', {
-            dateFormat: 'Y-m-d',
-            defaultDate: '2015-08-01',
-            onChange: (selectedDates) => {
-                startDate = selectedDates[0];
-                document.getElementById('time-range-toggle').textContent = `${startDate.toISOString().split('T')[0]} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
-                updateGraph();
             }
-        });
+        }
+    }
 
-        flatpickr('#end-date', {
-            dateFormat: 'Y-m-d',
-            defaultDate: '2025-04-05',
-            onChange: (selectedDates) => {
-                endDate = selectedDates[0];
-                document.getElementById('time-range-toggle').textContent = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate.toISOString().split('T')[0]}`;
-                updateGraph();
-            }
-        });
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const graphContainer = document.getElementById('graph-container');
+        const tab = document.getElementById('sidebar-tab');
+        const mobileButton = document.getElementById('mobile-sidebar-button');
+        sidebar.classList.toggle('collapsed');
+        graphContainer.classList.toggle('full-width');
+        tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
+        mobileButton.style.display = sidebar.classList.contains('collapsed') && window.innerWidth <= 480 ? 'block' : 'none';
+        if (dataLoaded && graphInitialized) Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
+    }
 
-        window.addEventListener('resize', () => {
-            if (dataLoaded && graphInitialized) Plotly.relayout('graph', { 
-                width: calculateGraphWidth(), 
-                height: calculateGraphHeight(),
-                margin: { 
-                    t: window.innerWidth <= 480 ? 50 : 60, 
-                    b: window.innerWidth <= 480 ? 80 : 100, 
-                    l: window.innerWidth <= 480 ? 80 : 100, 
-                    r: window.innerWidth <= 480 ? 20 : 30 
-                },
-                font: { size: window.innerWidth <= 480 ? 10 : 12 },
-                title: { font: { size: window.innerWidth <= 480 ? 14 : 16 } },
-                legend: { font: { size: window.innerWidth <= 480 ? 10 : 12 } }
+    function enforceSingleSelection(groupId, changedId) {
+        const checkboxes = document.querySelectorAll(`#${groupId} input[type="checkbox"]`);
+        checkboxes.forEach(checkbox => {
+            if (checkbox.id !== changedId && checkbox.checked) checkbox.checked = false;
+        });
+    }
+
+    function filterByRanges(data) {
+        return data.filter(row => {
+            return Object.keys(currentRanges).every(key => {
+                if (key === 'Soil_Depth') return true;
+                const value = parseFloat(row[key]);
+                const range = currentRanges[key];
+                return isNaN(value) || (value >= range.defaultMin && value <= range.defaultMax);
             });
-            const sidebar = document.getElementById('sidebar');
-            const mobileButton = document.getElementById('mobile-sidebar-button');
-            mobileButton.style.display = sidebar.classList.contains('collapsed') && window.innerWidth <= 480 ? 'block' : 'none';
         });
+    }
 
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.2.0/math.min.js';
-        script.onload = () => {
-            if (typeof math === 'undefined') console.error('math.js failed to initialize');
-            loadData();
+    function filterByDepthRange(data) {
+        const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
+        return data.map(row => {
+            const newRow = { ...row };
+            depths.forEach(depth => {
+                if (depth < depthRange[0] || depth > depthRange[1]) newRow[`TS_${depth}`] = null;
+            });
+            return newRow;
+        });
+    }
+
+    function toggleControlPanel() {
+        const popup = document.getElementById('control-panel-popup');
+        const content = document.getElementById('control-panel-content');
+        const button = document.getElementById('control-panel-button');
+        const isVisible = popup.style.display === 'block';
+        popup.style.display = isVisible ? 'none' : 'block';
+        button.textContent = isVisible ? 'Show Control Panel' : 'Hide Control Panel';
+
+        if (!isVisible) {
+            content.innerHTML = Object.keys(controlRanges).map(key => `
+                <div class="slider-container">
+                    <label>${controlRanges[key].label}</label>
+                    <div class="range-slider">
+                        <div class="range-track" id="${key}-track"></div>
+                        <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMin}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
+                        <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMax}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
+                    </div>
+                    <div class="slider-values">
+                        <span id="${key}-min-value">${currentRanges[key].defaultMin}</span>
+                        <span id="${key}-max-value">${currentRanges[key].defaultMax}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            Object.keys(controlRanges).forEach(key => {
+                const minSlider = document.getElementById(`${key}-min`);
+                const maxSlider = document.getElementById(`${key}-max`);
+                const track = document.getElementById(`${key}-track`);
+                const minValue = document.getElementById(`${key}-min-value`);
+                const maxValue = document.getElementById(`${key}-max-value`);
+
+                function updateTrack() {
+                    const min = parseFloat(minSlider.value);
+                    const max = parseFloat(maxSlider.value);
+                    const minPercent = ((min - controlRanges[key].min) / (controlRanges[key].max - controlRanges[key].min)) * 100;
+                    const maxPercent = ((max - controlRanges[key].min) / (controlRanges[key].max - controlRanges[key].min)) * 100;
+                    track.style.left = `${minPercent}%`;
+                    track.style.width = `${maxPercent - minPercent}%`;
+                }
+
+                let isDragging = false;
+
+                minSlider.addEventListener('mousedown', () => isDragging = true);
+                maxSlider.addEventListener('mousedown', () => isDragging = true);
+                document.addEventListener('mouseup', () => {
+                    if (isDragging) {
+                        isDragging = false;
+                        updateGraph();
+                    }
+                });
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    let min = parseFloat(minSlider.value);
+                    let max = parseFloat(maxSlider.value);
+                    if (e.target === minSlider) {
+                        min = Math.min(max, parseFloat(minSlider.value));
+                        minSlider.value = min;
+                        currentRanges[key].defaultMin = min;
+                        minValue.textContent = min.toFixed(1);
+                        if (key === 'Soil_Depth') depthRange[0] = min;
+                    } else if (e.target === maxSlider) {
+                        max = Math.max(min, parseFloat(maxSlider.value));
+                        maxSlider.value = max;
+                        currentRanges[key].defaultMax = max;
+                        maxValue.textContent = max.toFixed(1);
+                        if (key === 'Soil_Depth') depthRange[1] = max;
+                    }
+                    updateTrack();
+                });
+
+                updateTrack();
+            });
+        }
+    }
+
+    function calculateFit(x, y, fitType) {
+        const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] }))
+            .filter(d => !isNaN(d.x) && !isNaN(d.y) && d.x !== null && d.y !== null && d.x > 0);
+        if (pairedData.length < 2) {
+            console.log('Insufficient data for fit:', pairedData.length);
+            return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
+        }
+
+        const xNum = pairedData.map(d => d.x);
+        const yNum = pairedData.map(d => d.y);
+        const n = pairedData.length;
+
+        console.log('Fit inputs:', { xNum: xNum.slice(0, 5), yNum: yNum.slice(0, 5), total: n, fitType });
+        console.log('xNum variation:', { min: Math.min(...xNum), max: Math.max(...xNum) });
+
+        const fits = {};
+        const defaultResult = { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
+
+        const linearFit = () => {
+            const sumX = xNum.reduce((a, b) => a + b, 0);
+            const sumY = yNum.reduce((a, b) => a + b, 0);
+            const sumXY = pairedData.reduce((sum, d) => sum + d.x * d.y, 0);
+            const sumXX = xNum.reduce((sum, d) => sum + d * d, 0);
+            const denominator = n * sumXX - sumX * sumX;
+            if (!isFinite(denominator) || denominator === 0) return null;
+            const slope = (n * sumXY - sumX * sumY) / denominator;
+            const intercept = (sumY - slope * sumX) / n;
+            if (!isFinite(slope) || !isFinite(intercept)) return null;
+            const yPred = xNum.map(x => slope * x + intercept);
+            return calculateStats(xNum, yNum, yPred, 'linear', { slope, intercept });
         };
-        script.onerror = () => console.error('Failed to load math.js');
-        document.head.appendChild(script);
-    </script>
+
+        const logFit = () => {
+            const logX = xNum.map(x => Math.log(x));
+            const sumLogX = logX.reduce((a, b) => a + b, 0);
+            const sumY = yNum.reduce((a, b) => a + b, 0);
+            const sumLogXY = pairedData.reduce((sum, d) => sum + Math.log(d.x) * d.y, 0);
+            const sumLogXLogX = logX.reduce((sum, d) => sum + d * d, 0);
+            const denominator = n * sumLogXLogX - sumLogX * sumLogX;
+            if (!isFinite(denominator) || denominator === 0) return null;
+            const slope = (n * sumLogXY - sumLogX * sumY) / denominator;
+            const intercept = (sumY - slope * sumLogX) / n;
+            if (!isFinite(slope) || !isFinite(intercept)) return null;
+            const yPred = xNum.map(x => slope * Math.log(x) + intercept);
+            return calculateStats(xNum, yNum, yPred, 'logarithmic', { slope, intercept });
+        };
+
+        const expFit = () => {
+            const validPairs = pairedData.filter(d => d.y > 0);
+            if (validPairs.length < 2) return null;
+            const xExp = validPairs.map(d => d.x);
+            const logY = validPairs.map(d => Math.log(d.y));
+            const sumX = xExp.reduce((a, b) => a + b, 0);
+            const sumLogY = logY.reduce((a, b) => a + b, 0);
+            const sumXLogY = validPairs.reduce((sum, d) => sum + d.x * Math.log(d.y), 0);
+            const sumXX = xExp.reduce((sum, d) => sum + d * d, 0);
+            const denominator = n * sumXX - sumX * sumX;
+            if (!isFinite(denominator) || denominator === 0) return null;
+            const slope = (n * sumXLogY - sumX * sumLogY) / denominator;
+            const intercept = (sumLogY - slope * sumX) / n;
+            const a = Math.exp(intercept);
+            const b = slope;
+            if (!isFinite(a) || !isFinite(b)) return null;
+            const yPred = xNum.map(x => a * Math.exp(b * x));
+            return calculateStats(xNum, yNum, yPred, 'exponential', { a, b });
+        };
+
+        const polyFit = () => {
+            if (typeof math === 'undefined' || !math.lusolve) return null;
+            const X = xNum.map(x => [1, x, x * x]);
+            const Y = yNum;
+            try {
+                const XtX = math.multiply(math.transpose(X), X);
+                const XtY = math.multiply(math.transpose(X), Y);
+                console.log('Polynomial intermediates:', { XtX, XtY });
+                const det = math.det(XtX);
+                if (Math.abs(det) < 1e-10) {
+                    console.log('Singular matrix in polynomial fit, det:', det);
+                    return null;
+                }
+                const coeffs = math.lusolve(XtX, XtY);
+                if (!coeffs || !coeffs._data || coeffs._data.length < 3) {
+                    console.log('Invalid coeffs from lusolve:', coeffs);
+                    return null;
+                }
+                const c = coeffs._data[0][0], b = coeffs._data[1][0], a = coeffs._data[2][0];
+                if (!isFinite(a) || !isFinite(b) || !isFinite(c)) return null;
+                const yPred = xNum.map(x => a * x * x + b * x + c);
+                return calculateStats(xNum, yNum, yPred, 'polynomial', { a, b, c });
+            } catch (e) {
+                console.error('Polynomial fit failed:', e.message);
+                return null;
+            }
+        };
+
+        if (fitType === 'auto') {
+            fits.linear = linearFit();
+            fits.logarithmic = logFit();
+            fits.exponential = expFit();
+            fits.polynomial = polyFit();
+
+            const validFits = Object.entries(fits)
+                .filter(([_, fit]) => fit && !isNaN(fit.rSquared))
+                .map(([type, fit]) => ({ type, ...fit }));
+            if (validFits.length === 0) return defaultResult;
+            const bestFit = validFits.reduce((best, current) => 
+                (best.rSquared > current.rSquared) ? best : current
+            );
+            console.log('Auto best fit:', bestFit.type, 'R²:', bestFit.rSquared);
+            return bestFit;
+        } else {
+            switch (fitType) {
+                case 'linear': return linearFit() || defaultResult;
+                case 'logarithmic': return logFit() || defaultResult;
+                case 'exponential': return expFit() || defaultResult;
+                case 'polynomial': return polyFit() || defaultResult;
+                default: return defaultResult;
+            }
+        }
+    }
+
+    function calculateStats(xNum, yNum, yPred, type, params) {
+        const n = xNum.length;
+        const meanY = yNum.reduce((a, b) => a + b, 0) / n;
+        const ssTot = yNum.reduce((sum, d) => sum + Math.pow(d - meanY, 2), 0);
+        const ssRes = xNum.reduce((sum, _, i) => sum + Math.pow(yNum[i] - yPred[i], 2), 0);
+        const rSquared = ssTot === 0 ? NaN : 1 - (ssRes / ssTot);
+        const dfReg = (type === 'polynomial' ? 2 : 1);
+        const dfRes = n - (dfReg + 1);
+        const msReg = (ssTot - ssRes) / dfReg;
+        const msRes = ssRes / dfRes;
+        const fValue = msRes === 0 ? NaN : msReg / msRes;
+        const pValue = isNaN(fValue) ? NaN : jStat.ftest(fValue, dfReg, dfRes);
+
+        if (yPred.some(y => !isFinite(y))) return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
+        return { type, params, rSquared, fValue, pValue, yPred };
+    }
+
+    function calculateANOVA(data, independent, dependent) {
+        const groups = {};
+        data.forEach(row => {
+            const group = row[independent];
+            if (!groups[group]) groups[group] = [];
+            const value = parseFloat(row[dependent]);
+            if (!isNaN(value)) groups[group].push(value);
+        });
+        const groupArrays = Object.values(groups).filter(arr => arr.length > 0);
+        if (groupArrays.length < 2) return { fScore: NaN, pValue: NaN, means: [], groupNames: [] };
+        const fScore = jStat.anovafscore(...groupArrays);
+        const pValue = jStat.anovaftest(...groupArrays);
+        const means = groupArrays.map(arr => jStat.mean(arr));
+        const groupNames = Object.keys(groups).filter(key => groups[key].length > 0);
+        return { fScore, pValue, means, groupNames };
+    }
+
+    function calculateBoxStats(yValues) {
+        const validY = yValues.filter(y => !isNaN(y));
+        if (validY.length === 0) return { median: NaN, q1: NaN, q3: NaN, iqr: NaN, min: NaN, max: NaN };
+        const median = jStat.median(validY);
+        const q1 = jStat.percentile(validY, 0.25);
+        const q3 = jStat.percentile(validY, 0.75);
+        const iqr = q3 - q1;
+        const lowerBound = q1 - 1.5 * iqr;
+        const upperBound = q3 + 1.5 * iqr;
+        const min = Math.max(Math.min(...validY), lowerBound);
+        const max = Math.min(Math.max(...validY), upperBound);
+        return { median, q1, q3, iqr, min, max };
+    }
+
+    function aggregateVariables(data) {
+        const depths = [0, 5, 10, 20, 30, 40, 50, 100, 200];
+        const zones = ['A', 'B', 'C'];
+        return data.map(row => {
+            const newRow = { ...row };
+            depths.forEach(depth => {
+                const suffix = depth === 0 ? 1 : depth === 5 ? 2 : depth === 10 ? 3 : depth === 20 ? 4 : depth === 30 ? 5 : depth === 40 ? 6 : depth === 50 ? 7 : depth === 100 ? 8 : 9;
+                const keys = zones.map(zone => `TS_${depth}_${zone}${suffix}`);
+                const values = keys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
+                newRow[`TS_${depth}`] = values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
+            });
+            const taKeys = ['TA_2_0_1', 'TA_2_0_2'];
+            const taValues = taKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
+            newRow['TA_2_0'] = taValues.length > 0 ? taValues.reduce((sum, v) => sum + v, 0) / taValues.length : null;
+            const rhKeys = ['RH_2_0_1', 'RH_2_0_2'];
+            const rhValues = rhKeys.map(k => parseFloat(row[k])).filter(v => !isNaN(v));
+            newRow['RH_2_0'] = rhValues.length > 0 ? rhValues.reduce((sum, v) => sum + v, 0) / rhValues.length : null;
+            ['CO2_measured', 'H2O_measured', 'WD_10', 'PREC_6'].forEach(key => {
+                const value = parseFloat(row[key]);
+                newRow[key] = isNaN(value) ? null : value;
+            });
+            return newRow;
+        });
+    }
+
+    function getWeeklyTimestamps(data, start, end) {
+        const weeklyData = {};
+        data.forEach(row => {
+            const date = row.TIMESTAMP;
+            if ((!start || date >= start) && (!end || date <= new Date(end.getTime() + 24 * 60 * 60 * 1000 - 1))) {
+                const weekStart = new Date(date);
+                weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                weekStart.setHours(0, 0, 0, 0);
+                const key = weekStart.getTime();
+                if (!weeklyData[key]) weeklyData[key] = { TIMESTAMP: weekStart, values: {} };
+                Object.keys(row).forEach(k => {
+                    if (k !== 'TIMESTAMP') {
+                        weeklyData[key].values[k] = weeklyData[key].values[k] || [];
+                        const value = parseFloat(row[k]);
+                        if (!isNaN(value)) weeklyData[key].values[k].push(value);
+                    }
+                });
+            }
+        });
+        const result = Object.values(weeklyData).map(w => ({
+            TIMESTAMP: w.TIMESTAMP,
+            ...Object.keys(w.values).reduce((acc, k) => ({
+                ...acc,
+                [k]: w.values[k].length > 0 ? w.values[k].reduce((sum, v) => sum + v, 0) / w.values[k].length : null
+            }), {})
+        }));
+        console.log('Weekly timestamps sample:', result.slice(0, 5).map(d => d.TIMESTAMP));
+        return result;
+    }
+
+    function calculateGraphWidth() { return document.getElementById('graph-container').clientWidth; }
+    function calculateGraphHeight() { 
+        const headerHeight = document.querySelector('h1')?.offsetHeight || 60;
+        return window.innerHeight - headerHeight;
+    }
+
+    function toggleLegend() {
+        if (dataLoaded && graphInitialized) {
+            legendVisible = !legendVisible;
+            Plotly.relayout('graph', { showlegend: legendVisible });
+            document.getElementById('legend-tab').textContent = legendVisible ? 'Hide Legend' : 'Show Legend';
+        }
+    }
+
+    function filterOutliers(x, y) {
+        const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
+        if (pairedData.length < 2) return { x: x, y: y };
+        const yValues = pairedData.map(d => d.y);
+        const q1 = jStat.percentile(yValues, 0.25);
+        const q3 = jStat.percentile(yValues, 0.75);
+        const iqr = q3 - q1;
+        const lowerBound = q1 - 1.5 * iqr;
+        const upperBound = q3 + 1.5 * iqr;
+        const filtered = pairedData.filter(d => d.y >= lowerBound && d.y <= upperBound);
+        return { x: filtered.map(d => d.x), y: filtered.map(d => d.y) };
+    }
+
+    function updateStatsOptions() {
+        const chartType = document.querySelector('#chart-type-menu input:checked').value;
+        const fitOptions = document.getElementById('fit-options');
+        fitOptions.style.display = ['scatter', 'line', 'area'].includes(chartType) ? 'block' : 'none';
+    }
+
+    function updateGraph() {
+        const graphDiv = document.getElementById('graph');
+        if (!dataLoaded || typeof Plotly === 'undefined') {
+            resetGraph();
+            return;
+        }
+
+        const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || null;
+        const allDependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
+        const chartType = document.querySelector('#chart-type-menu input:checked').value;
+        const fitType = document.querySelector('#fit-options input:checked')?.value || 'auto';
+        const showFit = document.getElementById('show-fit').checked;
+        const showOnChart = document.getElementById('show-on-chart').checked;
+
+        document.getElementById('independent-toggle').textContent = independent ? document.querySelector(`label[for="${independent}"]`)?.textContent || 'Select Independent' : 'Select Independent';
+        document.getElementById('dependent-toggle').innerHTML = allDependents.length ? allDependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent}</span>`).join('<br>') : 'Select Dependent';
+
+        if (!allDependents.length || !independent) {
+            resetGraph();
+            return;
+        }
+
+        let workingData = filterByRanges(cachedData);
+        workingData = filterByDepthRange(workingData);
+        workingData = workingData.filter(row => {
+            const rowDate = row.TIMESTAMP;
+            return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1)) &&
+                   (selectedPlots.length === 0 || selectedPlots.includes(row.Plot));
+        });
+        console.log(`Filtered data length: ${workingData.length}, Selected Plots: ${selectedPlots.length ? selectedPlots.join(', ') : 'None'}`);
+
+        if (independent === 'TIMESTAMP' && ['scatter', 'line', 'area'].includes(chartType)) {
+            workingData = getWeeklyTimestamps(workingData, startDate, endDate);
+        }
+
+        const units = allDependents.map(dep => unitMap[dep]);
+        const commonUnit = units.every(u => u === units[0]) ? units[0] : null;
+        const dependents = commonUnit ? allDependents.filter(dep => unitMap[dep] === commonUnit) : allDependents;
+        if (!dependents.length || !workingData.length) {
+            resetGraph();
+            console.warn('No valid data after filtering');
+            return;
+        }
+
+        const traces = [];
+        const fitTraces = [];
+        let invalidTraces = [];
+        const statsText = [];
+
+        if (chartType === 'anova' && dependents.length === 1) {
+            const anovaResults = calculateANOVA(workingData, independent, dependents[0]);
+            if (isNaN(anovaResults.fScore)) {
+                graphDiv.innerHTML = '<div class="warning-message">Insufficient data for ANOVA</div>';
+                graphInitialized = false;
+                return;
+            }
+            traces.push({
+                x: anovaResults.groupNames,
+                y: anovaResults.means,
+                type: 'bar',
+                name: `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means`,
+                marker: { color: dependentColors[dependents[0]] || '#00FFFF' }
+            });
+            statsText.push(`${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]}: F-Score=${anovaResults.fScore.toFixed(2)}, p-value=${anovaResults.pValue.toFixed(4)}`);
+        } else {
+            dependents.forEach(dep => {
+                const pairedData = workingData
+                    .map(row => ({
+                        x: independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent]),
+                        y: parseFloat(row[dep])
+                    }))
+                    .filter(d => d.x !== null && !isNaN(d.x) && d.y !== null && !isNaN(d.y));
+
+                if (pairedData.length === 0) {
+                    console.warn(`No valid data for ${dep} vs ${independent}: pairedData length=0`);
+                    invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has no valid data`);
+                    return;
+                }
+
+                let xValues = pairedData.map(d => d.x);
+                let yValues = pairedData.map(d => d.y);
+
+                const filtered = filterOutliers(xValues, yValues);
+                xValues = filtered.x;
+                yValues = filtered.y;
+
+                const color = dependentColors[dep] || '#FFFFFF';
+                traces.push({
+                    x: xValues,
+                    y: yValues,
+                    mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
+                    type: chartType === 'scatter' ? 'scattergl' : chartType === 'area' ? 'scattergl' : chartType,
+                    name: document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep,
+                    marker: { color: color, size: 8 },
+                    line: (chartType === 'line' || chartType === 'area') ? { color: color, width: 2 } : undefined,
+                    fill: chartType === 'area' ? 'tozeroy' : undefined
+                });
+
+                if (chartType === 'box') {
+                    const boxStats = calculateBoxStats(yValues);
+                    statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Median=${boxStats.median.toFixed(2)}, Q1=${boxStats.q1.toFixed(2)}, Q3=${boxStats.q3.toFixed(2)}, IQR=${boxStats.iqr.toFixed(2)}, Min=${boxStats.min.toFixed(2)}, Max=${boxStats.max.toFixed(2)}`);
+                } else if (chartType === 'bar') {
+                    const mean = jStat.mean(yValues);
+                    const stdDev = jStat.stdev(yValues);
+                    statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Mean=${mean.toFixed(2)}, StdDev=${stdDev.toFixed(2)}`);
+                } else if (['scatter', 'line', 'area'].includes(chartType) && xValues.length > 1 && showFit) {
+                    let xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
+                    let originalXMin = 0;
+                    if (independent === 'TIMESTAMP') {
+                        originalXMin = Math.min(...xNum);
+                        xNum = xNum.map(x => (x - originalXMin) / (1000 * 60 * 60 * 24));
+                    }
+                    const fit = calculateFit(xNum, yValues, fitType);
+                    console.log(`Fit for ${dep}:`, fit);
+                    if (fit.type !== 'none' && fit.yPred.length > 0) {
+                        let xFit, yFit;
+                        if (independent === 'TIMESTAMP') {
+                            xFit = xNum.map(x => new Date(originalXMin + x * 1000 * 60 * 60 * 24));
+                            yFit = fit.yPred;
+                        } else {
+                            const xMin = Math.min(...xNum);
+                            const xMax = Math.max(...xNum);
+                            xFit = Array.from({ length: 100 }, (_, i) => xMin + (xMax - xMin) * i / 99);
+                            yFit = xFit.map(x => {
+                                if (fit.type === 'linear') return fit.params.slope * x + fit.params.intercept;
+                                if (fit.type === 'logarithmic') return fit.params.slope * Math.log(x) + fit.params.intercept;
+                                if (fit.type === 'exponential') return fit.params.a * Math.exp(fit.params.b * x);
+                                if (fit.type === 'polynomial') return fit.params.a * x * x + fit.params.b * x + fit.params.c;
+                                return NaN;
+                            });
+                        }
+                        if (yFit.every(y => isFinite(y))) {
+                            fitTraces.push({
+                                x: xFit,
+                                y: yFit,
+                                mode: 'lines',
+                                type: 'scattergl',
+                                name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (${fit.type} fit)`,
+                                line: { color: color, width: 2, dash: 'dash' }
+                            });
+                        }
+                    }
+                    let eq = 'Fit not available';
+                    if (fit.type === 'linear') eq = `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}x`;
+                    else if (fit.type === 'logarithmic') eq = `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}ln(x)`;
+                    else if (fit.type === 'exponential') eq = `y = ${fit.params.a.toFixed(2)}e^(${fit.params.b.toFixed(2)}x)`;
+                    else if (fit.type === 'polynomial') eq = `y = ${fit.params.a.toFixed(2)}x² + ${fit.params.b.toFixed(2)}x + ${fit.params.c.toFixed(2)}`;
+                    statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: ${eq}, R²=${(fit.rSquared || NaN).toFixed(2)}, F=${(fit.fValue || NaN).toFixed(2)}, p=${(fit.pValue || NaN).toFixed(4)}`);
+                }
+            });
+        }
+
+        if (!traces.length) {
+            console.warn('No valid traces to plot:', invalidTraces);
+            resetGraph();
+            if (invalidTraces.length) graphDiv.innerHTML = `<div class="warning-message">${invalidTraces.join('<br>')}<br>Check the data source or variable selection.</div>`;
+            return;
+        }
+
+        if (statsOpened) {
+            document.getElementById('stats-content').innerHTML = `<span style="color: #00FF00">${statsText.join('<br>')}</span>`;
+        }
+
+        const xAxisTitle = independent === 'TIMESTAMP' ? 'Time' : document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
+        const yAxisTitle = dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent : 
+                          dependents.every(dep => dep.startsWith('TS_')) ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit || 'Mixed Units'})`;
+
+        const annotations = showOnChart && statsText.length ? dependents.map((dep, i) => ({
+            x: 0.02,
+            y: 0.98 - i * 0.05, // Stack annotations vertically
+            xref: 'paper',
+            yref: 'paper',
+            text: statsText[i],
+            showarrow: false,
+            font: { 
+                color: dependentColors[dep] || '#FFFFFF', 
+                family: 'Lato', 
+                size: window.innerWidth <= 480 ? 10 : 12 
+            },
+            bgcolor: 'rgba(26, 26, 26, 0.7)',
+            bordercolor: 'transparent',
+            borderpad: 4
+        })).slice(0, 5) : []; // Limit to 5 as before
+
+        const layout = {
+            width: calculateGraphWidth(),
+            height: calculateGraphHeight(),
+            plot_bgcolor: '#1A1A1A',
+            paper_bgcolor: '#1A1A1A',
+            font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 },
+            title: { text: `${yAxisTitle} vs. ${xAxisTitle}`, font: { size: window.innerWidth <= 480 ? 14 : 16 } },
+            xaxis: {
+                title: xAxisTitle,
+                gridcolor: '#444',
+                zerolinecolor: '#444',
+                type: independent === 'TIMESTAMP' ? 'date' : chartType === 'anova' ? 'category' : 'linear'
+            },
+            yaxis: { 
+                title: yAxisTitle, 
+                gridcolor: '#444', 
+                zerolinecolor: '#444' 
+            },
+            margin: { 
+                t: window.innerWidth <= 480 ? 50 : 60, 
+                b: window.innerWidth <= 480 ? 80 : 100, 
+                l: window.innerWidth <= 480 ? 80 : 100, 
+                r: window.innerWidth <= 480 ? 20 : 30 
+            },
+            showlegend: legendVisible,
+            legend: { 
+                x: 1, 
+                y: 1, 
+                xanchor: 'right', 
+                yanchor: 'top', 
+                bgcolor: 'rgba(26, 26, 26, 0.7)', 
+                bordercolor: 'transparent', 
+                font: { color: '#FFFFFF', size: window.innerWidth <= 480 ? 10 : 12 },
+                traceorder: 'normal'
+            },
+            annotations: annotations,
+            hovermode: 'closest'
+        };
+
+        const data = traces.concat(fitTraces);
+
+        console.log('Traces:', traces.length, 'Fit Traces:', fitTraces.length, 'Annotations:', annotations.length);
+
+        const welcomeMessage = document.getElementById('welcome-message');
+        if (welcomeMessage) welcomeMessage.style.display = 'none';
+
+        if (!graphInitialized) {
+            Plotly.newPlot(graphDiv, data, layout, { responsive: true })
+                .then(() => {
+                    graphInitialized = true;
+                    console.log('Graph initialized');
+                })
+                .catch(err => console.error('Plotly newPlot error:', err));
+        } else {
+            Plotly.react(graphDiv, data, layout)
+                .catch(err => {
+                    console.error('Plotly react error:', err);
+                    Plotly.newPlot(graphDiv, data, layout, { responsive: true })
+                        .then(() => graphInitialized = true)
+                        .catch(err => console.error('Fallback newPlot error:', err));
+                });
+        }
+    }
+
+    document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
+    document.getElementById('mobile-sidebar-button').addEventListener('click', toggleSidebar);
+    document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
+    document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
+    document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
+    document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
+    document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
+    document.getElementById('legend-tab').addEventListener('click', toggleLegend);
+    document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
+    document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu'));
+    document.getElementById('show-fit').addEventListener('change', updateGraph);
+    document.getElementById('show-on-chart').addEventListener('change', updateGraph);
+
+    document.querySelectorAll('#independent-menu input').forEach(input => {
+        input.addEventListener('change', () => {
+            enforceSingleSelection('independent-menu', input.id);
+            updateGraph();
+        });
+    });
+
+    document.querySelectorAll('#dependent-menu input').forEach(input => {
+        input.addEventListener('change', updateGraph);
+    });
+
+    document.querySelectorAll('#chart-type-menu input').forEach(input => {
+        input.addEventListener('change', () => {
+            document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+            updateStatsOptions();
+            updateGraph();
+        });
+    });
+
+    document.querySelectorAll('#fit-options input').forEach(input => {
+        input.addEventListener('change', updateGraph);
+    });
+
+    document.querySelectorAll('#plot-number-menu input').forEach(input => {
+        input.addEventListener('change', () => {
+            selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked'))
+                .map(input => Number(input.value));
+            updateGraph();
+        });
+    });
+
+    flatpickr('#start-date', {
+        dateFormat: 'Y-m-d',
+        defaultDate: '2015-08-01',
+        onChange: (selectedDates) => {
+            startDate = selectedDates[0];
+            document.getElementById('time-range-toggle').textContent = `${startDate.toISOString().split('T')[0]} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+            updateGraph();
+        }
+    });
+
+    flatpickr('#end-date', {
+        dateFormat: 'Y-m-d',
+        defaultDate: '2025-04-05',
+        onChange: (selectedDates) => {
+            endDate = selectedDates[0];
+            document.getElementById('time-range-toggle').textContent = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate.toISOString().split('T')[0]}`;
+            updateGraph();
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        if (dataLoaded && graphInitialized) Plotly.relayout('graph', { 
+            width: calculateGraphWidth(), 
+            height: calculateGraphHeight(),
+            margin: { 
+                t: window.innerWidth <= 480 ? 50 : 60, 
+                b: window.innerWidth <= 480 ? 80 : 100, 
+                l: window.innerWidth <= 480 ? 80 : 100, 
+                r: window.innerWidth <= 480 ? 20 : 30 
+            },
+            font: { size: window.innerWidth <= 480 ? 10 : 12 },
+            title: { font: { size: window.innerWidth <= 480 ? 14 : 16 } },
+            legend: { font: { size: window.innerWidth <= 480 ? 10 : 12 } }
+        });
+        const sidebar = document.getElementById('sidebar');
+        const mobileButton = document.getElementById('mobile-sidebar-button');
+        mobileButton.style.display = sidebar.classList.contains('collapsed') && window.innerWidth <= 480 ? 'block' : 'none';
+    });
+
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.2.0/math.min.js';
+    script.onload = () => {
+        if (typeof math === 'undefined') console.error('math.js failed to initialize');
+        loadData();
+    };
+    script.onerror = () => console.error('Failed to load math.js');
+    document.head.appendChild(script);
+</script>
 </body>
 </html>
