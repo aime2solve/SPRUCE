@@ -200,7 +200,7 @@
     </div>
     <div class="mobile-sidebar-button" id="mobile-sidebar-button">></div>
 
-    <script>
+   <script>
     let allData = [];
     const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
     let startDate = new Date('2015-08-01');
@@ -804,8 +804,23 @@
                     const fit = calculateFit(xNum, yValues, fitType);
                     console.log(`Fit for ${dep}:`, fit);
                     if (fit.type !== 'none' && fit.yPred.length > 0) {
-                        const xFit = independent === 'TIMESTAMP' ? xNum.map(x => new Date(originalXMin + x * 1000 * 60 * 60 * 24)) : xNum;
-                        const yFit = fit.yPred;
+                        let xFit, yFit;
+                        if (independent === 'TIMESTAMP') {
+                            xFit = xNum.map(x => new Date(originalXMin + x * 1000 * 60 * 60 * 24));
+                            yFit = fit.yPred;
+                        } else {
+                            // Generate a smooth X-range for non-time variables
+                            const xMin = Math.min(...xNum);
+                            const xMax = Math.max(...xNum);
+                            xFit = Array.from({ length: 100 }, (_, i) => xMin + (xMax - xMin) * i / 99);
+                            yFit = xFit.map(x => {
+                                if (fit.type === 'linear') return fit.params.slope * x + fit.params.intercept;
+                                if (fit.type === 'logarithmic') return fit.params.slope * Math.log(x) + fit.params.intercept;
+                                if (fit.type === 'exponential') return fit.params.a * Math.exp(fit.params.b * x);
+                                if (fit.type === 'polynomial') return fit.params.a * x * x + fit.params.b * x + fit.params.c;
+                                return NaN;
+                            });
+                        }
                         if (yFit.every(y => isFinite(y))) {
                             fitTraces.push({
                                 x: xFit,
@@ -876,7 +891,7 @@
             margin: { 
                 t: window.innerWidth <= 480 ? 50 : 60, 
                 b: window.innerWidth <= 480 ? 80 : 100, 
-                l: window.innerWidth <= 480 ? 80 : 100, // Increased left margin for Y-axis spacing
+                l: window.innerWidth <= 480 ? 80 : 100, 
                 r: window.innerWidth <= 480 ? 20 : 30 
             },
             showlegend: legendVisible,
@@ -985,7 +1000,7 @@
             },
             font: { size: window.innerWidth <= 480 ? 10 : 12 },
             title: { font: { size: window.innerWidth <= 480 ? 14 : 16 } },
-            legend: { font: { size: window.innerWidth <= 480 ? 10 : 12 } }
+            legend: { font: { size: window.innerWidth (<= 480 ? 10 : 12 } }
         });
         const sidebar = document.getElementById('sidebar');
         const mobileButton = document.getElementById('mobile-sidebar-button');
