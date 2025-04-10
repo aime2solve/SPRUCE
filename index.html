@@ -847,43 +847,45 @@
         }
 
         if (!traces.length) {
-            console.warn('No valid traces to plot:', invalidTraces);
-            resetGraph();
-            if (invalidTraces.length) graphDiv.innerHTML = `<div class="warning-message">${invalidTraces.join('<br>')}<br>Check the data source or variable selection.</div>`;
-            return;
-        }
+    console.warn('No valid traces to plot:', invalidTraces);
+    resetGraph();
+    if (invalidTraces.length) {
+        graphDiv.innerHTML = `<div class="warning-message">${invalidTraces.join('<br>')}<br>Check the data source or variable selection.</div>`;
+    }
+    return;
+}
 
-        if (statsOpened) {
-            document.getElementById('stats-content').innerHTML = statsText.length ? statsText.join('<br>') : 'No stats available';
-        }
+if (statsOpened) {
+    document.getElementById('stats-content').innerHTML = statsText.length ? statsText.join('<br>') : 'No stats available';
+}
 
-        const xAxisTitle = independent === 'TIMESTAMP' ? 'Time' : document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
-        const yAxisTitle = dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent : 
-                          dependents.every(dep => dep.startsWith('TS_')) ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit || 'Mixed Units'})`;
+const xAxisTitle = independent === 'TIMESTAMP' ? 'Time' : document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
+const yAxisTitle = dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent : 
+                  dependents.every(dep => dep.startsWith('TS_')) ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit || 'Mixed Units'})`;
 
-        const annotations = showOnChart && statsText.length ? [{
+const annotations = showOnChart && statsText.length ? [{
     x: 0.02,
     y: 0.98,
     xref: 'paper',
     yref: 'paper',
     text: statsText.slice(0, 5).map((text, i) => {
-        const depMatch = text.match(/^([^:]+):/); // Extract dependent variable label
-        if (!depMatch) return text; // Fallback if no match
+        const depMatch = text.match(/^([^:]+):/);
+        if (!depMatch) return text;
         const depLabel = depMatch[1].trim();
         const depKey = dependents.find(d => 
             (document.querySelector(`label[for="${d}"], label[for="${d}_dep"]`)?.textContent || d).includes(depLabel)
         );
-        const color = depKey ? dependentColors[depKey] : '#FFFFFF'; // Default to white if no match
+        const color = depKey ? dependentColors[depKey] : '#FFFFFF';
         return `<span style="color:${color}">${text}</span>`;
     }).join('<br>') + (statsText.length > 5 ? '<br><span style="color:#FFFFFF">(Truncated, see Stats menu)</span>' : ''),
     showarrow: false,
-    font: { family: 'Lato', size: window.innerWidth <= 480 ? 10 : 12 }, // Remove color here
+    font: { family: 'Lato', size: window.innerWidth <= 480 ? 10 : 12 },
     bgcolor: 'rgba(26, 26, 26, 0.7)',
     bordercolor: 'transparent',
     borderpad: 4
 }] : [];
 
-        const layout = {
+const layout = {
     width: calculateGraphWidth(),
     height: calculateGraphHeight(),
     plot_bgcolor: '#1A1A1A',
@@ -907,7 +909,7 @@
         l: window.innerWidth <= 480 ? 80 : 100, 
         r: window.innerWidth <= 480 ? 20 : 30 
     },
-    showlegend: false, // Always show legend
+    showlegend: false,
     legend: { 
         x: 1, 
         y: 0.95, 
@@ -921,30 +923,36 @@
     hovermode: 'closest'
 };
 
-        const data = traces.concat(fitTraces);
+const data = traces.concat(fitTraces);
 
-        console.log('Traces:', traces.length, 'Fit Traces:', fitTraces.length, 'Annotations:', annotations.length);
+console.log('Traces:', traces.length, 'Fit Traces:', fitTraces.length, 'Annotations:', annotations.length);
 
-        const welcomeMessage = document.getElementById('welcome-message');
-        if (welcomeMessage) welcomeMessage.style.display = 'none';
+// Clear any existing warning message before rendering the plot
+const warningMessage = graphDiv.querySelector('.warning-message');
+if (warningMessage) {
+    warningMessage.remove();
+}
 
-        if (!graphInitialized) {
+// Hide the welcome message
+const welcomeMessage = document.getElementById('welcome-message');
+if (welcomeMessage) welcomeMessage.style.display = 'none';
+
+if (!graphInitialized) {
+    Plotly.newPlot(graphDiv, data, layout, { responsive: true })
+        .then(() => {
+            graphInitialized = true;
+            console.log('Graph initialized');
+        })
+        .catch(err => console.error('Plotly newPlot error:', err));
+} else {
+    Plotly.react(graphDiv, data, layout)
+        .catch(err => {
+            console.error('Plotly react error:', err);
             Plotly.newPlot(graphDiv, data, layout, { responsive: true })
-                .then(() => {
-                    graphInitialized = true;
-                    console.log('Graph initialized');
-                })
-                .catch(err => console.error('Plotly newPlot error:', err));
-        } else {
-            Plotly.react(graphDiv, data, layout)
-                .catch(err => {
-                    console.error('Plotly react error:', err);
-                    Plotly.newPlot(graphDiv, data, layout, { responsive: true })
-                        .then(() => graphInitialized = true)
-                        .catch(err => console.error('Fallback newPlot error:', err));
-                });
-        }
-    }
+                .then(() => graphInitialized = true)
+                .catch(err => console.error('Fallback newPlot error:', err));
+        });
+}
 
     document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
     document.getElementById('mobile-sidebar-button').addEventListener('click', toggleSidebar);
