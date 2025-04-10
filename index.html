@@ -45,41 +45,68 @@
         .welcome-message img { display: block; margin: 0 auto; max-width: 300px; height: auto; }
         .welcome-message hr { border: 1px solid #00FFFF; width: 80%; margin: 10px auto; }
        
-        .controls-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; padding: 15px; color: #00FFFF; font-size: 13px; z-index: 20; display: none; width: 400px; max-height: 80vh; overflow-y: auto; }
-        .controls-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .controls-header h3 { margin: 0; color: #DAA520; font-family: 'Exo 2', sans-serif; font-size: 18px; flex-grow: 1; text-align: left; }
-        .slider-container { margin: 10px 0; position: relative; }
-        .slider-container label { display: block; margin-bottom: 5px; }
-        .range-slider { position: relative; width: 100%; height: 5px; background: #444; border-radius: 5px; pointer-events: none; }
-        .range-track { position: absolute; height: 5px; background: #00FFFF; z-index: 1; }
-        .range-slider input[type="range"] { position: absolute; width: 100%; height: 5px; top: -5px; background: none; -webkit-appearance: none; pointer-events: none; }
-        .range-slider input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; background: #00FFFF; border-radius: 50%; cursor: pointer; pointer-events: auto; box-shadow: 0 0 5px #00FFFF; }
-        .range-slider input[type="range"]::-webkit-slider-runnable-track { background: transparent; }
-        .slider-values { display: flex; justify-content: space-between; font-size: 11px; color: #00FF00; margin-top: 5px; pointer-events: none; }
-        .warning-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #FF4500; font-family: 'VT323', monospace; font-size: 17px; text-align: center; text-shadow: 0 0 5px #FF4500; z-index: 5; }
-        .mobile-sidebar-button { display: none; position: absolute; top: 10px; left: 10px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 19px; line-height: 36px; text-align: center; cursor: pointer; z-index: 12; }
+        .controls-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(26, 26, 26, 0.7); /* Semi-transparent */
+    border: 2px solid #00FFFF;
+    border-radius: 10px;
+    padding: 15px;
+    color: #00FFFF;
+    font-size: 13px;
+    z-index: 20;
+    display: none;
+    width: 320px; /* Narrower width */
+    max-height: 80vh;
+    overflow-y: auto;
+}
+.controls-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    cursor: move; /* Indicate draggable header */
+}
+.controls-header h3 {
+    margin: 0;
+    color: #DAA520;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 18px;
+    flex-grow: 1;
+    text-align: left;
+}
+.close-button {
+    display: none; /* Hidden by default */
+    width: 30px;
+    height: 30px;
+    background: rgba(26, 26, 26, 0.8);
+    border: 2px solid #00FFFF;
+    border-radius: 50%;
+    color: #00FFFF;
+    font-size: 16px;
+    line-height: 26px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 0 5px #00FFFF;
+}
+.slider-container { margin: 10px 0; position: relative; }
+.slider-container label { display: block; margin-bottom: 5px; }
+.range-slider { position: relative; width: 100%; height: 5px; background: #444; border-radius: 5px; pointer-events: none; }
+.range-track { position: absolute; height: 5px; background: #00FFFF; z-index: 1; }
+.range-slider input[type="range"] { position: absolute; width: 100%; height: 5px; top: -5px; background: none; -webkit-appearance: none; pointer-events: none; }
+.range-slider input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; background: #00FFFF; border-radius: 50%; cursor: pointer; pointer-events: auto; box-shadow: 0 0 5px #00FFFF; }
+.range-slider input[type="range"]::-webkit-slider-runnable-track { background: transparent; }
+.slider-values { display: flex; justify-content: space-between; font-size: 11px; color: #00FF00; margin-top: 5px; pointer-events: none; }
 
-        /* Mobile Optimizations */
-        @media (max-width: 768px) {
-            .sidebar { width: 200px; }
-            .graph-container { width: calc(100vw - 200px); }
-            .graph-container.full-width { width: 100vw; }
-            .legend-tab { top: 40px; right: 1vw; padding: 4px 8px; font-size: 12px; }
-            .controls-popup { width: 300px; font-size: 11px; }
-            .sidebar-title { font-size: 20px; }
-            .sidebar-title span { font-size: 14px; }
-            .button-label { font-size: 11px; width: 80px; }
-            .dropdown-toggle, #control-panel-button { font-size: 10px; width: calc(100% - 90px); }
-            .dropdown-menu { left: 90px; width: calc(100% - 90px); font-size: 10px; }
-            #plot-number-menu { width: 250px; }
-            h1 { font-size: calc(14px + 1vw); }
-        }
-        @media (max-width: 480px) {
-            .sidebar { width: 150px; }
-            .graph-container { width: calc(100vw - 150px); }
-            .graph-container.full-width { width: 100vw; }
-            .legend-tab { top: 50px; right: 1vw; padding: 3px 6px; font-size: 10px; }
-            .controls-popup { width: 90vw; padding: 10px; }
+@media (max-width: 768px) {
+    .controls-popup { width: 240px; font-size: 11px; }
+}
+@media (max-width: 480px) {
+    .controls-popup { width: 80vw; padding: 10px; }
+    .close-button { display: block; }
+}
             .sidebar-title { font-size: 18px; }
             .sidebar-title span { font-size: 12px; }
             .button-label { font-size: 10px; width: 70px; }
@@ -189,15 +216,15 @@
         </div>
     </div>
 
-    <div class="controls-popup" id="control-panel-popup">
-        <div class="controls-header">
-            <h3 style="flex-grow: 1; text-align: left;">Control Panel</h3>
-            <div class="dropdown-toggle" id="plot-number-toggle" style="width: 80px;">Plot # (all)</div>
-            <div class="dropdown-menu" id="plot-number-menu"></div>
-        </div>
-        <div id="control-panel-content"></div>
+   <div class="controls-popup" id="control-panel-popup">
+    <div class="controls-header" id="controls-header">
+        <h3 style="flex-grow: 1; text-align: left;">Control Panel</h3>
+        <div class="dropdown-toggle" id="plot-number-toggle" style="width: 80px;">Plot #</div>
+        <div class="close-button" id="close-control-panel">×</div>
     </div>
-    <div class="mobile-sidebar-button" id="mobile-sidebar-button">></div>
+    <div id="control-panel-content"></div>
+</div>
+<div class="mobile-sidebar-button" id="mobile-sidebar-button">></div>
 
    <script>
     let allData = [];
@@ -356,80 +383,83 @@
         });
     }
 
-    function toggleControlPanel() {
-        const popup = document.getElementById('control-panel-popup');
+   function toggleControlPanel() {
+    const popup = document.getElementById('control-panel-popup');
+    const button = document.getElementById('control-panel-button');
+    const isVisible = popup.style.display === 'block';
+    popup.style.display = isVisible ? 'none' : 'block';
+    button.textContent = isVisible ? 'Show Control Panel' : 'Hide Control Panel';
+
+    if (!isVisible) {
+        popup.style.left = '50%';
+        popup.style.top = '50%';
+        popup.style.transform = 'translate(-50%, -50%)';
         const content = document.getElementById('control-panel-content');
-        const button = document.getElementById('control-panel-button');
-        const isVisible = popup.style.display === 'block';
-        popup.style.display = isVisible ? 'none' : 'block';
-        button.textContent = isVisible ? 'Show Control Panel' : 'Hide Control Panel';
-
-        if (!isVisible) {
-            content.innerHTML = Object.keys(controlRanges).map(key => `
-                <div class="slider-container">
-                    <label>${controlRanges[key].label}</label>
-                    <div class="range-slider">
-                        <div class="range-track" id="${key}-track"></div>
-                        <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMin}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
-                        <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMax}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
-                    </div>
-                    <div class="slider-values">
-                        <span id="${key}-min-value">${currentRanges[key].defaultMin}</span>
-                        <span id="${key}-max-value">${currentRanges[key].defaultMax}</span>
-                    </div>
+        content.innerHTML = Object.keys(controlRanges).map(key => `
+            <div class="slider-container">
+                <label>${controlRanges[key].label}</label>
+                <div class="range-slider">
+                    <div class="range-track" id="${key}-track"></div>
+                    <input type="range" id="${key}-min" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMin}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
+                    <input type="range" id="${key}-max" min="${controlRanges[key].min}" max="${controlRanges[key].max}" value="${currentRanges[key].defaultMax}" step="${key === 'Soil_Depth' ? 5 : 0.1}">
                 </div>
-            `).join('');
+                <div class="slider-values">
+                    <span id="${key}-min-value">${currentRanges[key].defaultMin}</span>
+                    <span id="${key}-max-value">${currentRanges[key].defaultMax}</span>
+                </div>
+            </div>
+        `).join('');
 
-            Object.keys(controlRanges).forEach(key => {
-                const minSlider = document.getElementById(`${key}-min`);
-                const maxSlider = document.getElementById(`${key}-max`);
-                const track = document.getElementById(`${key}-track`);
-                const minValue = document.getElementById(`${key}-min-value`);
-                const maxValue = document.getElementById(`${key}-max-value`);
+        Object.keys(controlRanges).forEach(key => {
+            const minSlider = document.getElementById(`${key}-min`);
+            const maxSlider = document.getElementById(`${key}-max`);
+            const track = document.getElementById(`${key}-track`);
+            const minValue = document.getElementById(`${key}-min-value`);
+            const maxValue = document.getElementById(`${key}-max-value`);
 
-                function updateTrack() {
-                    const min = parseFloat(minSlider.value);
-                    const max = parseFloat(maxSlider.value);
-                    const minPercent = ((min - controlRanges[key].min) / (controlRanges[key].max - controlRanges[key].min)) * 100;
-                    const maxPercent = ((max - controlRanges[key].min) / (controlRanges[key].max - controlRanges[key].min)) * 100;
-                    track.style.left = `${minPercent}%`;
-                    track.style.width = `${maxPercent - minPercent}%`;
+            function updateTrack() {
+                const min = parseFloat(minSlider.value);
+                const max = parseFloat(maxSlider.value);
+                const minPercent = ((min - controlRanges[key].min) / (controlRanges[key].max - controlRanges[key].min)) * 100;
+                const maxPercent = ((max - controlRanges[key].min) / (controlRanges[key].max - controlRanges[key].min)) * 100;
+                track.style.left = `${minPercent}%`;
+                track.style.width = `${maxPercent - minPercent}%`;
+            }
+
+            let isDragging = false;
+
+            minSlider.addEventListener('mousedown', () => isDragging = true);
+            maxSlider.addEventListener('mousedown', () => isDragging = true);
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    updateGraph();
                 }
-
-                let isDragging = false;
-
-                minSlider.addEventListener('mousedown', () => isDragging = true);
-                maxSlider.addEventListener('mousedown', () => isDragging = true);
-                document.addEventListener('mouseup', () => {
-                    if (isDragging) {
-                        isDragging = false;
-                        updateGraph();
-                    }
-                });
-                document.addEventListener('mousemove', (e) => {
-                    if (!isDragging) return;
-                    let min = parseFloat(minSlider.value);
-                    let max = parseFloat(maxSlider.value);
-                    if (e.target === minSlider) {
-                        min = Math.min(max, parseFloat(minSlider.value));
-                        minSlider.value = min;
-                        currentRanges[key].defaultMin = min;
-                        minValue.textContent = min.toFixed(1);
-                        if (key === 'Soil_Depth') depthRange[0] = min;
-                    } else if (e.target === maxSlider) {
-                        max = Math.max(min, parseFloat(maxSlider.value));
-                        maxSlider.value = max;
-                        currentRanges[key].defaultMax = max;
-                        maxValue.textContent = max.toFixed(1);
-                        if (key === 'Soil_Depth') depthRange[1] = max;
-                    }
-                    updateTrack();
-                });
-
+            });
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                let min = parseFloat(minSlider.value);
+                let max = parseFloat(maxSlider.value);
+                if (e.target === minSlider) {
+                    min = Math.min(max, parseFloat(minSlider.value));
+                    minSlider.value = min;
+                    currentRanges[key].defaultMin = min;
+                    minValue.textContent = min.toFixed(1);
+                    if (key === 'Soil_Depth') depthRange[0] = min;
+                } else if (e.target === maxSlider) {
+                    max = Math.max(min, parseFloat(maxSlider.value));
+                    maxSlider.value = max;
+                    currentRanges[key].defaultMax = max;
+                    maxValue.textContent = max.toFixed(1);
+                    if (key === 'Soil_Depth') depthRange[1] = max;
+                }
                 updateTrack();
             });
-        }
+
+            updateTrack();
+        });
     }
+}
 
     function calculateFit(x, y, fitType) {
         const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] }))
@@ -933,6 +963,64 @@
                 });
         }
     }
+// Close button for control panel (mobile)
+document.getElementById('close-control-panel').addEventListener('click', () => {
+    const popup = document.getElementById('control-panel-popup');
+    const button = document.getElementById('control-panel-button');
+    popup.style.display = 'none';
+    button.textContent = 'Show Control Panel';
+});
+
+// Draggable control panel
+function makeDraggable(element, header) {
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    header.addEventListener('mousedown', startDragging);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', stopDragging);
+
+    function startDragging(e) {
+        initialX = e.clientX - xOffset;
+        initialY = e.clientY - yOffset;
+        if (e.target === header || e.target.parentElement === header) {
+            isDragging = true;
+        }
+    }
+
+    function drag(e) {
+        if (isDragging) {
+            e.preventDefault();
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+            xOffset = currentX;
+            yOffset = currentY;
+
+            const rect = element.getBoundingClientRect();
+            const maxX = window.innerWidth - rect.width;
+            const maxY = window.innerHeight - rect.height;
+            currentX = Math.max(0, Math.min(currentX, maxX));
+            currentY = Math.max(0, Math.min(currentY, maxY));
+
+            element.style.transform = 'none';
+            element.style.left = currentX + 'px';
+            element.style.top = currentY + 'px';
+        }
+    }
+
+    function stopDragging() {
+        isDragging = false;
+    }
+}
+
+const controlPanel = document.getElementById('control-panel-popup');
+const controlHeader = document.getElementById('controls-header');
+makeDraggable(controlPanel, controlHeader);
 
     document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
     document.getElementById('mobile-sidebar-button').addEventListener('click', toggleSidebar);
