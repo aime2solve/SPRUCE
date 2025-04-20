@@ -819,14 +819,13 @@
 // Global variables
 let allData = [];
 const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
-const metagenomicUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Metagenomics/kraken2_summary.json';
+const metagenomicUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Metagenomics/kraken_taxa.json';
 let startDate = new Date('2015-08-01');
 let endDate = new Date('2025-04-05');
 let dataLoaded = false;
 let legendVisible = true;
 let cachedData = null;
 let graphInitialized = false;
-let statsOpened = false;
 let selectedPlots = [4, 6, 7, 8, 10, 11, 13, 14, 16, 17, 19, 20, 21]; // All plots selected by default
 
 // Color mappings for dependent variables
@@ -897,9 +896,7 @@ async function loadData() {
     graphDiv.innerHTML = '<div class="welcome-message" id="welcome-message">Loading data...</div>';
     try {
         const response = await fetch(dataUrl);
-        if (!response.ok) {
-            throw new Error(`HTTP error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
         allData = await response.json();
         allData = allData.map(row => {
             const year = parseInt(row.Year, 10);
@@ -913,7 +910,6 @@ async function loadData() {
             row.Plot = Number(row.Plot);
             return row;
         }).filter(row => !isNaN(row.TIMESTAMP.getTime()) && row.TIMESTAMP instanceof Date && !isNaN(row.Plot));
-
         dataLoaded = true;
         cachedData = aggregateVariables(allData);
         resetGraph();
@@ -947,7 +943,6 @@ function toggleDropdown(id) {
         menu.classList.toggle('open');
         console.log(`Toggled dropdown: ${id}, now ${menu.classList.contains('open') ? 'open' : 'closed'}`);
         if (id === 'stats-menu' && menu.classList.contains('open')) {
-            statsOpened = true;
             updateStatsOptions();
             updateGraph();
         }
@@ -1044,12 +1039,7 @@ function toggleControlPanel() {
         slidersHtml += `
             <div class="dropdown-container">
                 <label>Plot Selection</label>
-                <div id="plot-number-toggle" class="dropdown-toggle">Plot # (${selectedPlots.length ? selectedPlots.join(', ') : 'all'})</div>
-                <div id="plot-number-menu" class="dropdown-menu">
-                    ${Object.entries(plotConditions).map(([plot, cond]) => {
-                        return `<div class="dropdown-item"><input type="checkbox" id="plot-${plot}" value="${plot}" ${selectedPlots.includes(Number(plot)) ? 'checked' : ''}><label for="plot-${plot}">Plot ${plot} (Temp: ${cond.temp}, CO₂: ${cond.co2}, Chamber: ${cond.chamber})</label></div>`;
-                    }).join('')}
-                </div>
+                <div id="plot-number-button" class="dropdown-toggle">Plot # (${selectedPlots.length ? selectedPlots.join(', ') : 'all'})</div>
             </div>
         `;
 
@@ -1103,20 +1093,45 @@ function toggleControlPanel() {
             updateTrack();
         });
 
-        const plotNumberToggle = document.getElementById('plot-number-toggle');
-        const plotNumberMenu = document.getElementById('plot-number-menu');
-        if (plotNumberToggle && plotNumberMenu) {
-            plotNumberToggle.addEventListener('click', () => toggleDropdown('plot-number-menu'));
-            plotNumberMenu.addEventListener('change', (e) => {
-                if (e.target.type === 'checkbox') {
-                    selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked')).map(input => Number(input.value));
-                    plotNumberToggle.textContent = selectedPlots.length ? `Plot # (${selectedPlots.join(', ')})` : 'Plot # (all)';
-                    console.log('Selected plots updated:', selectedPlots);
-                    updateGraph();
-                    updateMetagenomics();
-                }
-            });
+        const plotNumberButton = document.getElementById('plot-number-button');
+        if (plotNumberButton) {
+            plotNumberButton.addEventListener('click', togglePlotSelectionPopup);
         }
+    }
+}
+
+// Toggle plot selection popup
+function togglePlotSelectionPopup() {
+    const popup = document.getElementById('plot-selection-popup');
+    const content = document.getElementById('plot-selection-content');
+    const plotNumberButton = document.getElementById('plot-number-button');
+    if (!popup || !content || !plotNumberButton) {
+        console.error('Plot selection popup elements missing');
+        return;
+    }
+    const isVisible = popup.style.display === 'block';
+    popup.style.display = isVisible ? 'none' : 'block';
+
+    if (!isVisible) {
+        const plotsHtml = Object.entries(plotConditions).map(([plot, cond]) => {
+            return `
+                <div class="dropdown-item">
+                    <input type="checkbox" id="plot-${plot}" value="${plot}" ${selectedPlots.includes(Number(plot)) ? 'checked' : ''}>
+                    <label for="plot-${plot}">Plot ${plot} (Temp: ${cond.temp}, CO₂: ${cond.co2}, Chamber: ${cond.chamber})</label>
+                </div>
+            `;
+        }).join('');
+        content.innerHTML = plotsHtml;
+
+        content.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox') {
+                selectedPlots = Array.from(document.querySelectorAll('#plot-selection-content input:checked')).map(input => Number(input.value));
+                plotNumberButton.textContent = selectedPlots.length ? `Plot # (${selectedPlots.join(', ')})` : 'Plot # (all)';
+                console.log('Selected plots updated:', selectedPlots);
+                updateGraph();
+                updateMetagenomics();
+            }
+        }, { once: false });
     }
 }
 
@@ -1361,14 +1376,16 @@ function updateStatsOptions() {
 async function loadMetagenomicData() {
     try {
         const response = await fetch(metagenomicUrl);
-        if (!response.ok) {
-            throw new Error(`HTTP error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
         const data = await response.json();
         console.log('Metagenomic data loaded:', Object.keys(data).length, 'samples');
         return data;
     } catch (error) {
         console.error('Error loading metagenomic data:', error);
+        const graphDiv = document.getElementById('graph');
+        if (graphDiv) {
+            graphDiv.innerHTML = '<div class="warning-message">Failed to load metagenomic data. Please check the data source URL or try again later.</div>';
+        }
         return null;
     }
 }
@@ -1383,10 +1400,7 @@ async function showStackedBarChart(e) {
     }
 
     const data = await loadMetagenomicData();
-    if (!data) {
-        graphDiv.innerHTML = '<div class="warning-message">Failed to load metagenomic data.</div>';
-        return;
-    }
+    if (!data) return;
 
     const filteredSamples = Object.keys(data).filter(sample => {
         const plot = sampleToPlotMap[sample]?.plot;
@@ -1438,13 +1452,16 @@ function updateMetagenomics() {
     const links = metagenomicsMenu.querySelectorAll('.metagenomics-link:not(.kraken-stacked-bar)');
     links.forEach(link => {
         const sampleId = link.href.match(/SRR\d+/)?.[0];
-        if (!sampleId) return;
+        const isMultiQC = link.href.includes('multiqc_report.html');
+        if (!sampleId || isMultiQC) {
+            link.style.display = 'block';
+            return;
+        }
         const plotNumber = sampleToPlotMap[sampleId]?.plot;
         link.style.display = (!selectedPlots.length || (plotNumber && selectedPlots.includes(plotNumber))) ? 'block' : 'none';
     });
 }
 
-// Update graph based on selections
 // Update graph based on selections
 function updateGraph() {
     const graphDiv = document.getElementById('graph');
@@ -1639,23 +1656,21 @@ function updateGraph() {
             statsContent.innerHTML = statsText.length ? statsText.join('<br>') : 'No statistics available';
         }
 
-        // Clear the graph div to remove welcome message
         graphDiv.innerHTML = '';
 
-        // Prepare annotations for stats if "Show on Chart" is checked
         const annotations = showOnChart && statsText.length ? statsText.map((text, index) => ({
             xref: 'paper',
             yref: 'paper',
-            x: 0.98,
+            x: 0.02,
             y: 0.98 - index * 0.05,
-            xanchor: 'right',
+            xanchor: 'left',
             yanchor: 'top',
             text: text,
             showarrow: false,
             font: {
-                family: 'Exo 2, sans-serif',
+                family: 'VT323, monospace',
                 size: 12,
-                color: '#FFFFFF'
+                color: '#00FF00'
             },
             bgcolor: 'rgba(26, 26, 26, 0.8)',
             bordercolor: '#00FFFF',
@@ -1730,6 +1745,17 @@ function setupEventListeners() {
         });
     }
 
+    const closePlotSelection = document.getElementById('close-plot-selection');
+    if (closePlotSelection) {
+        closePlotSelection.addEventListener('click', () => {
+            const popup = document.getElementById('plot-selection-popup');
+            if (popup) {
+                popup.style.display = 'none';
+                console.log('Plot selection popup closed');
+            }
+        });
+    }
+
     ['independent', 'dependent', 'time-range', 'chart-type', 'stats', 'metagenomics'].forEach(type => {
         const toggle = document.getElementById(`${type}-toggle`);
         const menu = document.getElementById(`${type}-menu`);
@@ -1777,10 +1803,17 @@ function setupEventListeners() {
                 showStackedBarChart(e);
             } else {
                 const sampleId = link.href.match(/SRR\d+/)?.[0];
-                const plotNumber = sampleToPlotMap[sampleId]?.plot;
-                if (!selectedPlots.length || (plotNumber && selectedPlots.includes(plotNumber))) {
+                const isMultiQC = link.href.includes('multiqc_report.html');
+                const plotNumber = sampleId ? sampleToPlotMap[sampleId]?.plot : null;
+                if (!sampleId || isMultiQC || !selectedPlots.length || (plotNumber && selectedPlots.includes(plotNumber))) {
                     popup.style.display = 'block';
                     iframe.src = link.href;
+                    iframe.onerror = () => {
+                        iframe.src = '';
+                        const message = isMultiQC ? 'Failed to load MultiQC report. Please check the URL or GitHub Pages configuration.' : 'Failed to load Krona report. Please check the URL or try again later.';
+                        iframe.insertAdjacentHTML('afterend', `<div class="warning-message">${message}</div>`);
+                        console.error('Iframe load failed for URL:', link.href);
+                    };
                     console.log('Metagenomics popup opened with URL:', link.href);
                 }
             }
@@ -1795,6 +1828,10 @@ function setupEventListeners() {
             if (popup && iframe) {
                 popup.style.display = 'none';
                 iframe.src = '';
+                const warning = iframe.nextElementSibling;
+                if (warning && warning.classList.contains('warning-message')) {
+                    warning.remove();
+                }
                 console.log('Metagenomics popup closed');
             }
         });
