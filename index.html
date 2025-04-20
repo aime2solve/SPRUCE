@@ -1445,6 +1445,7 @@ function updateMetagenomics() {
 }
 
 // Update graph based on selections
+// Update graph based on selections
 function updateGraph() {
     const graphDiv = document.getElementById('graph');
     if (!graphDiv) {
@@ -1463,8 +1464,9 @@ function updateGraph() {
         const chartType = document.querySelector('#chart-type-menu input:checked')?.value || 'scatter';
         const fitType = document.querySelector('#fit-options input:checked')?.value || 'auto';
         const showFit = document.getElementById('show-fit')?.checked || false;
+        const showOnChart = document.getElementById('show-on-chart')?.checked || false;
 
-        console.log('Selections:', { independent, allDependents, chartType, fitType, selectedPlots });
+        console.log('Selections:', { independent, allDependents, chartType, fitType, selectedPlots, showOnChart });
 
         const independentToggle = document.getElementById('independent-toggle');
         const dependentToggle = document.getElementById('dependent-toggle');
@@ -1637,6 +1639,30 @@ function updateGraph() {
             statsContent.innerHTML = statsText.length ? statsText.join('<br>') : 'No statistics available';
         }
 
+        // Clear the graph div to remove welcome message
+        graphDiv.innerHTML = '';
+
+        // Prepare annotations for stats if "Show on Chart" is checked
+        const annotations = showOnChart && statsText.length ? statsText.map((text, index) => ({
+            xref: 'paper',
+            yref: 'paper',
+            x: 0.98,
+            y: 0.98 - index * 0.05,
+            xanchor: 'right',
+            yanchor: 'top',
+            text: text,
+            showarrow: false,
+            font: {
+                family: 'Exo 2, sans-serif',
+                size: 12,
+                color: '#FFFFFF'
+            },
+            bgcolor: 'rgba(26, 26, 26, 0.8)',
+            bordercolor: '#00FFFF',
+            borderwidth: 1,
+            borderpad: 4
+        })) : [];
+
         const layout = {
             title: {
                 text: `SPRUCE Experiment: ${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep).join(', ')} vs ${independent === 'TIMESTAMP' ? 'Time' : document.querySelector(`label[for="${independent}"]`)?.textContent || independent}`,
@@ -1658,12 +1684,13 @@ function updateGraph() {
             showlegend: legendVisible,
             width: calculateGraphWidth(),
             height: calculateGraphHeight(),
-            margin: { t: 50, b: 50, l: 100, r: 50 }
+            margin: { t: 50, b: 50, l: 100, r: 50 },
+            annotations: annotations
         };
 
         Plotly.newPlot(graphDiv, allTraces, layout, { responsive: true });
         graphInitialized = true;
-        console.log('Graph plotted successfully');
+        console.log('Graph plotted successfully with', annotations.length, 'annotations');
     } catch (error) {
         console.error('Error in updateGraph:', error);
         resetGraph();
