@@ -1,4 +1,113 @@
 
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparative Biospheromics Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Nasalization';
+            src: url('https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Nasalization.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        /* Base styles */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            background-color: #000000;
+            font-family: 'Lato', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            color: #00FFFF;
+            text-align: center;
+            padding: 2vh;
+            font-family: 'Nasalization', sans-serif;
+            font-size: calc(16px + 1.5vw);
+            margin: 0;
+            text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF;
+            animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+            flex-shrink: 0;
+            z-index: 11;
+            line-height: 1.5;
+            text-transform: uppercase;
+        }
+
+        @keyframes glowBreathe {
+            0%, 100% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; }
+            25%, 75% { text-shadow: 2px 2px 5px #00CC66, -2px -2px 5px #00CC66, 0 0 12px #00FFFF; }
+            50% { text-shadow: 2px 2px 4.5px #00CC66, -2px -2px 4.5px #00CC66, 0 0 11px #00FFFF; }
+        }
+
+        .container {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+            height: calc(100vh - 4vh);
+            position: relative;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            width: 250px;
+            background: rgba(26, 26, 26, 0.8);
+            border-right: 2px solid #00FFFF;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-250px);
+        }
+
+        .sidebar-tab {
+            position: absolute;
+            top: 0;
+            right: -40px;
+            width: 40px;
+            height: 40px;
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid #00FFFF;
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+        ;
+            color: #00FFFF;
+            font-size: 19px;
+            line-height: 36px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 0 8px #00FFFF;
+            z-index: 11;
+        }
+
+        .sidebar-title {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 26px;
+Starting new file: index.html
+Truncated at the end.
+
+filepath: index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,242 +126,612 @@
             font-weight: normal;
             font-style: normal;
         }
-        body, html { margin: 0; padding: 0; height: 100vh; width: 100vw; background-color: #000000; font-family: 'Lato', sans-serif; overflow: hidden; display: flex; flex-direction: column; }
-        h1 { color: #00FFFF; text-align: center; padding: 2vh; font-family: 'Nasalization', sans-serif; font-size: calc(16px + 1.5vw); margin: 0; text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite; flex-shrink: 0; z-index: 11; line-height: 1.5; text-transform: uppercase; }
-        @keyframes glowBreathe { 0%, 100% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; } 25%, 75% { text-shadow: 2px 2px 5px #00CC66, -2px -2px 5px #00CC66, 0 0 12px #00FFFF; } 50% { text-shadow: 2px 2px 4.5px #00CC66, -2px -2px 4.5px #00CC66, 0 0 11px #00FFFF; } }
-        .container { display: flex; flex-grow: 1; overflow: hidden; height: calc(100vh - 4vh); position: relative; }
-        .sidebar { width: 250px; background: rgba(26, 26, 26, 0.8); border-right: 2px solid #00FFFF; padding: 15px; display: flex; flex-direction: column; gap: 15px; position: absolute; top: 0; left: 0; height: 100%; transition: transform 0.3s ease; z-index: 10; }
-        .sidebar.collapsed { transform: translateX(-250px); }
-        .sidebar-tab { position: absolute; top: 0; right: -40px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-left: none; border-radius: 0 10px 10px 0; color: #00FFFF; font-size: 19px; line-height: 36px; text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; z-index: 11; }
-        .sidebar-title { font-family: 'Exo 2', sans-serif; font-size: 26px; color: #DAA520; text-align: center; text-shadow: 0 0 10px #DAA520; line-height: 1.2; margin-top: 0; }
-        .sidebar-title span { display: block; font-size: 18px; }
-        .button-container { display: flex; align-items: center; width: 100%; position: relative; }
-        .button-label { color: #FFFF00; font-size: 13px; margin-right: 10px; width: 100px; text-align: right; padding-left: 10px; }
-        .dropdown-toggle, #control-panel-button { background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 11px; padding: 4px 8px; width: calc(100% - 120px); text-align: center; cursor: pointer; box-shadow: 0 0 8px #00FFFF; }
-        #time-range-toggle { font-size: 10px; white-space: nowrap; }
-        .dropdown-menu { position: absolute; top: 100%; left: 110px; width: calc(100% - 120px); max-height: 200px; overflow-y: auto; background: rgba(26, 26, 26, 0.9); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 11px; padding: 8px; z-index: 100; display: none; }
-        .dropdown-menu.open { display: block; }
-        .dropdown-item { display: flex; align-items: center; margin-bottom: 3px; }
-        #dependent-menu .dropdown-item label, #independent-menu .dropdown-item label, #plot-number-menu .dropdown-item label { margin-left: 5px; }
-        #time-range-menu { padding: 10px; }
-        #time-range-menu .dropdown-item { flex-direction: column; align-items: flex-start; margin-bottom: 10px; }
-        #time-range-menu input[type="text"] { width: 100%; background: rgba(26, 26, 26, 0.8); border: 1px solid #00FFFF; color: #00FFFF; padding: 4px; margin-top: 5px; font-size: 11px; }
-        #stats-menu { color: #00FF00; font-family: 'VT323', monospace; font-size: 15px; }
-        #plot-number-menu { width: 300px; left: auto; right: -10px; top: 40px; }
-        .graph-container { position: absolute; right: 0; width: calc(100vw - 250px); background-color: #1A1A1A; height: calc(100vh - 4vh); transition: width 0.3s ease, left 0.3s ease; z-index: 1; overflow: hidden; }
-        .graph-container.full-width { width: 100vw; left: 0; }
-        #graph { width: 100%; height: 100%; min-width: 320px; min-height: 240px; position: relative; }
-        .welcome-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00FF00; font-family: 'VT323', monospace; font-size: 20px; text-align: center; text-shadow: 0 0 10px #00FF00; z-index: 2; }
-        .welcome-message img { display: block; margin: 0 auto; max-width: 300px; height: auto; }
-        .welcome-message hr { border: 1px solid #00FFFF; width: 80%; margin: 10px auto; }
-       .metagenomics-link {
-    display: block;
-    padding: 5px 10px;
-    text-decoration: none;
-    color: #FFFFFF;
-    cursor: pointer;
-    pointer-events: auto;
-    position: relative;
-    z-index: 10;
-}
-.metagenomics-link:hover {
-    background-color: #333;
-}
-.metagenomics-link.active {
-    background-color: #555;
-    font-weight: bold;
-}
-.metagenomics-subheader {
-    color: #DAA520;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 4px 8px;
-    width: 100%;
-}
-.kraken-stacked-bar {
-    color: #00FF00;
-}
-.kraken-stacked-bar:hover {
-    background: rgba(0, 255, 0, 0.2);
-}
-#metagenomics-menu {
-    width: calc(100% - 120px);
-    left: 110px;
-}
-.metagenomics-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(26, 26, 26, 0.9);
-    border: 2px solid #00FFFF;
-    border-radius: 10px;
-    padding: 15px;
-    color: #00FFFF;
-    font-size: 13px;
-    z-index: 20;
-    display: none;
-    width: 80vw;
-    max-height: 90vh;
-    overflow: auto;
-}
-.metagenomics-popup h3 {
-    color: #DAA520;
-    font-family: 'Exo 2', sans-serif;
-    font-size: 18px;
-}
-@media (max-width: 768px) {
-    #metagenomics-menu {
-        width: calc(100% - 90px);
-        left: 90px;
-    }
-    .metagenomics-popup {
-        width: 90vw;
-        padding: 10px;
-    }
-}
-@media (max-width: 480px) {
-    #metagenomics-menu {
-        width: calc(100% - 80px);
-        left: 80px;
-    }
-    .metagenomics-link {
-        font-size: 9px;
-    }
-    .metagenomics-subheader {
-        font-size: 10px;
-    }
-    .metagenomics-popup {
-        width: 95vw;
-    }
-    .metagenomics-popup h3 {
-        font-size: 16px;
-    }
-}
 
-        .controls-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(26, 26, 26, 0.7); border: 2px solid #00FFFF; border-radius: 10px; padding: 15px; color: #00FFFF; font-size: 13px; z-index: 20; display: none; width: 400px; max-height: 80vh; overflow-y: auto; }
-	.close-button {
-    display: none; /* Hidden by default */
-    cursor: pointer;
-    color: #00FFFF;
-    font-size: 18px;
-    font-weight: bold;
-    padding: 0 10px;
-}
-.controls-header {
-    display: flex !important;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background-color: #1A1A1A;
-    border-bottom: 1px solid #444;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 10010;
-    height: 40px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.close-button {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    display: block !important;
-    cursor: pointer;
-    color: #FFFFFF;
-    background-color: #FF4500;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    line-height: 32px;
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
-    z-index: 10011;
-    pointer-events: auto;
-    user-select: none;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
-}
-
-#metagenomics-popup {
-    z-index: 10000;
-    background-color: #1A1A1A;
-    overflow: hidden;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-}
-
-#metagenomics-iframe, #metagenomics-popup > div:not(.controls-header) {
-    margin-top: 40px;
-    height: calc(100% - 40px);
-    width: 100%;
-    box-sizing: border-box;
-    z-index: 9999;
-}
-
-#graph {
-    display: block !important;
-    z-index: 1;
-    position: relative;
-    width: 100%;
-    height: calc(100vh - 60px);
-    visibility: visible;
-    opacity: 1;
-}
-
-#graph-container {
-    z-index: 1;
-    position: relative;
-}
-        .controls-header h3 { margin: 0; color: #DAA520; font-family: 'Exo 2', sans-serif; font-size: 18px; flex-grow: 1; text-align: left; }
-        .slider-container { margin: 10px 0; position: relative; }
-        .slider-container label { display: block; margin-bottom: 5px; }
-        .range-slider { position: relative; width: 100%; height: 5px; background: #444; border-radius: 5px; pointer-events: none; }
-        .range-track { position: absolute; height: 5px; background: #00FFFF; z-index: 1; }
-        .range-slider input[type="range"] { position: absolute; width: 100%; height: 5px; top: -5px; background: none; -webkit-appearance: none; pointer-events: none; }
-        .range-slider input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; background: #00FFFF; border-radius: 50%; cursor: pointer; pointer-events: auto; box-shadow: 0 0 5px #00FFFF; }
-        .range-slider input[type="range"]::-webkit-slider-runnable-track { background: transparent; }
-        .slider-values { display: flex; justify-content: space-between; font-size: 11px; color: #00FF00; margin-top: 5px; pointer-events: none; }
-        .warning-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #FF4500; font-family: 'VT323', monospace; font-size: 17px; text-align: center; text-shadow: 0 0 5px #FF4500; z-index: 5; }
-        .mobile-sidebar-button { display: none; position: absolute; top: 10px; left: 10px; width: 40px; height: 40px; background: rgba(26, 26, 26, 0.8); border: 2px solid #00FFFF; border-radius: 10px; color: #00FFFF; font-size: 19px; line-height: 36px; text-align: center; cursor: pointer; z-index: 12; }
-
-        /* Mobile Optimizations */
-        @media (max-width: 768px) {
-            .sidebar { width: 200px; }
-            .graph-container { width: calc(100vw - 200px); }
-            .graph-container.full-width { width: 100vw; }
-            .legend-tab { top: 40px; right: 1vw; padding: 4px 8px; font-size: 12px; }
-            .controls-popup { width: 300px; font-size: 11px; }
-            .sidebar-title { font-size: 20px; }
-            .sidebar-title span { font-size: 14px; }
-            .button-label { font-size: 11px; width: 80px; }
-            .dropdown-toggle, #control-panel-button { font-size: 10px; width: calc(100% - 90px); }
-            .dropdown-menu { left: 90px; width: calc(100% - 90px); font-size: 10px; }
-            #plot-number-menu { width: 250px; }
-            h1 { font-size: calc(14px + 1vw); }
+        /* Base styles */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            background-color: #000000;
+            font-family: 'Lato', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
-        @media (max-width: 480px) {
-            .sidebar { width: 150px; }
-            .graph-container { width: calc(100vw - 150px); }
-            .graph-container.full-width { width: 100vw; }
-            .legend-tab { top: 50px; right: 1vw; padding: 3px 6px; font-size: 10px; }
-            .controls-popup { width: 90vw; padding: 10px; }
-            .sidebar-title { font-size: 18px; }
-            .sidebar-title span { font-size: 12px; }
-            .button-label { font-size: 10px; width: 70px; }
-            .dropdown-toggle, #control-panel-button { font-size: 9px; width: calc(100% - 80px); }
-            .dropdown-menu { left: 80px; width: calc(100% - 80px); font-size: 9px; }
-            #plot-number-menu { width: 200px; top: 35px; }
-            h1 { font-size: calc(12px + 1vw); }
-            .mobile-sidebar-button { display: block; }
-	.close-button { display: block; } /* Show close button on mobile */
 
+        h1 {
+            color: #00FFFF;
+            text-align: center;
+            padding: 2vh;
+            font-family: 'Nasalization', sans-serif;
+            font-size: calc(16px + 1.5vw);
+            margin: 0;
+            text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF;
+            animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+            flex-shrink: 0;
+            z-index: 11;
+            line-height: 1.5;
+            text-transform: uppercase;
+        }
+
+        @keyframes glowBreathe {
+            0%, 100% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; }
+            25%, 75% { text-shadow: 2px 2px 5px #00CC66, -2px -2px 5px #00CC66, 0 0 12px #00FFFF; }
+            50% { text-shadow: 2px 2px 4.5px #00CC66, -2px -2px 4.5px #00CC66, 0 0 11px #00FFFF; }
+        }
+
+        .container {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+            height: calc(100vh - 4vh);
+            position: relative;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            width: 250px;
+            background: rgba(26, 26, 26, 0.8);
+            border-right: 2px solid #00FFFF;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-250px);
+        }
+
+        .sidebar-tab {
+            position: absolute;
+            top: 0;
+            right: -40px;
+            width: 40px;
+            height: 40px;
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid #00FFFF;
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+            color: #00FFFF;
+            font-size: 19px;
+            line-height: 36px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 0 8px #00FFFF;
+            z-index: 11;
+        }
+
+        .sidebar-title {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 26px;
+            color: #DAA520;
+            text-align: center;
+            text-shadow: 0 0 10px #DAA520;
+            line-height: 1.2;
+            margin-top: 0;
+        }
+
+        .sidebar-title span {
+            display: block;
+            font-size: 18px;
+        }
+
+        .button-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            position: relative;
+        }
+
+        .button-label {
+            color: #FFFF00;
+            font-size: 13px;
+            margin-right: 10px;
+            width: 100px;
+            text-align: right;
+            padding-left: 10px;
+        }
+
+        .dropdown-toggle, #control-panel-button {
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            color: #00FFFF;
+            font-size: 11px;
+            padding: 4px 8px;
+            width: calc(100% - 120px);
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 0 8px #00FFFF;
+        }
+
+        #time-range-toggle {
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 110px;
+            width: calc(100% - 120px);
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(26, 26, 26, 0.9);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            color: #00FFFF;
+            font-size: 11px;
+            padding: 8px;
+            z-index: 100;
+            display: none;
+        }
+
+        .dropdown-menu.open {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+
+        #dependent-menu .dropdown-item label,
+        #independent-menu .dropdown-item label,
+        #plot-number-menu .dropdown-item label {
+            margin-left: 5px;
+        }
+
+        #time-range-menu {
+            padding: 10px;
+        }
+
+        #time-range-menu .dropdown-item {
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        #time-range-menu input[type="text"] {
+            width: 100%;
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid #00FFFF;
+            color: #00FFFF;
+            padding: 4px;
+            margin-top: 5px;
+            font-size: 11px;
+        }
+
+        #stats-menu {
+            color: #00FF00;
+            font-family: 'VT323', monospace;
+            font-size: 15px;
+        }
+
+        #plot-number-menu {
+            width: 300px;
+            left: auto;
+            right: -10px;
+            top: 40px;
+        }
+
+        /* Graph container */
+        .graph-container {
+            position: absolute;
+            right: 0;
+            width: calc(100vw - 250px);
+            background-color: #1A1A1A;
+            height: calc(100vh - 4vh);
+            transition: width 0.3s ease, left 0.3s ease;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .graph-container.full-width {
+            width: 100vw;
+            left: 0;
+        }
+
+        #graph {
+            width: 100%;
+            height: 100%;
+            min-width: 320px;
+            min-height: 240px;
+            position: relative;
+            display: block !important;
+            z-index: 1;
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .welcome-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00FF00;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            text-align: center;
+            text-shadow: 0 0 10px #00FF00;
+            z-index: 2;
+        }
+
+        .welcome-message img {
+            display: block;
+            margin: 0 auto;
+            max-width: 300px;
+            height: auto;
+        }
+
+        .welcome-message hr {
+            border: 1px solid #00FFFF;
+            width: 80%;
+            margin: 10px auto;
+        }
+
+        /* Metagenomics styles */
+        .metagenomics-link {
+            display: block;
+            padding: 5px 10px;
+            text-decoration: none;
+            color: #FFFFFF;
+            cursor: pointer;
+            pointer-events: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .metagenomics-link:hover {
+            background-color: #333;
+        }
+
+        .metagenomics-link.active {
+            background-color: #555;
+            font-weight: bold;
+        }
+
+        .metagenomics-subheader {
+            color: #DAA520;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 4px 8px;
+            width: 100%;
+        }
+
+        .kraken-stacked-bar {
+            color: #00FF00;
+        }
+
+        .kraken-stacked-bar:hover {
+            background: rgba(0, 255, 0, 0.2);
+        }
+
+        #metagenomics-menu {
+            width: calc(100% - 120px);
+            left: 110px;
+        }
+
+        .metagenomics-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #1A1A1A;
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            padding: 0;
+            color: #00FFFF;
+            font-size: 13px;
+            z-index: 10000;
+            display: none;
+            overflow: hidden;
+        }
+
+        .metagenomics-popup h3 {
+            color: #DAA520;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 18px;
+            margin: 0;
+        }
+
+        /* Controls popup */
+        .controls-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(26, 26, 26, 0.7);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            padding: 15px;
+            color: #00FFFF;
+            font-size: 13px;
+            z-index: 20;
+            display: none;
+            width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #1A1A1A;
+            border-bottom: 1px solid #444;
+            position: sticky;
+            top: 0;
+            z-index: 10010;
+            height: 40px;
+            box-sizing: border-box;
+        }
+
+        .close-button {
+            display: block;
+            cursor: pointer;
+            color: #FFFFFF;
+            background-color: #FF4500;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 10011;
+            pointer-events: auto;
+            user-select: none;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
+        }
+
+        #metagenomics-iframe,
+        #metagenomics-popup > div:not(.controls-header) {
+            margin-top: 40px;
+            height: calc(100% - 40px);
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 9999;
+            border: none;
+        }
+
+        /* Slider styles */
+        .slider-container {
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .slider-container label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .range-slider {
+            position: relative;
+            width: 100%;
+            height: 5px;
+            background: #444;
+            border-radius: 5px;
+            pointer-events: none;
+        }
+
+        .range-track {
+            position: absolute;
+            height: 5px;
+            background: #00FFFF;
+            z-index: 1;
+        }
+
+        .range-slider input[type="range"] {
+            position: absolute;
+            width: 100%;
+            height: 5px;
+            top: -5px;
+            background: none;
+            -webkit-appearance: none;
+            pointer-events: none;
+        }
+
+        .range-slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            background: #00FFFF;
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 0 5px #00FFFF;
+        }
+
+        .range-slider input[type="range"]::-webkit-slider-runnable-track {
+            background: transparent;
+        }
+
+        .slider-values {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #00FF00;
+            margin-top: 5px;
+            pointer-events: none;
+        }
+
+        .warning-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #FF4500;
+            font-family: 'VT323', monospace;
+            font-size: 17px;
+            text-align: center;
+            text-shadow: 0 0 5px #FF4500;
+            z-index: 5;
+        }
+
+        /* Mobile sidebar button */
+        .mobile-sidebar-button {
+            display: none;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 40px;
+            height: 40px;
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            color: #00FFFF;
+            font-size: 19px;
+            line-height: 36px;
+            text-align: center;
+            cursor: pointer;
+            z-index: 12;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .graph-container {
+                width: calc(100vw - 200px);
+            }
+
+            .graph-container.full-width {
+                width: 100vw;
+            }
+
+            .controls-popup {
+                width: 300px;
+                font-size: 11px;
+            }
+
+            .sidebar-title {
+                font-size: 20px;
+            }
+
+            .sidebar-title span {
+                font-size: 14px;
+            }
+
+            .button-label {
+                font-size: 11px;
+                width: 80px;
+            }
+
+            .dropdown-toggle, #control-panel-button {
+                font-size: 10px;
+                width: calc(100% - 90px);
+            }
+
+            .dropdown-menu {
+                left: 90px;
+                width: calc(100% - 90px);
+                font-size: 10px;
+            }
+
+            #metagenomics-menu {
+                width: calc(100% - 90px);
+                left: 90px;
+            }
+
+            #plot-number-menu {
+                width: 250px;
+            }
+
+            h1 {
+                font-size: calc(14px + 1vw);
+            }
+
+            .metagenomics-popup {
+                width: 90vw;
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 150px;
+            }
+
+            .graph-container {
+                width: calc(100vw - 150px);
+            }
+
+            .graph-container.full-width {
+                width: 100vw;
+            }
+
+            .controls-popup {
+                width: 90vw;
+                padding: 10px;
+            }
+
+            .sidebar-title {
+                font-size: 18px;
+            }
+
+            .sidebar-title span {
+                font-size: 12px;
+            }
+
+            .button-label {
+                font-size: 10px;
+                width: 70px;
+            }
+
+            .dropdown-toggle, #control-panel-button {
+                font-size: 9px;
+                width: calc(100% - 80px);
+            }
+
+            .dropdown-menu {
+                left: 80px;
+                width: calc(100% - 80px);
+                font-size: 9px;
+            }
+
+            #metagenomics-menu {
+                width: calc(100% - 80px);
+                left: 80px;
+            }
+
+            #plot-number-menu {
+                width: 200px;
+                top: 35px;
+            }
+
+            h1 {
+                font-size: calc(12px + 1vw);
+            }
+
+            .mobile-sidebar-button {
+                display: block;
+            }
+
+            .metagenomics-link {
+                font-size: 9px;
+            }
+
+            .metagenomics-subheader {
+                font-size: 10px;
+            }
+
+            .metagenomics-popup h3 {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
@@ -280,26 +759,26 @@
                 </div>
             </div>
             <div class="button-container">
-    <span class="button-label">Y-Axis:</span>
-    <div class="dropdown-toggle" id="dependent-toggle">Select Dependent</div>
-    <div class="dropdown-menu" id="dependent-menu">
-        <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0" checked><label for="TS_0" style="color: #00FFFF;">Soil Temp 0 cm (°C)</label></div>
-        <div class="dropdown-item"><input type="checkbox" id="TS_5" value="TS_5"><label for="TS_5" style="color: #FFFF00;">Soil Temp 5 cm (°C)</label></div>
-        <div class="dropdown-item"><input type="checkbox" id="TS_10" value="TS_10"><label for="TS_10" style="color: #FF00FF;">Soil Temp 10 cm (°C)</label></div>
-        <div class="dropdown-item"><input type="checkbox" id="TS_20" value="TS_20"><label for="TS_20" style="color: #00FF00;">Soil Temp 20 cm (°C)</label></div>
-        <div class="dropdown-item"><input type="checkbox" id="TS_30" value="TS_30"><label for="TS_30" style="color: #FF0000;">Soil Temp 30 cm (°C)</label></div>
-        <div class="dropdown-item"><input type="checkbox" id="TS_40" value="TS_40"><label for="TS_40" style="color: #0000FF;">Soil Temp 40 cm (°C)</label></div>
-        <div class="dropdown-item"><input type="checkbox" id="TS_50" value="TS_50" checked><label for="TS_50" style="color: #FFA500;">Soil Temp 50 cm (°C)</label></div>
-        <div class="dropdown-item"><input type="checkbox" id="TS_100" value="TS_100"><label for="TS_100" style="color: #800080;">Soil Temp 100 cm (°C)</label></div>
-        <div class="dropdown-item"><input type="checkbox" id="TS_200" value="TS_200"><label for="TS_200" style="color: #008080;">Soil Temp 200 cm (°C)</label></div>
-        <div class="dropdown-item"><input type="checkbox" id="TA_2_0_dep" value="TA_2_0"><label for="TA_2_0_dep" style="color: #FF6347;">Ambient Temp 2m (°C)</label></div>
-        <div class="dropdown-item"><input type="checkbox" id="RH_2_0_dep" value="RH_2_0"><label for="RH_2_0_dep" style="color: #4682B4;">Relative Humidity 2m (%)</label></div>
-        <div class="dropdown-item"><input type="checkbox" id="WD_10_dep" value="WD_10"><label for="WD_10_dep" style="color: #6A5ACD;">Wind Direction 10m (°)</label></div>
-        <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PREC_6"><label for="PREC_6_dep" style="color: #DAA520;">Precipitation (mm)</label></div>
-        <div class="dropdown-item"><input type="checkbox" id="CO2_measured_dep" value="CO2_measured"><label for="CO2_measured_dep" style="color: #FF69B4;">Measured CO₂ (ppm)</label></div>
-        <div class="dropdown-item"><input type="checkbox" id="H2O_measured_dep" value="H2O_measured"><label for="H2O_measured_dep" style="color: #7FFF00;">Measured H₂O (mmol/mol)</label></div>
-    </div>
-</div>
+                <span class="button-label">Y-Axis:</span>
+                <div class="dropdown-toggle" id="dependent-toggle">Select Dependent</div>
+                <div class="dropdown-menu" id="dependent-menu">
+                    <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0" checked><label for="TS_0" style="color: #00FFFF;">Soil Temp 0 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_5" value="TS_5"><label for="TS_5" style="color: #FFFF00;">Soil Temp 5 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_10" value="TS_10"><label for="TS_10" style="color: #FF00FF;">Soil Temp 10 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_20" value="TS_20"><label for="TS_20" style="color: #00FF00;">Soil Temp 20 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_30" value="TS_30"><label for="TS_30" style="color: #FF0000;">Soil Temp 30 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_40" value="TS_40"><label for="TS_40" style="color: #0000FF;">Soil Temp 40 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_50" value="TS_50" checked><label for="TS_50" style="color: #FFA500;">Soil Temp 50 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_100" value="TS_100"><label for="TS_100" style="color: #800080;">Soil Temp 100 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_200" value="TS_200"><label for="TS_200" style="color: #008080;">Soil Temp 200 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0_dep" value="TA_2_0"><label for="TA_2_0_dep" style="color: #FF6347;">Ambient Temp 2m (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0_dep" value="RH_2_0"><label for="RH_2_0_dep" style="color: #4682B4;">Relative Humidity 2m (%)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10_dep" value="WD_10"><label for="WD_10_dep" style="color: #6A5ACD;">Wind Direction 10m (°)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PREC_6"><label for="PREC_6_dep" style="color: #DAA520;">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="CO2_measured_dep" value="CO2_measured"><label for="CO2_measured_dep" style="color: #FF69B4;">Measured CO₂ (ppm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="H2O_measured_dep" value="H2O_measured"><label for="H2O_measured_dep" style="color: #7FFF00;">Measured H₂O (mmol/mol)</label></div>
+                </div>
+            </div>
             <div class="button-container">
                 <span class="button-label">Time Range:</span>
                 <div class="dropdown-toggle" id="time-range-toggle">2015-08-01 - 2025-04-05</div>
@@ -387,7 +866,7 @@
     </div>
     <div class="controls-popup" id="control-panel-popup">
         <div class="controls-header">
-            <h3 style="flex-grow: 1; text-align: left;">Control Panel</h3>
+            <h3>Control Panel</h3>
             <div class="close-button" id="close-control-panel">X</div>
             <div class="dropdown-toggle" id="plot-number-toggle" style="width: 80px;">Plot # (all)</div>
             <div class="dropdown-menu" id="plot-number-menu"></div>
@@ -399,41 +878,8 @@
             <h3>Metagenomics Visualization</h3>
             <div class="close-button" id="close-metagenomics">X</div>
         </div>
-        <iframe id="metagenomics-iframe" style="width: 100%; height: 80vh; border: none;"></iframe>
+        <iframe id="metagenomics-iframe" style="width: 100%; height: calc(100% - 40px); border: none;"></iframe>
     </div>
-    <div class="mobile-sidebar-button" id="mobile-sidebar-button">></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="graph-container" id="graph-container">
-            <div id="graph">
-                <div class="welcome-message" id="welcome-message">
-                    <a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a>
-                    <hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO₂ concentrations.<hr>Beginning August 2015
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="controls-popup" id="control-panel-popup">
-        <div class="controls-header">
-            <h3 style="flex-grow: 1; text-align: left;">Control Panel</h3>
-            <div class="close-button" id="close-control-panel">X</div>
-            <div class="dropdown-toggle" id="plot-number-toggle" style="width: 80px;">Plot # (all)</div>
-            <div class="dropdown-menu" id="plot-number-menu"></div>
-        </div>
-        <div id="control-panel-content"></div>
-    </div>
-
-    <div class="metagenomics-popup" id="metagenomics-popup">
-        <div class="controls-header">
-            <h3>Metagenomics Visualization</h3>
-            <div class="close-button" id="close-metagenomics">X</div>
-        </div>
-        <iframe id="metagenomics-iframe" style="width: 100%; height: 80vh; border: none;"></iframe>
-    </div>
-
     <div class="mobile-sidebar-button" id="mobile-sidebar-button">></div>
 
     <script>
@@ -469,7 +915,7 @@
     let depthRange = [0, 200];
 
     const unitMap = {
-        'TS_0': '°C', 'TS_5': '°C', 'TS_10': '°C', 'TS_20': '°C', 'TS_30': '°C', 
+        'TS_0': '°C', 'TS_5': '°C', 'TS_10': '°C', 'TS_20': '°C', 'TS_30': '°C',
         'TS_40': '°C', 'TS_50': '°C', 'TS_100': '°C', 'TS_200': '°C', 'TA_2_0': '°C',
         'RH_2_0': '%', 'WD_10': '°', 'PREC_6': 'mm',
         'CO2_measured': 'ppm', 'H2O_measured': 'mmol/mol'
@@ -745,7 +1191,7 @@
                 .filter(([_, fit]) => fit && !isNaN(fit.rSquared))
                 .map(([type, fit]) => ({ type, ...fit }));
             if (validFits.length === 0) return defaultResult;
-            const bestFit = validFits.reduce((best, current) => 
+            const bestFit = validFits.reduce((best, current) =>
                 (best.rSquared > current.rSquared) ? best : current
             );
             console.log('Auto best fit:', bestFit.type, 'R²:', bestFit.rSquared);
@@ -896,6 +1342,65 @@
         fitOptions.style.display = ['scatter', 'line', 'area'].includes(chartType) ? 'block' : 'none';
     }
 
+    async function loadMetagenomicData() {
+        try {
+            const response = await fetch('https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Metagenomics/kraken2_summary.json');
+            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+            const data = await response.json();
+            console.log('Metagenomic data loaded:', data);
+            return data;
+        } catch (error) {
+            console.error('Error loading metagenomic data:', error);
+            return null;
+        }
+    }
+
+    async function showStackedBarChart() {
+        const popup = document.getElementById('metagenomics-popup');
+        const iframe = document.getElementById('metagenomics-iframe');
+        const graphDiv = document.getElementById('graph');
+        const data = await loadMetagenomicData();
+
+        if (!data) {
+            graphDiv.innerHTML = '<div class="warning-message">Failed to load metagenomic data.</div>';
+            return;
+        }
+
+        popup.style.display = 'block';
+        iframe.src = '';
+
+        const samples = Object.keys(data);
+        const taxa = [...new Set(samples.flatMap(sample => Object.keys(data[sample])))].slice(0, 10);
+        const traces = taxa.map(taxon => ({
+            x: samples,
+            y: samples.map(sample => data[sample][taxon] || 0),
+            name: taxon,
+            type: 'bar'
+        }));
+
+        const layout = {
+            title: { text: 'Top Taxa by Sample', font: { color: '#00FFFF' } },
+            barmode: 'stack',
+            xaxis: { title: 'Samples', tickangle: 45, color: '#00FFFF' },
+            yaxis: { title: 'Relative Abundance (%)', color: '#00FFFF' },
+            paper_bgcolor: '#1A1A1A',
+            plot_bgcolor: '#1A1A1A',
+            font: { color: '#00FFFF' },
+            showlegend: true,
+            margin: { b: 150 }
+        };
+
+        iframe.onload = () => {
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            const plotDiv = iframeDoc.createElement('div');
+            plotDiv.id = 'stacked-bar-plot';
+            iframeDoc.body.appendChild(plotDiv);
+            Plotly.newPlot(plotDiv, traces, layout);
+        };
+        iframe.srcdoc = '<html><head><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script></head><body></body></html>';
+        console.log('Stacked bar chart displayed in metagenomics popup');
+    }
+
     function updateGraph() {
         const graphDiv = document.getElementById('graph');
         if (!dataLoaded || typeof Plotly === 'undefined') {
@@ -974,9 +1479,9 @@
                         y: parseFloat(row[dep])
                     }))
                     .filter(d => d.x !== null && !isNaN(d.x) && d.y !== null && !isNaN(d.y));
-                
-                console.log(`Paired data for ${dep}:`, { 
-                    length: pairedData.length, 
+
+                console.log(`Paired data for ${dep}:`, {
+                    length: pairedData.length,
                     sample: pairedData.slice(0, 5),
                     xSample: pairedData.slice(0, 5).map(d => d.x),
                     ySample: pairedData.slice(0, 5).map(d => d.y)
@@ -995,10 +1500,10 @@
                 xValues = filtered.x;
                 yValues = filtered.y;
 
-                console.log(`Filtered values for ${dep}:`, { 
-                    xLength: xValues.length, 
-                    yLength: yValues.length, 
-                    xSample: xValues.slice(0, 5), 
+                console.log(`Filtered values for ${dep}:`, {
+                    xLength: xValues.length,
+                    yLength: yValues.length,
+                    xSample: xValues.slice(0, 5),
                     ySample: yValues.slice(0, 5),
                     xValid: xValues.every(v => v !== null && !isNaN(v)),
                     yValid: yValues.every(v => v !== null && !isNaN(v))
@@ -1078,335 +1583,178 @@
             console.warn('No valid traces to plot:', invalidTraces);
             resetGraph();
             if (invalidTraces.length) {
-                graphDiv.innerHTML = `<div class="warning-message">${invalidTraces.join('<br>')}<br>Check the data source or variable selection.</div>`;
+                graphDiv.innerHTML = `<div class="warning-message">${invalidTraces.join('<br>')}</div>`;
+            } else {
+                graphDiv.innerHTML = '<div class="warning-message">No valid data to plot after filtering.</div>';
             }
+            graphInitialized = false;
             return;
         }
 
-        if (statsOpened) {
-            document.getElementById('stats-content').innerHTML = statsText.length ? statsText.join('<br>') : 'No stats available';
-        }
+        const allTraces = showFit ? [...traces, ...fitTraces] : traces;
+        console.log('Plotting traces:', allTraces.length, 'Invalid traces:', invalidTraces);
 
-        const xAxisTitle = independent === 'TIMESTAMP' ? 'Time' : document.querySelector(`label[for="${independent}"]`)?.textContent || 'X-Axis';
-        const yAxisTitle = dependents.length === 1 ? document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent : 
-            dependents.every(dep => dep.startsWith('TS_')) ? 'Soil Temp (°C)' : `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent.split(' ')[0]).join(', ')} (${commonUnit || 'Mixed Units'})`;
-
-        const annotations = showOnChart && statsText.length ? [{
-            x: 0.02,
-            y: 0.98,
-            xref: 'paper',
-            yref: 'paper',
-            text: statsText.slice(0, 5).join('<br>'),
-            showarrow: false,
-            font: { size: 10, color: '#00FF00', family: 'VT323, monospace' },
-            align: 'left',
-            bgcolor: 'rgba(26, 26, 26, 0.8)',
-            bordercolor: '#00FFFF',
-            borderwidth: 1
-        }] : [];
+        const statsContent = document.getElementById('stats-content');
+        statsContent.innerHTML = statsText.length ? statsText.join('<br>') : 'No statistics available';
 
         const layout = {
             title: {
-                text: `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep).join(', ')} vs ${xAxisTitle}`,
-                font: { size: 14, color: '#00FFFF', family: 'Nasalization, sans-serif' },
-                x: 0.5,
-                xanchor: 'center'
+                text: `SPRUCE Experiment: ${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep).join(', ')} vs ${independent === 'TIMESTAMP' ? 'Time' : document.querySelector(`label[for="${independent}"]`)?.textContent || independent}`,
+                font: { color: '#00FFFF', family: 'Exo 2', size: 16 }
             },
             xaxis: {
-                title: xAxisTitle,
-                titlefont: { size: 12, color: '#00FFFF' },
-                tickfont: { size: 10, color: '#00FFFF' },
-                gridcolor: '#444',
-                zerolinecolor: '#444',
-                type: independent === 'TIMESTAMP' ? 'date' : 'linear'
+                title: independent === 'TIMESTAMP' ? 'Date' : `${document.querySelector(`label[for="${independent}"]`)?.textContent || independent} (${unitMap[independent] || ''})`,
+                color: '#00FFFF',
+                gridcolor: '#444'
             },
             yaxis: {
-                title: yAxisTitle,
-                titlefont: { size: 12, color: '#00FFFF' },
-                tickfont: { size: 10, color: '#00FFFF' },
-                gridcolor: '#444',
-                zerolinecolor: '#444'
+                title: commonUnit ? `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep).join(', ')} (${commonUnit})` : 'Multiple Units',
+                color: '#00FFFF',
+                gridcolor: '#444'
             },
-            plot_bgcolor: '#1A1A1A',
             paper_bgcolor: '#1A1A1A',
+            plot_bgcolor: '#1A1A1A',
             font: { color: '#00FFFF' },
             showlegend: legendVisible,
-            legend: {
-                x: 1,
+            width: calculateGraphWidth(),
+            height: calculateGraphHeight(),
+            margin: { t: 50, b: 50, l: 50, r: 50 },
+            annotations: showOnChart && statsText.length ? [{
+                xref: 'paper',
+                yref: 'paper',
+                x: 0,
                 y: 1,
-                xanchor: 'right',
+                xanchor: 'left',
                 yanchor: 'top',
+                text: statsText.join('<br>'),
+                showarrow: false,
+                font: { color: '#00FF00', size: 10 },
                 bgcolor: 'rgba(26, 26, 26, 0.8)',
                 bordercolor: '#00FFFF',
-                borderwidth: 1,
-                font: { size: 10 }
-            },
-            margin: { l: 50, r: 50, t: 60, b: 50 },
-            annotations: annotations,
-            width: calculateGraphWidth(),
-            height: calculateGraphHeight()
+                borderwidth: 1
+            }] : []
         };
-
-        const allTraces = [...traces, ...fitTraces];
-        console.log('Plotting traces:', allTraces.length, 'Fit traces:', fitTraces.length);
-
-        if (graphInitialized) {
-            Plotly.purge(graphDiv);
-            graphInitialized = false;
-        }
 
         Plotly.newPlot(graphDiv, allTraces, layout, { responsive: true }).then(() => {
-            graphInitialized = true;
             console.log('Graph plotted successfully');
+            graphInitialized = true;
         }).catch(err => {
             console.error('Error plotting graph:', err);
-            graphDiv.innerHTML = '<div class="warning-message">Error rendering graph. Check the console for details.</div>';
+            resetGraph();
+            graphDiv.innerHTML = '<div class="warning-message">Error plotting graph. Check console for details.</div>';
         });
     }
 
-    // Placeholder for loadMetagenomicData (replace with your original implementation)
-    async function loadMetagenomicData() {
-    console.log('Loading metagenomic data...');
-    try {
-        const response = await fetch('https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Metagenomics/kraken_data.json');
-        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-        const data = await response.json();
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        loadData();
 
-        // Validate data
-        if (!Array.isArray(data) || data.length === 0 || !data[0].sample_id) {
-            throw new Error('Invalid metagenomic data format');
+        const sidebarTab = document.getElementById('sidebar-tab');
+        if (sidebarTab) sidebarTab.addEventListener('click', toggleSidebar);
+
+        const mobileSidebarButton = document.getElementById('mobile-sidebar-button');
+        if (mobileSidebarButton) mobileSidebarButton.addEventListener('click', toggleSidebar);
+
+        const controlPanelButton = document.getElementById('control-panel-button');
+        if (controlPanelButton) controlPanelButton.addEventListener('click', toggleControlPanel);
+
+        const independentMenu = document.getElementById('independent-menu');
+        if (independentMenu) {
+            independentMenu.addEventListener('change', (e) => {
+                if (e.target.type === 'checkbox') {
+                    enforceSingleSelection('independent-menu', e.target.id);
+                    updateGraph();
+                }
+            });
         }
 
-        // Extract taxa names (exclude sample_id)
-        const taxa = Object.keys(data[0]).filter(key => key !== 'sample_id');
+        const dependentMenu = document.getElementById('dependent-menu');
+        if (dependentMenu) dependentMenu.addEventListener('change', updateGraph);
 
-        // Calculate average abundance for each taxon across samples
-        const taxaAverages = taxa.map(taxon => ({
-            taxon,
-            avg: data.reduce((sum, sample) => sum + (parseFloat(sample[taxon]) || 0), 0) / data.length
-        }));
-
-        // Sort by average abundance (descending)
-        const sortedTaxa = taxaAverages.sort((a, b) => b.avg - a.avg).map(t => t.taxon);
-
-        // Store processed data globally
-        window.metagenomicData = {
-            samples: data,
-            sortedTaxa: sortedTaxa // All taxa, ranked
-        };
-
-        console.log('Loaded metagenomic data:', data.length, 'samples,', sortedTaxa.length, 'total taxa');
-    } catch (error) {
-        console.error('Error loading metagenomic data:', error);
-        window.metagenomicData = null;
-    }
-}
-
-    // Placeholder for showStackedBarChart (replace with your original implementation)
-    function showStackedBarChart() {
-    console.log('Showing stacked bar chart...');
-    const popup = document.getElementById('metagenomics-popup');
-    const iframe = document.getElementById('metagenomics-iframe');
-
-    // Create container for chart and controls
-    const container = document.createElement('div');
-    container.style.width = '100%';
-    container.style.height = 'calc(100% - 40px)';
-    container.style.position = 'relative';
-
-    // Add taxa number selector
-    const controls = document.createElement('div');
-    controls.style.padding = '10px';
-    controls.style.background = 'rgba(26, 26, 26, 0.8)';
-    controls.style.borderBottom = '1px solid #00FFFF';
-    controls.innerHTML = `
-        <label style="color: #00FFFF; font-size: 12px; margin-right: 10px;">Number of Taxa:</label>
-        <select id="taxa-count" style="background: rgba(26, 26, 26, 0.8); border: 1px solid #00FFFF; color: #00FFFF; padding: 4px;">
-            <option value="5">5</option>
-            <option value="10" selected>10</option>
-            <option value="15">15</option>
-            <option value="all">All</option>
-        </select>
-    `;
-
-    // Create chart div
-    const graphDiv = document.createElement('div');
-    graphDiv.id = 'stacked-bar-chart';
-    graphDiv.style.width = '100%';
-    graphDiv.style.height = 'calc(100% - 50px)';
-
-    container.appendChild(controls);
-    container.appendChild(graphDiv);
-    iframe.replaceWith(container);
-
-    popup.style.display = 'block';
-
-    if (!window.metagenomicData || !window.metagenomicData.samples || !window.metagenomicData.sortedTaxa) {
-        graphDiv.innerHTML = '<div class="warning-message">No metagenomic data available. Please try again later.</div>';
-        console.warn('No metagenomic data to display');
-        return;
-    }
-
-    const { samples, sortedTaxa } = window.metagenomicData;
-
-    // Function to render chart with N taxa
-    function renderChart(numTaxa) {
-        // Select taxa to display
-        const taxaToShow = numTaxa === 'all' ? sortedTaxa : sortedTaxa.slice(0, Math.min(numTaxa, sortedTaxa.length));
-
-        // Define colors using a palette
-        const colors = [
-            '#FF6666', '#66FF66', '#6666FF', '#FFFF66', '#FF66FF',
-            '#66FFFF', '#FF9966', '#9966FF', '#66FF99', '#FF66CC',
-            '#CC66FF', '#66CCFF', '#FFCC66', '#66FFCC', '#CC66CC'
-        ];
-        const taxonColors = {};
-        taxaToShow.forEach((taxon, i) => {
-            taxonColors[taxon] = colors[i % colors.length];
-        });
-
-        // Create traces for each taxon
-        const traces = taxaToShow.map(taxon => ({
-            x: samples.map(sample => sample.sample_id),
-            y: samples.map(sample => parseFloat(sample[taxon]) || 0),
-            type: 'bar',
-            name: taxon,
-            marker: { color: taxonColors[taxon] }
-        }));
-
-        const layout = {
-            title: {
-                text: `Top ${taxaToShow.length} Taxa Abundance by Sample`,
-                font: { size: 14, color: '#00FFFF', family: 'Nasalization, sans-serif' },
-                x: 0.5,
-                xanchor: 'center'
-            },
-            xaxis: {
-                title: 'Sample ID',
-                titlefont: { size: 12, color: '#00FFFF' },
-                tickfont: { size: 10, color: '#00FFFF' },
-                tickangle: 45
-            },
-            yaxis: {
-                title: 'Relative Abundance (%)',
-                titlefont: { size: 12, color: '#00FFFF' },
-                tickfont: { size: 10, color: '#00FFFF' }
-            },
-            barmode: 'stack',
-            plot_bgcolor: '#1A1A1A',
-            paper_bgcolor: '#1A1A1A',
-            font: { color: '#00FFFF' },
-            showlegend: true,
-            legend: {
-                x: 1,
-                y: 1,
-                xanchor: 'right',
-                yanchor: 'top',
-                bgcolor: 'rgba(26, 26, 26, 0.8)',
-                bordercolor: '#00FFFF',
-                borderwidth: 1,
-                font: { size: 10 }
-            },
-            margin: { l: 50, r: 50, t: 60, b: 100 }
-        };
-
-        Plotly.newPlot('stacked-bar-chart', traces, layout, { responsive: true })
-            .then(() => console.log(`Stacked bar chart rendered with ${taxaToShow.length} taxa`))
-            .catch(err => {
-                console.error('Error rendering stacked bar chart:', err);
-                graphDiv.innerHTML = '<div class="warning-message">Error rendering chart. Check the console for details.</div>';
-            });
-    }
-
-    // Initial render with default (10 taxa)
-    renderChart(10);
-
-    // Event listener for taxa count change
-    const taxaSelect = document.getElementById('taxa-count');
-    taxaSelect.addEventListener('change', () => {
-        const numTaxa = taxaSelect.value;
-        renderChart(numTaxa);
-    });
-}
-
-    // Initialize event listeners and load data
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('DOM fully loaded');
-
-        flatpickr('#start-date', { dateFormat: 'Y-m-d', defaultDate: '2015-08-01', onChange: (selectedDates) => { startDate = selectedDates[0]; updateGraph(); } });
-        flatpickr('#end-date', { dateFormat: 'Y-m-d', defaultDate: '2025-04-05', onChange: (selectedDates) => { endDate = selectedDates[0]; updateGraph(); } });
-
-        document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
-            toggle.addEventListener('click', () => toggleDropdown(toggle.id.replace('-toggle', '-menu')));
-        });
-
-        document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
-        document.getElementById('mobile-sidebar-button').addEventListener('click', toggleSidebar);
-
-        document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
-        document.getElementById('close-control-panel').addEventListener('click', toggleControlPanel);
-
-        document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu'));
-        document.getElementById('plot-number-menu').addEventListener('change', (e) => {
-            selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked')).map(input => Number(input.value));
-            document.getElementById('plot-number-toggle').textContent = selectedPlots.length ? `Plot # (${selectedPlots.join(', ')})` : 'Plot #';
+        const chartTypeMenu = document.getElementById('chart-type-menu');
+        if (chartTypeMenu) chartTypeMenu.addEventListener('change', () => {
+            updateStatsOptions();
             updateGraph();
         });
 
-        ['independent-menu', 'dependent-menu'].forEach(menuId => {
-            document.getElementById(menuId).addEventListener('change', (e) => {
-                if (menuId === 'independent-menu') enforceSingleSelection(menuId, e.target.id);
-                updateGraph();
-            });
-        });
+        const statsMenu = document.getElementById('stats-menu');
+        if (statsMenu) statsMenu.addEventListener('change', updateGraph);
 
-        document.getElementById('chart-type-menu').addEventListener('change', () => { updateStatsOptions(); updateGraph(); });
-        document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
-        document.getElementById('stats-menu').addEventListener('change', updateGraph);
-
-        const links = document.querySelectorAll('.metagenomics-link');
-        console.log('Found metagenomics links:', links.length);
-        links.forEach(link => {
-            if (!link.classList.contains('kraken-stacked-bar')) {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const popup = document.getElementById('metagenomics-popup');
-                    const iframe = document.getElementById('metagenomics-iframe');
-                    iframe.src = link.href;
-                    popup.style.display = 'block';
-                    links.forEach(l => l.classList.remove('active'));
-                    link.classList.add('active');
-                });
-            } else {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
+        const metagenomicsLinks = document.querySelectorAll('.metagenomics-link');
+        metagenomicsLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const popup = document.getElementById('metagenomics-popup');
+                const iframe = document.getElementById('metagenomics-iframe');
+                if (link.classList.contains('kraken-stacked-bar')) {
                     showStackedBarChart();
-                    links.forEach(l => l.classList.remove('active'));
-                    link.classList.add('active');
-                });
-            }
+                } else {
+                    popup.style.display = 'block';
+                    iframe.src = link.href;
+                    console.log('Metagenomics popup opened with URL:', link.href);
+                }
+            });
         });
 
         const closeMetagenomics = document.getElementById('close-metagenomics');
         if (closeMetagenomics) {
-            console.log('Close metagenomics button found and event listener attached');
             closeMetagenomics.addEventListener('click', () => {
-                document.getElementById('metagenomics-popup').style.display = 'none';
-                document.querySelectorAll('.metagenomics-link').forEach(l => l.classList.remove('active'));
+                const popup = document.getElementById('metagenomics-popup');
+                const iframe = document.getElementById('metagenomics-iframe');
+                popup.style.display = 'none';
+                iframe.src = '';
+                console.log('Metagenomics popup closed');
             });
         } else {
-            console.warn('Close metagenomics button not found');
+            console.warn('Close button for metagenomics popup not found');
         }
 
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.2.0/math.min.js';
-        script.onload = () => {
-            if (typeof math === 'undefined') console.error('math.js failed to initialize');
-            loadData();
-            loadMetagenomicData();
-        };
-        script.onerror = () => console.error('Failed to load math.js');
-        document.head.appendChild(script);
+        const closeControlPanel = document.getElementById('close-control-panel');
+        if (closeControlPanel) {
+            closeControlPanel.addEventListener('click', () => {
+                const popup = document.getElementById('control-panel-popup');
+                popup.style.display = 'none';
+                document.getElementById('control-panel-button').textContent = 'Show Control Panel';
+                console.log('Control panel popup closed');
+            });
+        } else {
+            console.warn('Close button for control panel popup not found');
+        }
+
+        flatpickr('#start-date', {
+            dateFormat: 'Y-m-d',
+            onChange: (selectedDates) => {
+                startDate = selectedDates[0];
+                document.getElementById('time-range-toggle').textContent = `${startDate.toISOString().split('T')[0]} - ${endDate.toISOString().split('T')[0]}`;
+                updateGraph();
+            }
+        });
+
+        flatpickr('#end-date', {
+            dateFormat: 'Y-m-d',
+            onChange: (selectedDates) => {
+                endDate = selectedDates[0];
+                document.getElementById('time-range-toggle').textContent = `${startDate.toISOString().split('T')[0]} - ${endDate.toISOString().split('T')[0]}`;
+                updateGraph();
+            }
+        });
+
+        const plotNumberMenu = document.getElementById('plot-number-menu');
+        if (plotNumberMenu) {
+            plotNumberMenu.addEventListener('change', (e) => {
+                selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked')).map(input => Number(input.value));
+                document.getElementById('plot-number-toggle').textContent = selectedPlots.length ? `Plot # (${selectedPlots.join(', ')})` : 'Plot #';
+                updateGraph();
+            });
+        }
+
+        document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
+        document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
+        document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
+        document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
+        document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
+        document.getElementById('metagenomics-toggle').addEventListener('click', () => toggleDropdown('metagenomics-menu'));
+        document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu'));
     });
 </script>
 </body>
