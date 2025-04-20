@@ -224,11 +224,13 @@
             transition: width 0.3s ease, left 0.3s ease;
             z-index: 1;
             overflow: hidden;
+            padding-left: 20px; /* Added to ensure space for y-axis label */
         }
 
         .graph-container.full-width {
             width: 100vw;
             left: 0;
+            padding-left: 20px;
         }
 
         #graph {
@@ -652,13 +654,13 @@
                 <span class="button-label">Y-Axis:</span>
                 <div class="dropdown-toggle" id="dependent-toggle">Select Dependent</div>
                 <div class="dropdown-menu" id="dependent-menu">
-                    <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0" checked><label for="TS_0" style="color: #00FFFF;">Soil Temp 0 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0"><label for="TS_0" style="color: #00FFFF;">Soil Temp 0 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_5" value="TS_5"><label for="TS_5" style="color: #FFFF00;">Soil Temp 5 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_10" value="TS_10"><label for="TS_10" style="color: #FF00FF;">Soil Temp 10 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_20" value="TS_20"><label for="TS_20" style="color: #00FF00;">Soil Temp 20 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_30" value="TS_30"><label for="TS_30" style="color: #FF0000;">Soil Temp 30 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_40" value="TS_40"><label for="TS_40" style="color: #0000FF;">Soil Temp 40 cm (°C)</label></div>
-                    <div class="dropdown-item"><input type="checkbox" id="TS_50" value="TS_50" checked><label for="TS_50" style="color: #FFA500;">Soil Temp 50 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_50" value="TS_50"><label for="TS_50" style="color: #FFA500;">Soil Temp 50 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_100" value="TS_100"><label for="TS_100" style="color: #800080;">Soil Temp 100 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TS_200" value="TS_200"><label for="TS_200" style="color: #008080;">Soil Temp 200 cm (°C)</label></div>
                     <div class="dropdown-item"><input type="checkbox" id="TA_2_0_dep" value="TA_2_0"><label for="TA_2_0_dep" style="color: #FF6347;">Ambient Temp 2m (°C)</label></div>
@@ -742,11 +744,6 @@
                         <a href="#" class="metagenomics-link kraken-stacked-bar">Stacked Bar Chart (Top Taxa)</a>
                     </div>
                 </div>
-            </div>
-            <div class="button-container">
-                <span class="button-label">Plot Number:</span>
-                <div class="dropdown-toggle" id="plot-number-toggle">Plot # (all)</div>
-                <div class="dropdown-menu" id="plot-number-menu"></div>
             </div>
         </div>
         <div class="graph-container" id="graph-container">
@@ -868,7 +865,7 @@
             selectedPlots = Object.keys(plotConditions).map(Number);
             dataLoaded = true;
             cachedData = aggregateVariables(allData);
-            updateGraph();
+            resetGraph(); // Show welcome screen initially
         } catch (error) {
             console.error('Error loading data:', error);
             graphDiv.innerHTML = '<div class="warning-message">Failed to load data. Check console for details.</div>';
@@ -979,7 +976,6 @@
         button.textContent = isVisible ? 'Show Control Panel' : 'Hide Control Panel';
 
         if (!isVisible) {
-            // Render sliders
             let slidersHtml = Object.keys(controlRanges).map(key => {
                 return `
                     <div class="slider-container">
@@ -997,7 +993,6 @@
                 `;
             }).join('');
 
-            // Add plot selection dropdown
             slidersHtml += `
                 <div class="dropdown-container">
                     <label>Plot Selection</label>
@@ -1012,7 +1007,6 @@
 
             content.innerHTML = slidersHtml;
 
-            // Set up slider event listeners
             Object.keys(controlRanges).forEach(key => {
                 const minSlider = document.getElementById(`${key}-min`);
                 const maxSlider = document.getElementById(`${key}-max`);
@@ -1076,7 +1070,6 @@
                 updateTrack();
             });
 
-            // Set up plot selection event listener
             const plotNumberMenu = document.getElementById('plot-number-menu');
             if (plotNumberMenu) {
                 plotNumberMenu.addEventListener('change', () => {
@@ -1089,7 +1082,6 @@
                 });
             }
 
-            // Set up plot dropdown toggle
             const plotToggle = document.getElementById('plot-number-toggle');
             if (plotToggle) {
                 plotToggle.addEventListener('click', () => toggleDropdown('plot-number-menu'));
@@ -1371,8 +1363,8 @@
 
     // Load metagenomic data
     async function loadMetagenomicData() {
-        // Replace with correct URL or local path
-        const metagenomicUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Metagenomics/kraken2_summary.json'; // Update this
+        // TODO: Update with correct URL or local path
+        const metagenomicUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Metagenomics/kraken2_summary.json';
         try {
             const response = await fetch(metagenomicUrl);
             if (!response.ok) {
@@ -1420,15 +1412,15 @@
         });
 
         const layout = {
-            title: { text: 'Top Taxa by Sample', font: { color: '#00FFFF' } },
+            title: { text: 'Top Taxa by Sample', font: { color: '#FFFFFF' } },
             barmode: 'stack',
-            xaxis: { title: 'Samples', tickangle: 45, color: '#00FFFF' },
-            yaxis: { title: 'Relative Abundance (%)', color: '#00FFFF' },
+            xaxis: { title: 'Samples', tickangle: 45, color: '#FFFFFF' },
+            yaxis: { title: 'Relative Abundance (%)', color: '#FFFFFF' },
             paper_bgcolor: '#1A1A1A',
             plot_bgcolor: '#1A1A1A',
-            font: { color: '#00FFFF' },
+            font: { color: '#FFFFFF' },
             showlegend: true,
-            margin: { b: 150 }
+            margin: { b: 150, l: 100 }
         };
 
         iframe.onload = () => {
@@ -1504,7 +1496,6 @@
             if (!allDependents.length || !independent) {
                 console.warn('No dependents or independent selected');
                 resetGraph();
-                graphDiv.innerHTML = '<div class="warning-message">Please select an independent (X-Axis) and at least one dependent (Y-Axis) variable.</div>';
                 return;
             }
 
@@ -1661,12 +1652,6 @@
             if (!traces.length) {
                 console.warn('No valid traces to plot:', invalidTraces);
                 resetGraph();
-                if (invalidTraces.length) {
-                    graphDiv.innerHTML = `<div class="warning-message">${invalidTraces.join('<br>')}</div>`;
-                } else {
-                    graphDiv.innerHTML = '<div class="warning-message">No valid data to plot after filtering.</div>';
-                }
-                graphInitialized = false;
                 return;
             }
 
@@ -1681,39 +1666,25 @@
             const layout = {
                 title: {
                     text: `SPRUCE Experiment: ${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep).join(', ')} vs ${independent === 'TIMESTAMP' ? 'Time' : document.querySelector(`label[for="${independent}"]`)?.textContent || independent}`,
-                    font: { color: '#00FFFF', family: 'Exo 2', size: 16 }
+                    font: { color: '#FFFFFF', family: 'Exo 2', size: 16 }
                 },
                 xaxis: {
                     title: independent === 'TIMESTAMP' ? 'Date' : `${document.querySelector(`label[for="${independent}"]`)?.textContent || independent} (${unitMap[independent] || ''})`,
-                    color: '#00FFFF',
+                    color: '#FFFFFF',
                     gridcolor: '#444'
                 },
                 yaxis: {
                     title: commonUnit ? `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep).join(', ')} (${commonUnit})` : 'Multiple Units',
-                    color: '#00FFFF',
+                    color: '#FFFFFF',
                     gridcolor: '#444'
                 },
                 paper_bgcolor: '#1A1A1A',
                 plot_bgcolor: '#1A1A1A',
-                font: { color: '#00FFFF' },
+                font: { color: '#FFFFFF' },
                 showlegend: legendVisible,
                 width: calculateGraphWidth(),
                 height: calculateGraphHeight(),
-                margin: { t: 50, b: 50, l: 50, r: 50 },
-                annotations: showOnChart && statsText.length ? [{
-                    xref: 'paper',
-                    yref: 'paper',
-                    x: 0,
-                    y: 1,
-                    xanchor: 'left',
-                    yanchor: 'top',
-                    text: statsText.join('<br>'),
-                    showarrow: false,
-                    font: { color: '#00FF00', size: 10 },
-                    bgcolor: 'rgba(26, 26, 26, 0.8)',
-                    bordercolor: '#00FFFF',
-                    borderwidth: 1
-                }] : []
+                margin: { t: 50, b: 50, l: 100, r: 50 } // Increased left margin for y-axis label
             };
 
             Plotly.newPlot(graphDiv, allTraces, layout, { responsive: true });
@@ -1846,7 +1817,12 @@
             }
         });
 
-        console.log('Event listeners setup completed');
+        // Set default independent variable to TIMESTAMP
+        const timestampCheckbox = document.getElementById('TIMESTAMP');
+        if (timestampCheckbox) {
+            timestampCheckbox.checked = true;
+            enforceSingleSelection('independent-menu', 'TIMESTAMP');
+        }
     }
 
     // DOMContentLoaded handler
