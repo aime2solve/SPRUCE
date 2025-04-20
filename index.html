@@ -1412,7 +1412,18 @@
             iframeDoc.body.appendChild(plotDiv);
             Plotly.newPlot(plotDiv, traces, layout);
         };
-        iframe.srcdoc = '<html><head><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script></head><body></body></html>';
+
+        // Simplified srcdoc to avoid parsing issues
+        const srcDocContent = `
+            <html>
+                <head>
+                    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+                </head>
+                <body></body>
+            </html>
+        `.trim();
+        iframe.srcdoc = srcDocContent;
+        console.log('Iframe srcdoc set successfully');
         console.log('Stacked bar chart displayed in metagenomics popup');
     }
 
