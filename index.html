@@ -375,6 +375,13 @@
             box-sizing: border-box;
         }
 
+        .controls-header h3 {
+            color: #DAA520;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 18px;
+            margin: 0;
+        }
+
         .close-button {
             cursor: pointer;
             color: #FF4500;
@@ -472,7 +479,56 @@
             z-index: 5;
         }
 
-        /* Plot selection dropdown */
+        /* Plot selection popup */
+        .plot-selection-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(26, 26, 26, 0.9);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            padding: 15px;
+            color: #00FFFF;
+            font-size: 13px;
+            z-index: 30;
+            display: none;
+            width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 10px #00FFFF;
+        }
+
+        .plot-selection-popup h3 {
+            color: #DAA520;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .plot-selection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #1A1A1A;
+            border-bottom: 1px solid #444;
+            position: sticky;
+            top: 0;
+            z-index: 10010;
+            height: 40px;
+            box-sizing: border-box;
+        }
+
+        .plot-selection-content {
+            margin-top: 10px;
+        }
+
+        .plot-selection-content .dropdown-item {
+            margin-bottom: 5px;
+        }
+
+        /* Control panel plot selection button */
         .dropdown-container {
             margin: 10px 0;
         }
@@ -484,7 +540,7 @@
             display: block;
         }
 
-        #plot-number-toggle {
+        #plot-number-button {
             background: rgba(26, 26, 26, 0.8);
             border: 2px solid #00FFFF;
             border-radius: 10px;
@@ -494,34 +550,12 @@
             text-align: center;
             cursor: pointer;
             box-shadow: 0 0 8px #00FFFF;
-            width: calc(100% - 20px);
+            width: 100%;
             transition: background 0.2s ease;
         }
 
-        #plot-number-toggle:hover {
+        #plot-number-button:hover {
             background: rgba(26, 26, 26, 1);
-        }
-
-        #plot-number-menu {
-            position: absolute;
-            top: 100%;
-            left: 10px;
-            width: calc(100% - 20px);
-            max-height: 200px;
-            overflow-y: auto;
-            background: rgba(26, 26, 26, 0.9);
-            border: 2px solid #00FFFF;
-            border-radius: 10px;
-            color: #00FFFF;
-            font-size: 11px;
-            padding: 8px;
-            z-index: 100;
-            display: none;
-            box-shadow: 0 0 8px #00FFFF;
-        }
-
-        #plot-number-menu.open {
-            display: block;
         }
 
         /* Mobile sidebar button */
@@ -562,6 +596,11 @@
                 font-size: 11px;
             }
 
+            .plot-selection-popup {
+                width: 300px;
+                font-size: 11px;
+            }
+
             .sidebar-title {
                 font-size: 20px;
             }
@@ -575,7 +614,7 @@
                 width: 80px;
             }
 
-            .dropdown-toggle, #control-panel-button {
+            .dropdown-toggle, #control-panel-button, #plot-number-button {
                 font-size: 10px;
                 width: calc(100% - 90px);
             }
@@ -586,7 +625,7 @@
                 font-size: 10px;
             }
 
-            #metagenomics-menu, #plot-number-menu {
+            #metagenomics-menu {
                 width: calc(100% - 90px);
                 left: 90px;
             }
@@ -619,6 +658,11 @@
                 padding: 10px;
             }
 
+            .plot-selection-popup {
+                width: 90vw;
+                padding: 10px;
+            }
+
             .sidebar-title {
                 font-size: 18px;
             }
@@ -632,7 +676,7 @@
                 width: 70px;
             }
 
-            .dropdown-toggle, #control-panel-button {
+            .dropdown-toggle, #control-panel-button, #plot-number-button {
                 font-size: 9px;
                 width: calc(100% - 80px);
             }
@@ -643,7 +687,7 @@
                 font-size: 9px;
             }
 
-            #metagenomics-menu, #plot-number-menu {
+            #metagenomics-menu {
                 width: calc(100% - 80px);
                 left: 80px;
             }
@@ -674,7 +718,7 @@
     <h1>Comparative Biospheromics Dashboard</h1>
     <div class="container">
         <div class="sidebar" id="sidebar">
-            <div class="sidebar-tab" id="sidebar-tab">&lt;</div>
+            <div class="sidebar-tab" id="sidebar-tab"><</div>
             <div class="sidebar-title">SPRUCE<br><span>Data Explorer</span></div>
             <div class="button-container">
                 <span class="button-label">Control Panel:</span>
@@ -812,11 +856,17 @@
         </div>
         <iframe id="metagenomics-iframe" style="width: 100%; height: calc(100% - 40px); border: none;"></iframe>
     </div>
-    <div class="mobile-sidebar-button" id="mobile-sidebar-button">&gt;</div>
+    <div class="plot-selection-popup" id="plot-selection-popup">
+        <div class="plot-selection-header">
+            <h3>Select Plots</h3>
+            <div class="close-button" id="close-plot-selection">X</div>
+        </div>
+        <div class="plot-selection-content" id="plot-selection-content"></div>
+    </div>
+    <div class="mobile-sidebar-button" id="mobile-sidebar-button">></div>
     
-
-  <script>
-// Global variables
+<script>
+  // Global variables
 let allData = [];
 const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
 const metagenomicUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Metagenomics/kraken_taxa.json';
@@ -1039,7 +1089,7 @@ function toggleControlPanel() {
         slidersHtml += `
             <div class="dropdown-container">
                 <label>Plot Selection</label>
-                <div id="plot-number-button" class="dropdown-toggle">Plot # (${selectedPlots.length ? selectedPlots.join(', ') : 'all'})</div>
+                <button id="plot-number-button" class="dropdown-toggle">Plot # (${selectedPlots.length ? selectedPlots.join(', ') : 'all'})</button>
             </div>
         `;
 
@@ -1096,6 +1146,9 @@ function toggleControlPanel() {
         const plotNumberButton = document.getElementById('plot-number-button');
         if (plotNumberButton) {
             plotNumberButton.addEventListener('click', togglePlotSelectionPopup);
+            console.log('Plot number button initialized');
+        } else {
+            console.error('Plot number button not found after rendering');
         }
     }
 }
@@ -1111,6 +1164,7 @@ function togglePlotSelectionPopup() {
     }
     const isVisible = popup.style.display === 'block';
     popup.style.display = isVisible ? 'none' : 'block';
+    console.log(`Plot selection popup toggled, now ${isVisible ? 'closed' : 'open'}`);
 
     if (!isVisible) {
         const plotsHtml = Object.entries(plotConditions).map(([plot, cond]) => {
@@ -1399,8 +1453,13 @@ async function showStackedBarChart(e) {
         return;
     }
 
+    graphDiv.innerHTML = '<div class="welcome-message">Loading metagenomic data...</div>';
+
     const data = await loadMetagenomicData();
-    if (!data) return;
+    if (!data) {
+        console.warn('No metagenomic data loaded');
+        return;
+    }
 
     const filteredSamples = Object.keys(data).filter(sample => {
         const plot = sampleToPlotMap[sample]?.plot;
@@ -1409,36 +1468,59 @@ async function showStackedBarChart(e) {
 
     if (!filteredSamples.length) {
         graphDiv.innerHTML = '<div class="warning-message">No metagenomic data for selected plots.</div>';
+        console.warn('No samples available for selected plots');
         return;
     }
 
-    const taxa = [...new Set(filteredSamples.flatMap(sample => Object.keys(data[sample])))].slice(0, 10);
-    const traces = taxa.map(taxon => {
+    const taxa = [...new Set(filteredSamples.flatMap(sample => Object.keys(data[sample] || {})))].slice(0, 10);
+    if (!taxa.length) {
+        graphDiv.innerHTML = '<div class="warning-message">No taxa data available for selected samples.</div>';
+        console.warn('No taxa found in data');
+        return;
+    }
+
+    const traces = taxa.map((taxon, index) => {
         return {
-            x: filteredSamples.map(sample => `${sample} (${sampleToPlotMap[sample]?.depth})`),
-            y: filteredSamples.map(sample => data[sample][taxon] || 0),
+            x: filteredSamples.map(sample => `${sample} (${sampleToPlotMap[sample]?.depth || 'Unknown'})`),
+            y: filteredSamples.map(sample => (data[sample] && data[sample][taxon] !== undefined) ? data[sample][taxon] : 0),
             name: taxon,
-            type: 'bar'
+            type: 'bar',
+            marker: { color: dependentColors[Object.keys(dependentColors)[index % Object.keys(dependentColors).length]] || '#FFFFFF' }
         };
     });
 
     const layout = {
-        title: { text: 'Top Taxa by Sample', font: { color: '#FFFFFF', size: 16 } },
+        title: { text: 'Top Taxa by Sample', font: { color: '#FFFFFF', size: 16, family: 'Exo 2' } },
         barmode: 'stack',
-        xaxis: { title: 'Samples (Depth)', tickangle: 45, color: '#FFFFFF' },
-        yaxis: { title: 'Relative Abundance (%)', color: '#FFFFFF' },
+        xaxis: { 
+            title: 'Samples (Depth)', 
+            tickangle: 45, 
+            color: '#FFFFFF', 
+            tickfont: { family: 'Exo 2', size: 12 }
+        },
+        yaxis: { 
+            title: 'Relative Abundance (%)', 
+            color: '#FFFFFF', 
+            tickfont: { family: 'Exo 2', size: 12 }
+        },
         paper_bgcolor: '#1A1A1A',
         plot_bgcolor: '#1A1A1A',
-        font: { color: '#FFFFFF' },
+        font: { color: '#FFFFFF', family: 'Exo 2' },
         showlegend: true,
-        margin: { b: 150, l: 100 },
+        legend: { font: { family: 'Exo 2', size: 12 } },
+        margin: { b: 150, l: 100, t: 50, r: 50 },
         width: calculateGraphWidth(),
         height: calculateGraphHeight()
     };
 
-    Plotly.newPlot(graphDiv, traces, layout, { responsive: true });
-    graphInitialized = true;
-    console.log('Stacked bar chart plotted successfully');
+    try {
+        Plotly.newPlot(graphDiv, traces, layout, { responsive: true });
+        graphInitialized = true;
+        console.log('Stacked bar chart plotted successfully with', traces.length, 'taxa');
+    } catch (error) {
+        console.error('Error plotting stacked bar chart:', error);
+        graphDiv.innerHTML = '<div class="warning-message">Error rendering stacked bar chart. Check console for details.</div>';
+    }
 }
 
 // Update metagenomics menu based on selected plots
@@ -1548,7 +1630,10 @@ function updateGraph() {
                 name: `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means`,
                 marker: { color: dependentColors[dependents[0]] || '#00FFFF' }
             });
-            statsText.push(`${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]}: F-Score=${anovaResults.fScore.toFixed(2)}, p-value=${anovaResults.pValue.toFixed(4)}`);
+            statsText.push({
+                text: `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]}: F-Score=${anovaResults.fScore.toFixed(2)}, p-value=${anovaResults.pValue.toFixed(4)}`,
+                color: dependentColors[dependents[0]] || '#00FFFF'
+            });
         } else {
             dependents.forEach(dep => {
                 const pairedData = workingData
@@ -1591,11 +1676,17 @@ function updateGraph() {
 
                 if (chartType === 'box') {
                     const boxStats = calculateBoxStats(yValues);
-                    statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Median=${boxStats.median.toFixed(2)}, Q1=${boxStats.q1.toFixed(2)}, Q3=${boxStats.q3.toFixed(2)}, IQR=${boxStats.iqr.toFixed(2)}, Min=${boxStats.min.toFixed(2)}, Max=${boxStats.max.toFixed(2)}`);
+                    statsText.push({
+                        text: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Median=${boxStats.median.toFixed(2)}, Q1=${boxStats.q1.toFixed(2)}, Q3=${boxStats.q3.toFixed(2)}, IQR=${boxStats.iqr.toFixed(2)}, Min=${boxStats.min.toFixed(2)}, Max=${boxStats.max.toFixed(2)}`,
+                        color: color
+                    });
                 } else if (chartType === 'bar') {
                     const mean = jStat.mean(yValues);
                     const stdDev = jStat.stdev(yValues);
-                    statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Mean=${mean.toFixed(2)}, StdDev=${stdDev.toFixed(2)}`);
+                    statsText.push({
+                        text: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Mean=${mean.toFixed(2)}, StdDev=${stdDev.toFixed(2)}`,
+                        color: color
+                    });
                 } else if (['scatter', 'line', 'area'].includes(chartType) && xValues.length > 1 && showFit) {
                     let xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
                     let originalXMin = 0;
@@ -1639,7 +1730,10 @@ function updateGraph() {
                     } else if (fit.type === 'exponential') {
                         eq = `y = ${fit.params.a.toFixed(2)}e^(${fit.params.b.toFixed(2)}x)`;
                     }
-                    statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: ${eq}, R²=${(fit.rSquared || NaN).toFixed(2)}, F=${(fit.fValue || NaN).toFixed(2)}, p=${(fit.pValue || NaN).toFixed(4)}`);
+                    statsText.push({
+                        text: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: ${eq}, R²=${(fit.rSquared || NaN).toFixed(2)}, F=${(fit.fValue || NaN).toFixed(2)}, p=${(fit.pValue || NaN).toFixed(4)}`,
+                        color: color
+                    });
                 }
             });
         }
@@ -1653,24 +1747,24 @@ function updateGraph() {
         const allTraces = showFit ? [...traces, ...fitTraces] : traces;
         const statsContent = document.getElementById('stats-content');
         if (statsContent) {
-            statsContent.innerHTML = statsText.length ? statsText.join('<br>') : 'No statistics available';
+            statsContent.innerHTML = statsText.length ? statsText.map(item => item.text).join('<br>') : 'No statistics available';
         }
 
         graphDiv.innerHTML = '';
 
-        const annotations = showOnChart && statsText.length ? statsText.map((text, index) => ({
+        const annotations = showOnChart && statsText.length ? statsText.map((item, index) => ({
             xref: 'paper',
             yref: 'paper',
             x: 0.02,
             y: 0.98 - index * 0.05,
             xanchor: 'left',
             yanchor: 'top',
-            text: text,
+            text: item.text,
             showarrow: false,
             font: {
                 family: 'VT323, monospace',
                 size: 12,
-                color: '#00FF00'
+                color: item.color
             },
             bgcolor: 'rgba(26, 26, 26, 0.8)',
             bordercolor: '#00FFFF',
