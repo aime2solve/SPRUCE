@@ -1663,16 +1663,10 @@
                 }] : []
             };
 
-            Plotly.newPlot(graphDiv, allTraces, layout, { responsive: true })
-                .then(() => {
-                    console.log('Graph plotted successfully');
-                    graphInitialized = true;
-                })
-                .catch(err => {
-                    console.error('Error plotting graph:', err);
-                    resetGraph();
-                    graphDiv.innerHTML = '<div class="warning-message">Error plotting graph. Check console for details.</div>';
-                });
+            // Simplified Plotly call with explicit error handling
+            Plotly.newPlot(graphDiv, allTraces, layout, { responsive: true });
+            console.log('Graph plotted successfully');
+            graphInitialized = true;
         } catch (error) {
             console.error('Error in updateGraph:', error);
             resetGraph();
@@ -1824,7 +1818,7 @@
         toggles.forEach(toggle => {
             const element = document.getElementById(toggle.id);
             if (element) {
-                element.addEventListener('click', () => toggleDropdown(toggle.menu));
+                element.addEventListener('click', () => toggleEditingAssistant: toggleDropdown(toggle.menu));
             }
         });
 
