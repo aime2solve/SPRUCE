@@ -1366,21 +1366,24 @@
 
     // Show stacked bar chart for metagenomics
     async function showStackedBarChart() {
+        console.log('Entering showStackedBarChart');
         const popup = document.getElementById('metagenomics-popup');
         const iframe = document.getElementById('metagenomics-iframe');
         const graphDiv = document.getElementById('graph');
         if (!popup || !iframe || !graphDiv) {
+            console.error('Popup, iframe, or graphDiv not found');
             return;
         }
 
         const data = await loadMetagenomicData();
         if (!data) {
             graphDiv.innerHTML = '<div class="warning-message">Failed to load metagenomic data.</div>';
+            console.error('Metagenomic data load failed');
             return;
         }
 
         popup.style.display = 'block';
-        iframe.src = '';
+        iframe.src = ''; // Clear previous content
 
         const samples = Object.keys(data);
         const taxa = [...new Set(samples.flatMap(sample => Object.keys(data[sample])))].slice(0, 10);
@@ -1406,25 +1409,43 @@
         };
 
         iframe.onload = () => {
+            console.log('Iframe onload triggered');
             const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-            const plotDiv = iframeDoc.createElement('div');
-            plotDiv.id = 'stacked-bar-plot';
-            iframeDoc.body.appendChild(plotDiv);
-            Plotly.newPlot(plotDiv, traces, layout);
+            // Ensure Plotly is available
+            if (!iframeDoc.defaultView.Plotly) {
+                console.error('Plotly not loaded in iframe');
+                const script = iframeDoc.createElement('script');
+                script.src = 'https://cdn.plot.ly/plotly-2.35.2.min.js';
+                script.onload = () => {
+                    console.log('Plotly loaded dynamically in iframe');
+                    const plotDiv = iframeDoc.createElement('div');
+                    plotDiv.id = 'stacked-bar-plot';
+                    iframeDoc.body.appendChild(plotDiv);
+                    iframeDoc.defaultView.Plotly.newPlot(plotDiv, traces, layout);
+                    console.log('Stacked bar chart plotted in iframe');
+                };
+                script.onerror = () => {
+                    console.error('Failed to load Plotly in iframe');
+                };
+                iframeDoc.head.appendChild(script);
+            } else {
+                const plotDiv = iframeDoc.createElement('div');
+                plotDiv.id = 'stacked-bar-plot';
+                iframeDoc.body.appendChild(plotDiv);
+                iframeDoc.defaultView.Plotly.newPlot(plotDiv, traces, layout);
+                console.log('Stacked bar chart plotted in iframe');
+            }
         };
 
-        // Simplified srcdoc to avoid parsing issues
-        const srcDocContent = `
+        // Set iframe content without inline script to avoid parsing issues
+        iframe.srcdoc = `
             <html>
-                <head>
-                    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-                </head>
+                <head></head>
                 <body></body>
             </html>
         `.trim();
-        iframe.srcdoc = srcDocContent;
         console.log('Iframe srcdoc set successfully');
-        console.log('Stacked bar chart displayed in metagenomics popup');
+        console.log('Exiting showStackedBarChart');
     }
 
     // Update graph based on selections
