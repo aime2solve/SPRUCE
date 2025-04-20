@@ -1,9 +1,0 @@
-{
-  "SRR1157607": {"depth": "SP0212_75cm", "plot": 4, "collection_date": "2020-07-15"},
-  "SRR1157608": {"depth": "SP0212_25cm", "plot": 6, "collection_date": "2020-07-15"},
-  "SRR1157609": {"depth": "SP0212_50cm", "plot": 7, "collection_date": "2020-07-15"},
-  "SRR1157614": {"depth": "SP0212_100cm", "plot": 8, "collection_date": "2020-07-15"},
-  "SRR1157615": {"depth": "SP0212_10cm", "plot": 10, "collection_date": "2020-07-15"},
-  "SRR1157616": {"depth": "SP0212_150cm", "plot": 11, "collection_date": "2020-07-15"},
-  "SRR1157617": {"depth": "SP0212_200cm", "plot": 13, "collection_date": "2020-07-15"}
-}
