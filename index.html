@@ -45,7 +45,86 @@
         .welcome-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00FF00; font-family: 'VT323', monospace; font-size: 20px; text-align: center; text-shadow: 0 0 10px #00FF00; z-index: 2; }
         .welcome-message img { display: block; margin: 0 auto; max-width: 300px; height: auto; }
         .welcome-message hr { border: 1px solid #00FFFF; width: 80%; margin: 10px auto; }
-       
+       .metagenomics-link {
+    color: #00FFFF;
+    text-decoration: none;
+    font-size: 11px;
+    padding: 4px 8px;
+    width: 100%;
+    display: block;
+    cursor: pointer;
+}
+.metagenomics-link:hover {
+    background: rgba(0, 255, 255, 0.2);
+}
+.metagenomics-subheader {
+    color: #DAA520;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 8px;
+    width: 100%;
+}
+.kraken-stacked-bar {
+    color: #00FF00;
+}
+.kraken-stacked-bar:hover {
+    background: rgba(0, 255, 0, 0.2);
+}
+#metagenomics-menu {
+    width: calc(100% - 120px);
+    left: 110px;
+}
+.metagenomics-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(26, 26, 26, 0.9);
+    border: 2px solid #00FFFF;
+    border-radius: 10px;
+    padding: 15px;
+    color: #00FFFF;
+    font-size: 13px;
+    z-index: 20;
+    display: none;
+    width: 80vw;
+    max-height: 90vh;
+    overflow: hidden;
+}
+.metagenomics-popup h3 {
+    color: #DAA520;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 18px;
+}
+@media (max-width: 768px) {
+    #metagenomics-menu {
+        width: calc(100% - 90px);
+        left: 90px;
+    }
+    .metagenomics-popup {
+        width: 90vw;
+        padding: 10px;
+    }
+}
+@media (max-width: 480px) {
+    #metagenomics-menu {
+        width: calc(100% - 80px);
+        left: 80px;
+    }
+    .metagenomics-link {
+        font-size: 9px;
+    }
+    .metagenomics-subheader {
+        font-size: 10px;
+    }
+    .metagenomics-popup {
+        width: 95vw;
+    }
+    .metagenomics-popup h3 {
+        font-size: 16px;
+    }
+}
+
         .controls-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(26, 26, 26, 0.7); border: 2px solid #00FFFF; border-radius: 10px; padding: 15px; color: #00FFFF; font-size: 13px; z-index: 20; display: none; width: 400px; max-height: 80vh; overflow-y: auto; }
 	.close-button {
     display: none; /* Hidden by default */
@@ -189,6 +268,48 @@
                 </div>
             </div>
         </div>
+
+	<div class="button-container">
+    <span class="button-label">Metagenomics:</span>
+    <div class="dropdown-toggle" id="metagenomics-toggle">Select Visualization</div>
+    <div class="dropdown-menu" id="metagenomics-menu">
+        <div class="dropdown-item">
+            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/multiqc_report.html" class="metagenomics-link">MultiQC Report (FastQC)</a>
+        </div>
+        <div class="dropdown-item">
+            <span class="metagenomics-subheader">Kraken2/Krona Reports</span>
+        </div>
+        <div class="dropdown-item">
+            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157607_krona.html" class="metagenomics-link">SRR1157607 (Kraken2/Krona)</a>
+        </div>
+        <div class="dropdown-item">
+            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157608_krona.html" class="metagenomics-link">SRR1157608 (Kraken2/Krona)</a>
+        </div>
+        <div class="dropdown-item">
+            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157609_krona.html" class="metagenomics-link">SRR1157609 (Kraken2/Krona)</a>
+        </div>
+        <div class="dropdown-item">
+            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157614_krona.html" class="metagenomics-link">SRR1157614 (Kraken2/Krona)</a>
+        </div>
+        <div class="dropdown-item">
+            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157615_krona.html" class="metagenomics-link">SRR1157615 (Kraken2/Krona)</a>
+        </div>
+        <div class="dropdown-item">
+            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157616_krona.html" class="metagenomics-link">SRR1157616 (Kraken2/Krona)</a>
+        </div>
+        <div class="dropdown-item">
+            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157617_krona.html" class="metagenomics-link">SRR1157617 (Kraken2/Krona)</a>
+        </div>
+        <div class="dropdown-item">
+            <span class="metagenomics-subheader">Kraken2 Visualizations</span>
+        </div>
+        <div class="dropdown-item">
+            <a href="#" class="metagenomics-link kraken-stacked-bar">Stacked Bar Chart (Top Taxa)</a>
+        </div>
+    </div>
+</div>
+
+
 
         <div class="graph-container" id="graph-container">
             <div id="graph">
@@ -923,6 +1044,153 @@ const layout = {
     hovermode: 'closest'
 };
 
+// Metagenomic data and metadata
+const krakenDataUrl = 'https://aime2solve.github.io/SPRUCE/Metagenomics/kraken_taxa.json';
+const metadataUrl = 'https://aime2solve.github.io/SPRUCE/Metagenomics/metadata.json';
+let krakenData = null;
+let metadata = null;
+
+// Load metagenomic data
+async function loadMetagenomicData() {
+    try {
+        const krakenResponse = await fetch(krakenDataUrl);
+        krakenData = await krakenResponse.json();
+        const metadataResponse = await fetch(metadataUrl);
+        metadata = await metadataResponse.json();
+        console.log('Loaded metagenomic data:', krakenData, metadata);
+    } catch (e) {
+        console.error('Failed to load metagenomic data:', e);
+    }
+}
+
+// Toggle Metagenomics dropdown
+document.getElementById('metagenomics-toggle').addEventListener('click', () => toggleDropdown('metagenomics-menu'));
+
+// Toggle Metagenomics popup
+function showMetagenomics(url) {
+    const popup = document.getElementById('metagenomics-popup');
+    const iframe = document.getElementById('metagenomics-iframe');
+    iframe.src = url;
+    popup.style.display = 'block';
+}
+
+// Close Metagenomics popup
+document.getElementById('close-metagenomics').addEventListener('click', () => {
+    const popup = document.getElementById('metagenomics-popup');
+    popup.style.display = 'none';
+    document.getElementById('metagenomics-iframe').src = '';
+};
+
+// Show stacked bar chart
+async function showStackedBarChart() {
+    const popup = document.getElementById('metagenomics-popup');
+    const iframe = document.getElementById('metagenomics-iframe');
+    iframe.src = '';
+    popup.style.display = 'block';
+
+    if (!krakenData || !metadata || Object.keys(krakenData).length === 0) {
+        const content = document.createElement('div');
+        content.style.color = '#FF4500';
+        content.style.padding = '10px';
+        content.innerHTML = '<p>No taxonomic data available for visualization.</p>';
+        iframe.insertAdjacentElement('afterend', content);
+        return;
+    }
+
+    // Filter runs by Control Panel and Plot Number
+    const workingData = filterByRanges(allData);
+    const selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked'))
+        .map(input => Number(input.value));
+    const filteredRuns = Object.keys(krakenData).filter(run => {
+        const runMetadata = metadata[run];
+        if (!runMetadata || !runMetadata.plot) return false;
+        const plot = runMetadata.plot;
+        if (!selectedPlots.includes(plot)) return false;
+        const envData = workingData.find(d => d.Plot === plot && d.TIMESTAMP);
+        if (!envData) return false;
+        return Object.keys(currentRanges).every(key => {
+            if (key === 'Soil_Depth') return true;
+            const value = parseFloat(envData[key]);
+            const range = currentRanges[key];
+            return isNaN(value) || (value >= range.defaultMin && value <= range.defaultMax);
+        });
+    });
+
+    if (!filteredRuns.length) {
+        const content = document.createElement('div');
+        content.style.color = '#FF4500';
+        content.style.padding = '10px';
+        content.innerHTML = '<p>No runs match the current filters.</p>';
+        iframe.insertAdjacentElement('afterend', content);
+        return;
+    }
+
+    // Create stacked bar chart
+    const taxa = Object.keys(krakenData[filteredRuns[0]]);
+    const traces = taxa.map(taxon => ({
+        x: filteredRuns,
+        y: filteredRuns.map(run => krakenData[run][taxon] || 0),
+        name: taxon,
+        type: 'bar',
+        marker: { color: getTaxonColor(taxon) }
+    }));
+
+    const layout = {
+        title: { text: 'Taxonomic Composition by Run', font: { size: 16, color: '#FFFFFF' } },
+        xaxis: { title: 'Run (Soil Depth)', ticktext: filteredRuns.map(run => `${run} (${metadata[run]?.depth || 'Unknown'})`), tickvals: filteredRuns },
+        yaxis: { title: 'Relative Abundance (%)', range: [0, 100] },
+        barmode: 'stack',
+        plot_bgcolor: '#1A1A1A',
+        paper_bgcolor: '#1A1A1A',
+        font: { color: '#FFFFFF', size: 12 },
+        margin: { t: 60, b: 100, l: 80, r: 30 },
+        showlegend: true,
+        legend: { bgcolor: 'rgba(26, 26, 26, 0.7)', bordercolor: 'transparent' }
+    };
+
+    const chartDiv = document.createElement('div');
+    chartDiv.style.width = '100%';
+    chartDiv.style.height = '70vh';
+    iframe.insertAdjacentElement('afterend', chartDiv);
+
+    Plotly.newPlot(chartDiv, traces, layout, { responsive: true });
+}
+
+// Taxon color mapping
+function getTaxonColor(taxon) {
+    const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347'];
+    return colors[taxon.charCodeAt(0) % colors.length];
+}
+
+// Handle metagenomics links
+document.querySelectorAll('.metagenomics-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.metagenomics-link').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        const url = link.getAttribute('href');
+        if (link.classList.contains('kraken-stacked-bar')) {
+            showStackedBarChart();
+        } else {
+            showMetagenomics(url);
+            document.getElementById('metagenomics-menu').style.display = 'none';
+        }
+    });
+});
+
+// Update existing updateGraph function
+const originalUpdateGraph = updateGraph;
+updateGraph = function() {
+    originalUpdateGraph();
+    if (document.getElementById('metagenomics-popup').style.display === 'block' && 
+        document.querySelector('.kraken-stacked-bar')?.classList.contains('active')) {
+        showStackedBarChart();
+    }
+};
+
+// Load metagenomic data on startup
+loadMetagenomicData();
+
 const data = traces.concat(fitTraces);
 
 console.log('Traces:', traces.length, 'Fit Traces:', fitTraces.length, 'Annotations:', annotations.length);
@@ -1047,5 +1315,12 @@ if (!graphInitialized) {
     script.onerror = () => console.error('Failed to load math.js');
     document.head.appendChild(script);
 </script>
+<div class="metagenomics-popup" id="metagenomics-popup">
+    <div class="controls-header">
+        <h3>Metagenomics Visualization</h3>
+        <div class="close-button" id="close-metagenomics">X</div>
+    </div>
+    <iframe id="metagenomics-iframe" style="width: 100%; height: 80vh; border: none;"></iframe>
+</div>
 </body>
 </html>
