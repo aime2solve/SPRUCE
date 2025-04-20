@@ -1600,10 +1600,10 @@
         if (dependentMenu) dependentMenu.addEventListener('change', updateGraph);
 
         const chartTypeMenu = document.getElementById('chart-type-menu');
-        if (chartTypeMenu) chartTypeMenu.addEventListener('change', () => {
-            업데이트StatsOptions();
-            updateGraph();
-        });
+       if (chartTypeMenu) chartTypeMenu.addEventListener('change', () => {
+    updateStatsOptions(); // Corrected from 업데이트StatsOptions
+    updateGraph();
+});
 
         const statsMenu = document.getElementById('stats-menu');
         if (statsMenu) statsMenu.addEventListener('change', updateGraph);
