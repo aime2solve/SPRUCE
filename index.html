@@ -46,16 +46,21 @@
         .welcome-message img { display: block; margin: 0 auto; max-width: 300px; height: auto; }
         .welcome-message hr { border: 1px solid #00FFFF; width: 80%; margin: 10px auto; }
        .metagenomics-link {
-    color: #00FFFF;
-    text-decoration: none;
-    font-size: 11px;
-    padding: 4px 8px;
-    width: 100%;
     display: block;
+    padding: 5px 10px;
+    text-decoration: none;
+    color: #FFFFFF;
     cursor: pointer;
+    pointer-events: auto;
+    position: relative;
+    z-index: 10;
 }
 .metagenomics-link:hover {
-    background: rgba(0, 255, 255, 0.2);
+    background-color: #333;
+}
+.metagenomics-link.active {
+    background-color: #555;
+    font-weight: bold;
 }
 .metagenomics-subheader {
     color: #DAA520;
@@ -303,8 +308,8 @@
                         <span class="metagenomics-subheader">Kraken2 Visualizations</span>
                     </div>
                     <div class="dropdown-item">
-                        <a href="#" class="metagenomics-link kraken-stacked-bar">Stacked Bar Chart (Top Taxa)</a>
-                    </div>
+    <a href="#" class="metagenomics-link kraken-stacked-bar" onclick="console.log('Direct click on Stacked Bar Chart')">Stacked Bar Chart (Top Taxa)</a>
+</div>
                 </div>
             </div>
         </div>
@@ -1141,16 +1146,27 @@ async function showStackedBarChart() {
     console.log('Selected plots:', selectedPlots, 'Working data sample:', workingData.slice(0, 5));
     const filteredRuns = Object.keys(krakenData).filter(run => {
         const runMetadata = metadata[run];
-        if (!runMetadata || !runMetadata.plot) return false;
+        if (!runMetadata || !runMetadata.plot) {
+            console.log(`No metadata or plot for run: ${run}`);
+            return false;
+        }
         const plot = runMetadata.plot;
-        if (!selectedPlots.includes(plot)) return false;
+        if (!selectedPlots.includes(plot)) {
+            console.log(`Run ${run} plot ${plot} not in selectedPlots: ${selectedPlots}`);
+            return false;
+        }
         const envData = workingData.find(d => d.Plot === plot && d.TIMESTAMP);
-        if (!envData) return false;
+        if (!envData) {
+            console.log(`No environmental data for run ${run} plot ${plot}`);
+            return false;
+        }
         return Object.keys(currentRanges).every(key => {
             if (key === 'Soil_Depth') return true;
             const value = parseFloat(envData[key]);
             const range = currentRanges[key];
-            return isNaN(value) || (value >= range.defaultMin && value <= range.defaultMax);
+            const valid = isNaN(value) || (value >= range.defaultMin && value <= range.defaultMax);
+            if (!valid) console.log(`Run ${run} filtered out: ${key}=${value} not in range [${range.defaultMin}, ${range.defaultMax}]`);
+            return valid;
         });
     });
     console.log('Filtered runs:', filteredRuns);
@@ -1209,86 +1225,131 @@ function getTaxonColor(taxon) {
     return colors[taxon.charCodeAt(0) % colors.length];
 }
 
-document.querySelectorAll('.metagenomics-link').forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        console.log('Clicked metagenomics link:', link.textContent);
-        document.querySelectorAll('.metagenomics-link').forEach(l => l.classList.remove('active'));
-        link.classList.add('active');
-        const url = link.getAttribute('href');
-        if (link.classList.contains('kraken-stacked-bar')) {
-            console.log('Triggering stacked bar chart');
-            showStackedBarChart();
-        } else {
-            console.log('Showing metagenomics URL:', url);
-            showMetagenomics(url);
-            document.getElementById('metagenomics-menu').style.display = 'none';
+// Initialize event listeners after DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded');
+
+    // Metagenomics toggle
+    const metagenomicsToggle = document.getElementById('metagenomics-toggle');
+    if (metagenomicsToggle) {
+        metagenomicsToggle.addEventListener('click', () => {
+            console.log('Metagenomics toggle clicked');
+            toggleDropdown('metagenomics-menu');
+        });
+    } else {
+        console.error('Metagenomics toggle not found');
+    }
+
+    // Metagenomics links
+    const metagenomicsLinks = document.querySelectorAll('.metagenomics-link');
+    console.log('Found metagenomics links:', metagenomicsLinks.length);
+    metagenomicsLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Clicked metagenomics link:', link.textContent, 'Classes:', link.classList);
+            document.querySelectorAll('.metagenomics-link').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            const url = link.getAttribute('href');
+            if (link.classList.contains('kraken-stacked-bar')) {
+                console.log('Triggering stacked bar chart');
+                showStackedBarChart();
+            } else {
+                console.log('Showing metagenomics URL:', url);
+                showMetagenomics(url);
+                document.getElementById('metagenomics-menu').style.display = 'none';
+            }
+        });
+    });
+
+    // Fallback event delegation for metagenomics menu
+    const metagenomicsMenu = document.getElementById('metagenomics-menu');
+    if (metagenomicsMenu) {
+        metagenomicsMenu.addEventListener('click', (e) => {
+            const link = e.target.closest('.metagenomics-link');
+            if (link) {
+                console.log('Delegated click on metagenomics link:', link.textContent);
+                e.preventDefault();
+                document.querySelectorAll('.metagenomics-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                const url = link.getAttribute('href');
+                if (link.classList.contains('kraken-stacked-bar')) {
+                    console.log('Triggering stacked bar chart (delegated)');
+                    showStackedBarChart();
+                } else {
+                    console.log('Showing metagenomics URL (delegated):', url);
+                    showMetagenomics(url);
+                    document.getElementById('metagenomics-menu').style.display = 'none';
+                }
+            }
+        });
+    } else {
+        console.error('Metagenomics menu not found');
+    }
+
+    // Other event listeners
+    document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
+    document.getElementById('mobile-sidebar-button').addEventListener('click', toggleSidebar);
+    document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
+    document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
+    document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
+    document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
+    document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
+    document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
+    document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu'));
+    document.getElementById('close-control-panel').addEventListener('click', toggleControlPanel);
+    document.getElementById('show-fit').addEventListener('change', updateGraph);
+    document.getElementById('show-on-chart').addEventListener('change', updateGraph);
+
+    document.querySelectorAll('#independent-menu input').forEach(input => {
+        input.addEventListener('change', () => {
+            enforceSingleSelection('independent-menu', input.id);
+            updateGraph();
+        });
+    });
+
+    document.querySelectorAll('#dependent-menu input').forEach(input => {
+        input.addEventListener('change', updateGraph);
+    });
+
+    document.querySelectorAll('#chart-type-menu input').forEach(input => {
+        input.addEventListener('change', () => {
+            document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+            updateStatsOptions();
+            updateGraph();
+        });
+    });
+
+    document.querySelectorAll('#fit-options input').forEach(input => {
+        input.addEventListener('change', updateGraph);
+    });
+
+    document.querySelectorAll('#plot-number-menu input').forEach(input => {
+        input.addEventListener('change', () => {
+            selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked'))
+                .map(input => Number(input.value));
+            updateGraph();
+        });
+    });
+
+    flatpickr('#start-date', {
+        dateFormat: 'Y-m-d',
+        defaultDate: '2015-08-01',
+        onChange: (selectedDates) => {
+            startDate = selectedDates[0];
+            document.getElementById('time-range-toggle').textContent = `${startDate.toISOString().split('T')[0]} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+            updateGraph();
         }
     });
-});
 
-document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
-document.getElementById('mobile-sidebar-button').addEventListener('click', toggleSidebar);
-document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
-document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
-document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
-document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
-document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
-document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
-document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu'));
-document.getElementById('close-control-panel').addEventListener('click', toggleControlPanel);
-document.getElementById('show-fit').addEventListener('change', updateGraph);
-document.getElementById('show-on-chart').addEventListener('change', updateGraph);
-
-document.querySelectorAll('#independent-menu input').forEach(input => {
-    input.addEventListener('change', () => {
-        enforceSingleSelection('independent-menu', input.id);
-        updateGraph();
+    flatpickr('#end-date', {
+        dateFormat: 'Y-m-d',
+        defaultDate: '2025-04-05',
+        onChange: (selectedDates) => {
+            endDate = selectedDates[0];
+            document.getElementById('time-range-toggle').textContent = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate.toISOString().split('T')[0]}`;
+            updateGraph();
+        }
     });
-});
-
-document.querySelectorAll('#dependent-menu input').forEach(input => {
-    input.addEventListener('change', updateGraph);
-});
-
-document.querySelectorAll('#chart-type-menu input').forEach(input => {
-    input.addEventListener('change', () => {
-        document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
-        updateStatsOptions();
-        updateGraph();
-    });
-});
-
-document.querySelectorAll('#fit-options input').forEach(input => {
-    input.addEventListener('change', updateGraph);
-});
-
-document.querySelectorAll('#plot-number-menu input').forEach(input => {
-    input.addEventListener('change', () => {
-        selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked'))
-            .map(input => Number(input.value));
-        updateGraph();
-    });
-});
-
-flatpickr('#start-date', {
-    dateFormat: 'Y-m-d',
-    defaultDate: '2015-08-01',
-    onChange: (selectedDates) => {
-        startDate = selectedDates[0];
-        document.getElementById('time-range-toggle').textContent = `${startDate.toISOString().split('T')[0]} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
-        updateGraph();
-    }
-});
-
-flatpickr('#end-date', {
-    dateFormat: 'Y-m-d',
-    defaultDate: '2025-04-05',
-    onChange: (selectedDates) => {
-        endDate = selectedDates[0];
-        document.getElementById('time-range-toggle').textContent = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate.toISOString().split('T')[0]}`;
-        updateGraph();
-    }
 });
 
 window.addEventListener('resize', () => {
@@ -1319,6 +1380,6 @@ script.onload = () => {
 };
 script.onerror = () => console.error('Failed to load math.js');
 document.head.appendChild(script);
-    </script>
+</script>
 </body>
 </html>
