@@ -773,8 +773,9 @@
         <iframe id="metagenomics-iframe" style="width: 100%; height: calc(100% - 40px); border: none;"></iframe>
     </div>
     <div class="mobile-sidebar-button" id="mobile-sidebar-button">></div>
+    
 
-    <script>
+  <script>
     let allData = [];
     const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
     let startDate = new Date('2015-08-01');
@@ -1566,7 +1567,8 @@
 
     // Event listeners
     document.addEventListener('DOMContentLoaded', () => {
-        // Ensure Plotly and jStat are loaded before initializing
+    try {
+        console.log('DOMContentLoaded fired');
         if (typeof Plotly === 'undefined' || typeof jStat === 'undefined') {
             console.error('Plotly or jStat not loaded');
             document.getElementById('graph').innerHTML = '<div class="warning-message">Required libraries not loaded.</div>';
@@ -1599,7 +1601,7 @@
 
         const chartTypeMenu = document.getElementById('chart-type-menu');
         if (chartTypeMenu) chartTypeMenu.addEventListener('change', () => {
-            updateStatsOptions();
+            업데이트StatsOptions();
             updateGraph();
         });
 
@@ -1696,7 +1698,11 @@
         document.getElementById('stats-toggle')?.addEventListener('click', () => toggleDropdown('stats-menu'));
         document.getElementById('metagenomics-toggle')?.addEventListener('click', () => toggleDropdown('metagenomics-menu'));
         document.getElementById('plot-number-toggle')?.addEventListener('click', () => toggleDropdown('plot-number-menu'));
-    });
+    } catch (error) {
+        console.error('Syntax error in DOMContentLoaded:', error);
+        document.getElementById('graph').innerHTML = '<div class="warning-message">Syntax error in script. Check console for details.</div>';
+    }
+});
 </script>
 </body>
 </html>
