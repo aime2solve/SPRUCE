@@ -1140,17 +1140,27 @@ async function showStackedBarChart() {
         return;
     }
 
+    // Log krakenData and metadata for debugging
+    console.log('krakenData structure:', Object.keys(krakenData).slice(0, 3), 'Sample:', krakenData[Object.keys(krakenData)[0]]);
+    console.log('metadata structure:', Object.keys(metadata).slice(0, 3), 'Sample:', metadata[Object.keys(metadata)[0]]);
+
+    // Extract all run IDs from krakenData (assuming taxon-keyed structure)
+    const taxa = Object.keys(krakenData);
+    const allRuns = [...new Set(taxa.flatMap(taxon => Object.keys(krakenData[taxon] || {})))];
+    console.log('All runs:', allRuns);
+
     const workingData = filterByRanges(allData);
     const selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked'))
         .map(input => Number(input.value));
     console.log('Selected plots:', selectedPlots, 'Working data sample:', workingData.slice(0, 5));
-    const filteredRuns = Object.keys(krakenData).filter(run => {
+
+    const filteredRuns = allRuns.filter(run => {
         const runMetadata = metadata[run];
         if (!runMetadata || !runMetadata.plot) {
             console.log(`No metadata or plot for run: ${run}`);
             return false;
         }
-        const plot = runMetadata.plot;
+        const plot = Number(runMetadata.plot);
         if (!selectedPlots.includes(plot)) {
             console.log(`Run ${run} plot ${plot} not in selectedPlots: ${selectedPlots}`);
             return false;
@@ -1158,7 +1168,7 @@ async function showStackedBarChart() {
         const envData = workingData.find(d => d.Plot === plot && d.TIMESTAMP);
         if (!envData) {
             console.log(`No environmental data for run ${run} plot ${plot}`);
-            return false;
+            return false; // Comment this out to allow runs without env data
         }
         return Object.keys(currentRanges).every(key => {
             if (key === 'Soil_Depth') return true;
@@ -1176,16 +1186,15 @@ async function showStackedBarChart() {
         const content = document.createElement('div');
         content.style.color = '#FF4500';
         content.style.padding = '10px';
-        content.innerHTML = '<p>No runs match the current filters.</p>';
+        content.innerHTML = '<p>No runs match the current filters. Try adjusting plot selection or environmental ranges.</p>';
         iframe.insertAdjacentElement('afterend', content);
         return;
     }
 
-    const taxa = Object.keys(krakenData[filteredRuns[0]]);
     console.log('Taxa:', taxa);
     const traces = taxa.map(taxon => ({
         x: filteredRuns,
-        y: filteredRuns.map(run => krakenData[run][taxon] || 0),
+        y: filteredRuns.map(run => krakenData[taxon][run] || 0),
         name: taxon,
         type: 'bar',
         marker: { color: getTaxonColor(taxon) }
