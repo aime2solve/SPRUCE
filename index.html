@@ -865,8 +865,11 @@
     </div>
     <div class="mobile-sidebar-button" id="mobile-sidebar-button">></div>
     
+
+
 <script>
-  // Global variables
+ 
+// Global variables
 let allData = [];
 const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
 const metagenomicUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Metagenomics/kraken_taxa.json';
@@ -1211,10 +1214,16 @@ function calculateFit(x, y, fitType) {
         const sumXY = pairedData.reduce((sum, d) => sum + d.x * d.y, 0);
         const sumXX = xNum.reduce((sum, d) => sum + d * d, 0);
         const denominator = n * sumXX - sumX * sumX;
-        if (!isFinite(denominator) || denominator === 0) return null;
+        if (!isFinite(denominator) || denominator === 0) {
+            console.log('Linear fit failed: invalid denominator');
+            return null;
+        }
         const slope = (n * sumXY - sumX * sumY) / denominator;
         const intercept = (sumY - slope * sumX) / n;
-        if (!isFinite(slope) || !isFinite(intercept)) return null;
+        if (!isFinite(slope) || !isFinite(intercept)) {
+            console.log('Linear fit failed: non-finite slope or intercept');
+            return null;
+        }
         const yPred = xNum.map(x => slope * x + intercept);
         return calculateStats(xNum, yNum, yPred, 'linear', { slope, intercept });
     };
@@ -1226,17 +1235,26 @@ function calculateFit(x, y, fitType) {
         const sumLogXY = pairedData.reduce((sum, d) => sum + Math.log(d.x) * d.y, 0);
         const sumLogXLogX = logX.reduce((sum, d) => sum + d * d, 0);
         const denominator = n * sumLogXLogX - sumLogX * sumLogX;
-        if (!isFinite(denominator) || denominator === 0) return null;
+        if (!isFinite(denominator) || denominator === 0) {
+            console.log('Logarithmic fit failed: invalid denominator');
+            return null;
+        }
         const slope = (n * sumLogXY - sumLogX * sumY) / denominator;
         const intercept = (sumY - slope * sumLogX) / n;
-        if (!isFinite(slope) || !isFinite(intercept)) return null;
+        if (!isFinite(slope) || !isFinite(intercept)) {
+            console.log('Logarithmic fit failed: non-finite slope or intercept');
+            return null;
+        }
         const yPred = xNum.map(x => slope * Math.log(x) + intercept);
         return calculateStats(xNum, yNum, yPred, 'logarithmic', { slope, intercept });
     };
 
     const expFit = () => {
         const validPairs = pairedData.filter(d => d.y > 0);
-        if (validPairs.length < 2) return null;
+        if (validPairs.length < 2) {
+            console.log('Exponential fit failed: insufficient positive y values', validPairs.length);
+            return null;
+        }
         const xExp = validPairs.map(d => d.x);
         const logY = validPairs.map(d => Math.log(d.y));
         const sumX = xExp.reduce((a, b) => a + b, 0);
@@ -1244,12 +1262,18 @@ function calculateFit(x, y, fitType) {
         const sumXLogY = validPairs.reduce((sum, d) => sum + d.x * Math.log(d.y), 0);
         const sumXX = xExp.reduce((sum, d) => sum + d * d, 0);
         const denominator = n * sumXX - sumX * sumX;
-        if (!isFinite(denominator) || denominator === 0) return null;
+        if (!isFinite(denominator) || denominator === 0) {
+            console.log('Exponential fit failed: invalid denominator');
+            return null;
+        }
         const slope = (n * sumXLogY - sumX * sumLogY) / denominator;
         const intercept = (sumLogY - slope * sumX) / n;
         const a = Math.exp(intercept);
         const b = slope;
-        if (!isFinite(a) || !isFinite(b)) return null;
+        if (!isFinite(a) || !isFinite(b)) {
+            console.log('Exponential fit failed: non-finite parameters');
+            return null;
+        }
         const yPred = xNum.map(x => a * Math.exp(b * x));
         return calculateStats(xNum, yNum, yPred, 'exponential', { a, b });
     };
@@ -1261,7 +1285,10 @@ function calculateFit(x, y, fitType) {
         const validFits = Object.entries(fits)
             .filter(([_, fit]) => fit && !isNaN(fit.rSquared))
             .map(([type, fit]) => ({ type, ...fit }));
-        if (validFits.length === 0) return defaultResult;
+        if (validFits.length === 0) {
+            console.log('No valid fits found');
+            return defaultResult;
+        }
         return validFits.reduce((best, current) => (best.rSquared > current.rSquared) ? best : current);
     } else {
         switch (fitType) {
@@ -1286,8 +1313,12 @@ function calculateStats(xNum, yNum, yPred, type, params) {
     const msRes = ssRes / dfRes;
     const fValue = msRes === 0 ? NaN : msReg / msRes;
     const pValue = isNaN(fValue) ? NaN : jStat.ftest(fValue, dfReg, dfRes);
+    if (isNaN(fValue)) {
+        console.log('p-value NaN due to invalid F-value', { msReg, msRes });
+    }
 
     if (yPred.some(y => !isFinite(y))) {
+        console.log('Invalid yPred values in fit', type);
         return { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
     }
     return { type, params, rSquared, fValue, pValue, yPred };
@@ -1461,21 +1492,29 @@ async function showStackedBarChart(e) {
         return;
     }
 
+    console.log('Selected plots:', selectedPlots);
+    console.log('Available samples:', Object.keys(data));
+    console.log('Sample to plot mapping:', sampleToPlotMap);
+
     const filteredSamples = Object.keys(data).filter(sample => {
         const plot = sampleToPlotMap[sample]?.plot;
-        return !selectedPlots.length || (plot && selectedPlots.includes(plot));
+        const isValid = !selectedPlots.length || (plot && selectedPlots.includes(plot));
+        console.log(`Sample ${sample}: plot=${plot}, included=${isValid}`);
+        return isValid;
     });
 
     if (!filteredSamples.length) {
-        graphDiv.innerHTML = '<div class="warning-message">No metagenomic data for selected plots.</div>';
-        console.warn('No samples available for selected plots');
+        graphDiv.innerHTML = '<div class="warning-message">No metagenomic data for selected plots. Ensure plots like 4, 6, 7, 8, 10, 11, or 13 are selected.</div>';
+        console.warn('No samples available for selected plots', { selectedPlots, availablePlots: Object.values(sampleToPlotMap).map(s => s.plot) });
         return;
     }
 
     const taxa = [...new Set(filteredSamples.flatMap(sample => Object.keys(data[sample] || {})))].slice(0, 10);
+    console.log('Extracted taxa:', taxa);
+
     if (!taxa.length) {
         graphDiv.innerHTML = '<div class="warning-message">No taxa data available for selected samples.</div>';
-        console.warn('No taxa found in data');
+        console.warn('No taxa found in data for samples:', filteredSamples);
         return;
     }
 
@@ -1759,11 +1798,14 @@ function updateGraph() {
             y: 0.98 - index * 0.05,
             xanchor: 'left',
             yanchor: 'top',
-            text: item.text,
+            text: item.text.replace(/p=0\.0000/, 'p<.0001').replace(/p=(\d+\.\d+)/, p => {
+                const val = parseFloat(p.split('=')[1]);
+                return val < 0.0001 ? 'p<.0001' : p;
+            }),
             showarrow: false,
             font: {
                 family: 'VT323, monospace',
-                size: 12,
+                size: 14,
                 color: item.color
             },
             bgcolor: 'rgba(26, 26, 26, 0.8)',
@@ -1985,6 +2027,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
 </script>
 </body>
 </html>
