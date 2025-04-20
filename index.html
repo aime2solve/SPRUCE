@@ -139,7 +139,43 @@
     font-weight: bold;
     padding: 0 10px;
 }
-        .controls-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.controls-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #1A1A1A;
+    border-bottom: 1px solid #444;
+    position: relative;
+    z-index: 1002;
+    height: 40px;
+    width: 100%;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: block;
+    cursor: pointer;
+    color: #FFFFFF;
+    background-color: #FF4500;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 1003;
+    pointer-events: auto;
+    user-select: none;
+}
+
+#metagenomics-iframe, #metagenomics-popup > div:not(.controls-header) {
+    margin-top: 40px;
+    height: calc(100% - 40px);
+}
         .controls-header h3 { margin: 0; color: #DAA520; font-family: 'Exo 2', sans-serif; font-size: 18px; flex-grow: 1; text-align: left; }
         .slider-container { margin: 10px 0; position: relative; }
         .slider-container label { display: block; margin-bottom: 5px; }
@@ -667,40 +703,10 @@ function calculateFit(x, y, fitType) {
         return calculateStats(xNum, yNum, yPred, 'exponential', { a, b });
     };
 
-    const polyFit = () => {
-        if (typeof math === 'undefined' || !math.lusolve) return null;
-        const X = xNum.map(x => [1, x, x * x]);
-        const Y = yNum;
-        try {
-            const XtX = math.multiply(math.transpose(X), X);
-            const XtY = math.multiply(math.transpose(X), Y);
-            console.log('Polynomial intermediates:', { XtX, XtY });
-            const det = math.det(XtX);
-            if (Math.abs(det) < 1e-10) {
-                console.log('Singular matrix in polynomial fit, det:', det);
-                return null;
-            }
-            const coeffs = math.lusolve(XtX, XtY);
-            if (!coeffs || !coeffs._data || coeffs._data.length < 3) {
-                console.log('Invalid coeffs from lusolve:', coeffs);
-                return null;
-            }
-            const c = coeffs._data[0][0], b = coeffs._data[1][0], a = coeffs._data[2][0];
-            if (!isFinite(a) || !isFinite(b) || !isFinite(c)) return null;
-            const yPred = xNum.map(x => a * x * x + b * x + c);
-            return calculateStats(xNum, yNum, yPred, 'polynomial', { a, b, c });
-        } catch (e) {
-            console.error('Polynomial fit failed:', e.message);
-            return null;
-        }
-    };
-
     if (fitType === 'auto') {
         fits.linear = linearFit();
         fits.logarithmic = logFit();
         fits.exponential = expFit();
-        fits.polynomial = polyFit();
-
         const validFits = Object.entries(fits)
             .filter(([_, fit]) => fit && !isNaN(fit.rSquared))
             .map(([type, fit]) => ({ type, ...fit }));
@@ -715,7 +721,6 @@ function calculateFit(x, y, fitType) {
             case 'linear': return linearFit() || defaultResult;
             case 'logarithmic': return logFit() || defaultResult;
             case 'exponential': return expFit() || defaultResult;
-            case 'polynomial': return polyFit() || defaultResult;
             default: return defaultResult;
         }
     }
@@ -756,7 +761,7 @@ function calculateANOVA(data, independent, dependent) {
 }
 
 function calculateBoxStats(yValues) {
-    const validY = yValues.filter(y => !isNaN(y));
+    const validY = yValues.filter(y => !isNaN(y) && y !== null);
     if (validY.length === 0) return { median: NaN, q1: NaN, q3: NaN, iqr: NaN, min: NaN, max: NaN };
     const median = jStat.median(validY);
     const q1 = jStat.percentile(validY, 0.25);
@@ -831,7 +836,7 @@ function calculateGraphHeight() {
 }
 
 function filterOutliers(x, y) {
-    const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y));
+    const pairedData = x.map((xi, i) => ({ x: xi, y: y[i] })).filter(d => !isNaN(d.y) && d.y !== null);
     if (pairedData.length < 2) return { x: x, y: y };
     const yValues = pairedData.map(d => d.y);
     const q1 = jStat.percentile(yValues, 0.25);
@@ -921,9 +926,11 @@ function updateGraph() {
                     y: parseFloat(row[dep])
                 }))
                 .filter(d => d.x !== null && !isNaN(d.x) && d.y !== null && !isNaN(d.y));
+            
+            console.log(`Paired data for ${dep}:`, { length: pairedData.length, sample: pairedData.slice(0, 5) });
 
-            if (pairedData.length === 0) {
-                console.warn(`No valid data for ${dep} vs ${independent}: pairedData length=0`);
+            if (pairedData.length < 2) {
+                console.warn(`No valid data for ${dep} vs ${independent}: pairedData length=${pairedData.length}`);
                 invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has no valid data`);
                 return;
             }
@@ -935,12 +942,20 @@ function updateGraph() {
             xValues = filtered.x;
             yValues = filtered.y;
 
+            console.log(`Filtered values for ${dep}:`, { xLength: xValues.length, yLength: yValues.length, xSample: xValues.slice(0, 5), ySample: yValues.slice(0, 5) });
+
+            if (xValues.length < 2 || yValues.length < 2) {
+                console.warn(`Insufficient data after outlier filtering for ${dep}: xLength=${xValues.length}, yLength=${yValues.length}`);
+                invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has insufficient data after filtering`);
+                return;
+            }
+
             const color = dependentColors[dep] || '#FFFFFF';
             traces.push({
                 x: xValues,
                 y: yValues,
                 mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
-                type: chartType === 'scatter' ? 'scattergl' : chartType === 'area' ? 'scattergl' : chartType,
+                type: chartType === 'scatter' ? 'scatter' : chartType === 'area' ? 'scatter' : chartType,
                 name: document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep,
                 marker: { color: color, size: 8 },
                 line: (chartType === 'line' || chartType === 'area') ? { color: color, width: 2 } : undefined,
@@ -976,7 +991,6 @@ function updateGraph() {
                             if (fit.type === 'linear') return fit.params.slope * x + fit.params.intercept;
                             if (fit.type === 'logarithmic') return fit.params.slope * Math.log(x) + fit.params.intercept;
                             if (fit.type === 'exponential') return fit.params.a * Math.exp(fit.params.b * x);
-                            if (fit.type === 'polynomial') return fit.params.a * x * x + fit.params.b * x + fit.params.c;
                             return NaN;
                         });
                     }
@@ -985,7 +999,7 @@ function updateGraph() {
                             x: xFit,
                             y: yFit,
                             mode: 'lines',
-                            type: 'scattergl',
+                            type: 'scatter',
                             name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (${fit.type} fit)`,
                             line: { color: color, width: 2, dash: 'dash' }
                         });
@@ -995,7 +1009,6 @@ function updateGraph() {
                 if (fit.type === 'linear') eq = `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}x`;
                 else if (fit.type === 'logarithmic') eq = `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}ln(x)`;
                 else if (fit.type === 'exponential') eq = `y = ${fit.params.a.toFixed(2)}e^(${fit.params.b.toFixed(2)}x)`;
-                else if (fit.type === 'polynomial') eq = `y = ${fit.params.a.toFixed(2)}x² + ${fit.params.b.toFixed(2)}x + ${fit.params.c.toFixed(2)}`;
                 statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: ${eq}, R²=${(fit.rSquared || NaN).toFixed(2)}, F=${(fit.fValue || NaN).toFixed(2)}, p=${(fit.pValue || NaN).toFixed(4)}`);
             }
         });
@@ -1064,7 +1077,7 @@ function updateGraph() {
             l: window.innerWidth <= 480 ? 80 : 100, 
             r: window.innerWidth <= 480 ? 20 : 30 
         },
-        showlegend: false,
+        showlegend: legendVisible,
         legend: { 
             x: 1, 
             y: 0.95, 
@@ -1080,7 +1093,7 @@ function updateGraph() {
 
     const data = traces.concat(fitTraces);
 
-    console.log('Traces:', traces.length, 'Fit Traces:', fitTraces.length, 'Annotations:', annotations.length);
+    console.log('Traces:', traces.length, 'Fit Traces:', fitTraces.length, 'Annotations:', annotations.length, 'Data sample:', data.slice(0, 2));
 
     const warningMessage = graphDiv.querySelector('.warning-message');
     if (warningMessage) warningMessage.remove();
@@ -1106,7 +1119,6 @@ function updateGraph() {
     }
 }
 
-// Rewritten metagenomics-related functions
 const krakenDataUrl = 'https://aime2solve.github.io/SPRUCE/Metagenomics/kraken_taxa.json';
 const metadataUrl = 'https://aime2solve.github.io/SPRUCE/Metagenomics/metadata.json';
 let krakenData = null;
@@ -1154,6 +1166,12 @@ function showMetagenomics(url) {
     iframe.src = url;
     iframe.style.display = 'block';
     popup.style.display = 'block';
+    // Ensure close button is visible
+    const closeButton = document.getElementById('close-metagenomics');
+    if (closeButton) {
+        closeButton.style.display = 'block';
+        console.log('Close button ensured visible for URL:', url);
+    }
 }
 
 async function showStackedBarChart() {
@@ -1165,6 +1183,25 @@ async function showStackedBarChart() {
     iframe.src = '';
     iframe.style.display = 'none';
     popup.style.display = 'block';
+
+    // Ensure controls-header and close button are present
+    let header = popup.querySelector('.controls-header');
+    if (!header) {
+        header = document.createElement('div');
+        header.className = 'controls-header';
+        header.innerHTML = `
+            <div id="metagenomics-title">Metagenomics</div>
+            <div id="close-metagenomics" class="close-button">X</div>
+        `;
+        popup.insertBefore(header, popup.firstChild);
+        console.log('Re-added controls-header with close button');
+    }
+
+    const closeButton = document.getElementById('close-metagenomics');
+    if (closeButton) {
+        closeButton.style.display = 'block';
+        console.log('Close button ensured visible for stacked bar chart');
+    }
 
     if (!krakenData || !metadata || Object.keys(krakenData).length === 0) {
         console.log('No taxonomic data available');
@@ -1268,76 +1305,29 @@ function getTaxonColor(taxon) {
     return colors[taxon.charCodeAt(0) % colors.length];
 }
 
-// Initialize event listeners
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded');
 
-    // Metagenomics toggle
-    const metagenomicsToggle = document.getElementById('metagenomics-toggle');
-    if (metagenomicsToggle) {
-        metagenomicsToggle.addEventListener('click', () => {
-            console.log('Metagenomics toggle clicked');
-            toggleDropdown('metagenomics-menu');
-        });
-    } else {
-        console.error('Metagenomics toggle not found');
-    }
-
-    // Metagenomics close button
+    // Verify close button existence
     const closeMetagenomics = document.getElementById('close-metagenomics');
     if (closeMetagenomics) {
-        closeMetagenomics.addEventListener('click', closeMetagenomicsPopup);
+        closeMetagenomics.addEventListener('click', () => {
+            console.log('Direct click on close-metagenomics');
+            closeMetagenomicsPopup();
+        });
+        console.log('Close metagenomics button found and event listener attached');
     } else {
         console.error('Close metagenomics button not found');
     }
 
-    // Metagenomics links
-    const metagenomicsLinks = document.querySelectorAll('.metagenomics-link');
-    console.log('Found metagenomics links:', metagenomicsLinks.length);
-    metagenomicsLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('Clicked metagenomics link:', link.textContent, 'Classes:', link.classList);
-            document.querySelectorAll('.metagenomics-link').forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            const url = link.getAttribute('href');
-            if (link.classList.contains('kraken-stacked-bar')) {
-                console.log('Triggering stacked bar chart');
-                showStackedBarChart();
-            } else {
-                console.log('Showing metagenomics URL:', url);
-                showMetagenomics(url);
-                document.getElementById('metagenomics-menu').style.display = 'none';
-            }
-        });
+    // Fallback event delegation for close button
+    document.addEventListener('click', (e) => {
+        if (e.target.id === 'close-metagenomics') {
+            console.log('Delegated click on close-metagenomics');
+            closeMetagenomicsPopup();
+        }
     });
 
-    // Fallback event delegation for metagenomics menu
-    const metagenomicsMenu = document.getElementById('metagenomics-menu');
-    if (metagenomicsMenu) {
-        metagenomicsMenu.addEventListener('click', (e) => {
-            const link = e.target.closest('.metagenomics-link');
-            if (link) {
-                console.log('Delegated click on metagenomics link:', link.textContent);
-                e.preventDefault();
-                document.querySelectorAll('.metagenomics-link').forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-                const url = link.getAttribute('href');
-                if (link.classList.contains('kraken-stacked-bar')) {
-                    console.log('Triggering stacked bar chart (delegated)');
-                    showStackedBarChart();
-                } else {
-                    console.log('Showing metagenomics URL (delegated):', url);
-                    showMetagenomics(url);
-                    document.getElementById('metagenomics-menu').style.display = 'none';
-                }
-            }
-        });
-    } else {
-        console.error('Metagenomics menu not found');
-    }
-
-    // Other event listeners
     document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
     document.getElementById('mobile-sidebar-button').addEventListener('click', toggleSidebar);
     document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
@@ -1381,6 +1371,60 @@ document.addEventListener('DOMContentLoaded', () => {
             updateGraph();
         });
     });
+
+    const metagenomicsToggle = document.getElementById('metagenomics-toggle');
+    if (metagenomicsToggle) {
+        metagenomicsToggle.addEventListener('click', () => {
+            console.log('Metagenomics toggle clicked');
+            toggleDropdown('metagenomics-menu');
+        });
+    } else {
+        console.error('Metagenomics toggle not found');
+    }
+
+    const metagenomicsLinks = document.querySelectorAll('.metagenomics-link');
+    console.log('Found metagenomics links:', metagenomicsLinks.length);
+    metagenomicsLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Clicked metagenomics link:', link.textContent, 'Classes:', link.classList);
+            document.querySelectorAll('.metagenomics-link').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            const url = link.getAttribute('href');
+            if (link.classList.contains('kraken-stacked-bar')) {
+                console.log('Triggering stacked bar chart');
+                showStackedBarChart();
+            } else {
+                console.log('Showing metagenomics URL:', url);
+                showMetagenomics(url);
+                document.getElementById('metagenomics-menu').style.display = 'none';
+            }
+        });
+    });
+
+    const metagenomicsMenu = document.getElementById('metagenomics-menu');
+    if (metagenomicsMenu) {
+        metagenomicsMenu.addEventListener('click', (e) => {
+            const link = e.target.closest('.metagenomics-link');
+            if (link) {
+                console.log('Delegated click on metagenomics link:', link.textContent);
+                e.preventDefault();
+                document.querySelectorAll('.metagenomics-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                const url = link.getAttribute('href');
+                if (link.classList.contains('kraken-stacked-bar')) {
+                    console.log('Triggering stacked bar chart (delegated)');
+                    showStackedBarChart();
+                } else {
+                    console.log('Showing metagenomics URL (delegated):', url);
+                    showMetagenomics(url);
+                    document.getElementById('metagenomics-menu').style.display = 'none';
+                }
+            }
+        });
+    } else {
+        console.error('Metagenomics menu not found');
+    }
 
     flatpickr('#start-date', {
         dateFormat: 'Y-m-d',
