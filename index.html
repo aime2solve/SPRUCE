@@ -268,48 +268,46 @@
                 </div>
             </div>
 
-	<div class="button-container">
-    <span class="button-label">Metagenomics:</span>
-    <div class="dropdown-toggle" id="metagenomics-toggle">Select Visualization</div>
-    <div class="dropdown-menu" id="metagenomics-menu">
-        <div class="dropdown-item">
-            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/multiqc_report.html" class="metagenomics-link">MultiQC Report (FastQC)</a>
+            <div class="button-container">
+                <span class="button-label">Metagenomics:</span>
+                <div class="dropdown-toggle" id="metagenomics-toggle">Select Visualization</div>
+                <div class="dropdown-menu" id="metagenomics-menu">
+                    <div class="dropdown-item">
+                        <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/multiqc_report.html" class="metagenomics-link">MultiQC Report (FastQC)</a>
+                    </div>
+                    <div class="dropdown-item">
+                        <span class="metagenomics-subheader">Kraken2/Krona Reports</span>
+                    </div>
+                    <div class="dropdown-item">
+                        <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157607_krona.html" class="metagenomics-link">SRR1157607 (Kraken2/Krona)</a>
+                    </div>
+                    <div class="dropdown-item">
+                        <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157608_krona.html" class="metagenomics-link">SRR1157608 (Kraken2/Krona)</a>
+                    </div>
+                    <div class="dropdown-item">
+                        <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157609_krona.html" class="metagenomics-link">SRR1157609 (Kraken2/Krona)</a>
+                    </div>
+                    <div class="dropdown-item">
+                        <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157614_krona.html" class="metagenomics-link">SRR1157614 (Kraken2/Krona)</a>
+                    </div>
+                    <div class="dropdown-item">
+                        <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157615_krona.html" class="metagenomics-link">SRR1157615 (Kraken2/Krona)</a>
+                    </div>
+                    <div class="dropdown-item">
+                        <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157616_krona.html" class="metagenomics-link">SRR1157616 (Kraken2/Krona)</a>
+                    </div>
+                    <div class="dropdown-item">
+                        <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157617_krona.html" class="metagenomics-link">SRR1157617 (Kraken2/Krona)</a>
+                    </div>
+                    <div class="dropdown-item">
+                        <span class="metagenomics-subheader">Kraken2 Visualizations</span>
+                    </div>
+                    <div class="dropdown-item">
+                        <a href="#" class="metagenomics-link kraken-stacked-bar">Stacked Bar Chart (Top Taxa)</a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="dropdown-item">
-            <span class="metagenomics-subheader">Kraken2/Krona Reports</span>
-        </div>
-        <div class="dropdown-item">
-            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157607_krona.html" class="metagenomics-link">SRR1157607 (Kraken2/Krona)</a>
-        </div>
-        <div class="dropdown-item">
-            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157608_krona.html" class="metagenomics-link">SRR1157608 (Kraken2/Krona)</a>
-        </div>
-        <div class="dropdown-item">
-            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157609_krona.html" class="metagenomics-link">SRR1157609 (Kraken2/Krona)</a>
-        </div>
-        <div class="dropdown-item">
-            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157614_krona.html" class="metagenomics-link">SRR1157614 (Kraken2/Krona)</a>
-        </div>
-        <div class="dropdown-item">
-            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157615_krona.html" class="metagenomics-link">SRR1157615 (Kraken2/Krona)</a>
-        </div>
-        <div class="dropdown-item">
-            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157616_krona.html" class="metagenomics-link">SRR1157616 (Kraken2/Krona)</a>
-        </div>
-        <div class="dropdown-item">
-            <a href="https://aime2solve.github.io/SPRUCE/Metagenomics/SRR1157617_krona.html" class="metagenomics-link">SRR1157617 (Kraken2/Krona)</a>
-        </div>
-        <div class="dropdown-item">
-            <span class="metagenomics-subheader">Kraken2 Visualizations</span>
-        </div>
-        <div class="dropdown-item">
-            <a href="#" class="metagenomics-link kraken-stacked-bar">Stacked Bar Chart (Top Taxa)</a>
-        </div>
-    </div>
-</div>
-
-        </div>
-
 
         <div class="graph-container" id="graph-container">
             <div id="graph">
@@ -325,22 +323,23 @@
         <div class="controls-header">
             <h3 style="flex-grow: 1; text-align: left;">Control Panel</h3>
             <div class="close-button" id="close-control-panel">X</div>
-	    <div class="dropdown-toggle" id="plot-number-toggle" style="width: 80px;">Plot # (all)</div>
+            <div class="dropdown-toggle" id="plot-number-toggle" style="width: 80px;">Plot # (all)</div>
             <div class="dropdown-menu" id="plot-number-menu"></div>
         </div>
         <div id="control-panel-content"></div>
     </div>
+
+    <div class="metagenomics-popup" id="metagenomics-popup">
+        <div class="controls-header">
+            <h3>Metagenomics Visualization</h3>
+            <div class="close-button" id="close-metagenomics">X</div>
+        </div>
+        <iframe id="metagenomics-iframe" style="width: 100%; height: 80vh; border: none;"></iframe>
+    </div>
+
     <div class="mobile-sidebar-button" id="mobile-sidebar-button">></div>
 
-<div class="metagenomics-popup" id="metagenomics-popup">
-    <div class="controls-header">
-        <h3>Metagenomics Visualization</h3>
-        <div class="close-button" id="close-metagenomics">X</div>
-    </div>
-    <iframe id="metagenomics-iframe" style="width: 100%; height: 80vh; border: none;"></iframe>
-</div>
-
-   <script>
+    <script>
 let allData = [];
 const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
 let startDate = new Date('2015-08-01');
@@ -421,7 +420,7 @@ async function loadData() {
         ).join('');
 
         selectedPlots = Object.keys(plotConditions).map(Number);
-        document.getElementById('plot-number-toggle').textContent = 'Plot #'; // Static text
+        document.getElementById('plot-number-toggle').textContent = 'Plot #';
 
         dataLoaded = true;
         cachedData = aggregateVariables(allData);
@@ -1050,54 +1049,84 @@ function updateGraph() {
         hovermode: 'closest'
     };
 
-    // Metagenomic data and metadata
-    const krakenDataUrl = 'https://aime2solve.github.io/SPRUCE/Metagenomics/kraken_taxa.json';
-    const metadataUrl = 'https://aime2solve.github.io/SPRUCE/Metagenomics/metadata.json';
-    let krakenData = null;
-    let metadata = null;
+    const data = traces.concat(fitTraces);
 
-    // Load metagenomic data
-    async function loadMetagenomicData() {
-        try {
-            const krakenResponse = await fetch(krakenDataUrl);
-            krakenData = await krakenResponse.json();
-            const metadataResponse = await fetch(metadataUrl);
-            metadata = await metadataResponse.json();
-            console.log('Loaded metagenomic data:', krakenData, metadata);
-        } catch (e) {
-            console.error('Failed to load metagenomic data:', e);
+    console.log('Traces:', traces.length, 'Fit Traces:', fitTraces.length, 'Annotations:', annotations.length);
+
+    const warningMessage = graphDiv.querySelector('.warning-message');
+    if (warningMessage) warningMessage.remove();
+
+    const welcomeMessage = document.getElementById('welcome-message');
+    if (welcomeMessage) welcomeMessage.style.display = 'none';
+
+    if (!graphInitialized) {
+        Plotly.newPlot(graphDiv, data, layout, { responsive: true })
+            .then(() => {
+                graphInitialized = true;
+                console.log('Graph initialized');
+            })
+            .catch(err => console.error('Plotly newPlot error:', err));
+    } else {
+        Plotly.react(graphDiv, data, layout)
+            .catch(err => {
+                console.error('Plotly react error:', err);
+                Plotly.newPlot(graphDiv, data, layout, { responsive: true })
+                    .then(() => graphInitialized = true)
+                    .catch(err => console.error('Fallback newPlot error:', err));
+            });
+    }
+}
+
+// Metagenomic data and metadata
+const krakenDataUrl = 'https://aime2solve.github.io/SPRUCE/Metagenomics/kraken_taxa.json';
+const metadataUrl = 'https://aime2solve.github.io/SPRUCE/Metagenomics/metadata.json';
+let krakenData = null;
+let metadata = null;
+
+async function loadMetagenomicData() {
+    try {
+        const krakenResponse = await fetch(krakenDataUrl);
+        if (!krakenResponse.ok) throw new Error(`Failed to fetch kraken data: ${krakenResponse.status}`);
+        krakenData = await krakenResponse.json();
+        const metadataResponse = await fetch(metadataUrl);
+        if (!metadataResponse.ok) throw new Error(`Failed to fetch metadata: ${metadataResponse.status}`);
+        metadata = await metadataResponse.json();
+        console.log('Loaded metagenomic data:', Object.keys(krakenData).length, 'runs,', Object.keys(metadata).length, 'metadata entries');
+    } catch (e) {
+        console.error('Failed to load metagenomic data:', e);
+        krakenData = null;
+        metadata = null;
+        const popup = document.getElementById('metagenomics-popup');
+        if (popup) {
+            popup.innerHTML += '<div style="color: #FF4500; padding: 10px;">Failed to load metagenomic data.</div>';
         }
     }
+}
 
-    // Toggle Metagenomics dropdown
-    document.getElementById('metagenomics-toggle').addEventListener('click', () => toggleDropdown('metagenomics-menu'));
+function showMetagenomics(url) {
+    const popup = document.getElementById('metagenomics-popup');
+    const iframe = document.getElementById('metagenomics-iframe');
+    iframe.src = url;
+    popup.style.display = 'block';
+}
 
-    // Toggle Metagenomics popup
-    function showMetagenomics(url) {
-        const popup = document.getElementById('metagenomics-popup');
-        const iframe = document.getElementById('metagenomics-iframe');
-        iframe.src = url;
-        popup.style.display = 'block';
-    }
+document.getElementById('close-metagenomics').addEventListener('click', () => {
+    const popup = document.getElementById('metagenomics-popup');
+    popup.style.display = 'none';
+    document.getElementById('metagenomics-iframe').src = '';
+});
 
-    // Close Metagenomics popup
-    document.getElementById('close-metagenomics').addEventListener('click', () => {
-        const popup = document.getElementById('metagenomics-popup');
-        popup.style.display = 'none';
-        document.getElementById('metagenomics-iframe').src = '';
-    });
-
-    // Show stacked bar chart
-   async function showStackedBarChart() {
+async function showStackedBarChart() {
+    console.log('Starting showStackedBarChart');
     const popup = document.getElementById('metagenomics-popup');
     const iframe = document.getElementById('metagenomics-iframe');
     iframe.src = '';
-    // Clear previous content
     const existingChart = popup.querySelector('div:not(.controls-header):not(#metagenomics-iframe)');
     if (existingChart) existingChart.remove();
     popup.style.display = 'block';
 
     if (!krakenData || !metadata || Object.keys(krakenData).length === 0) {
+        console.log('No taxonomic data available');
         const content = document.createElement('div');
         content.style.color = '#FF4500';
         content.style.padding = '10px';
@@ -1106,7 +1135,6 @@ function updateGraph() {
         return;
     }
 
-    // Filter runs
     const workingData = filterByRanges(allData);
     const selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked'))
         .map(input => Number(input.value));
@@ -1128,6 +1156,7 @@ function updateGraph() {
     console.log('Filtered runs:', filteredRuns);
 
     if (!filteredRuns.length) {
+        console.log('No runs match the current filters');
         const content = document.createElement('div');
         content.style.color = '#FF4500';
         content.style.padding = '10px';
@@ -1136,8 +1165,8 @@ function updateGraph() {
         return;
     }
 
-    // Create stacked bar chart
     const taxa = Object.keys(krakenData[filteredRuns[0]]);
+    console.log('Taxa:', taxa);
     const traces = taxa.map(taxon => ({
         x: filteredRuns,
         y: filteredRuns.map(run => krakenData[run][taxon] || 0),
@@ -1168,20 +1197,19 @@ function updateGraph() {
     chartDiv.style.height = '70vh';
     iframe.insertAdjacentElement('afterend', chartDiv);
 
+    console.log('Rendering Plotly chart with', traces.length, 'traces');
     Plotly.newPlot(chartDiv, traces, layout, { responsive: true }).catch(err => {
         console.error('Plotly error in stacked bar chart:', err);
         chartDiv.innerHTML = '<div style="color: #FF4500; padding: 10px;">Failed to render chart.</div>';
     });
 }
 
-    // Taxon color mapping
-    function getTaxonColor(taxon) {
-        const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347'];
-        return colors[taxon.charCodeAt(0) % colors.length];
-    }
+function getTaxonColor(taxon) {
+    const colors = ['#00FFFF', '#FFFF00', '#FF00FF', '#00FF00', '#FF0000', '#0000FF', '#FFA500', '#800080', '#008080', '#FF6347'];
+    return colors[taxon.charCodeAt(0) % colors.length];
+}
 
-    // Handle metagenomics links
-    document.querySelectorAll('.metagenomics-link').forEach(link => {
+document.querySelectorAll('.metagenomics-link').forEach(link => {
     link.addEventListener('click', (e) => {
         e.preventDefault();
         console.log('Clicked metagenomics link:', link.textContent);
@@ -1199,142 +1227,98 @@ function updateGraph() {
     });
 });
 
-    // Update existing updateGraph function
-    const originalUpdateGraph = updateGraph;
-    updateGraph = function() {
-        originalUpdateGraph();
-        if (document.getElementById('metagenomics-popup').style.display === 'block' && 
-            document.querySelector('.kraken-stacked-bar')?.classList.contains('active')) {
-            showStackedBarChart();
-        }
+document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
+document.getElementById('mobile-sidebar-button').addEventListener('click', toggleSidebar);
+document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
+document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
+document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
+document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
+document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
+document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
+document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu'));
+document.getElementById('close-control-panel').addEventListener('click', toggleControlPanel);
+document.getElementById('show-fit').addEventListener('change', updateGraph);
+document.getElementById('show-on-chart').addEventListener('change', updateGraph);
 
-        // Plot environmental data
-        const data = traces.concat(fitTraces);
+document.querySelectorAll('#independent-menu input').forEach(input => {
+    input.addEventListener('change', () => {
+        enforceSingleSelection('independent-menu', input.id);
+        updateGraph();
+    });
+});
 
-        console.log('Traces:', traces.length, 'Fit Traces:', fitTraces.length, 'Annotations:', annotations.length);
+document.querySelectorAll('#dependent-menu input').forEach(input => {
+    input.addEventListener('change', updateGraph);
+});
 
-        // Clear any existing warning message before rendering the plot
-        const warningMessage = graphDiv.querySelector('.warning-message');
-        if (warningMessage) {
-            warningMessage.remove();
-        }
+document.querySelectorAll('#chart-type-menu input').forEach(input => {
+    input.addEventListener('change', () => {
+        document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
+        updateStatsOptions();
+        updateGraph();
+    });
+});
 
-        // Hide the welcome message
-        const welcomeMessage = document.getElementById('welcome-message');
-        if (welcomeMessage) welcomeMessage.style.display = 'none';
+document.querySelectorAll('#fit-options input').forEach(input => {
+    input.addEventListener('change', updateGraph);
+});
 
-        if (!graphInitialized) {
-            Plotly.newPlot(graphDiv, data, layout, { responsive: true })
-                .then(() => {
-                    graphInitialized = true;
-                    console.log('Graph initialized');
-                })
-                .catch(err => console.error('Plotly newPlot error:', err));
-        } else {
-            Plotly.react(graphDiv, data, layout)
-                .catch(err => {
-                    console.error('Plotly react error:', err);
-                    Plotly.newPlot(graphDiv, data, layout, { responsive: true })
-                        .then(() => graphInitialized = true)
-                        .catch(err => console.error('Fallback newPlot error:', err));
-                });
-        }
-    };
+document.querySelectorAll('#plot-number-menu input').forEach(input => {
+    input.addEventListener('change', () => {
+        selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked'))
+            .map(input => Number(input.value));
+        updateGraph();
+    });
+});
 
-    // Load metagenomic data on startup
+flatpickr('#start-date', {
+    dateFormat: 'Y-m-d',
+    defaultDate: '2015-08-01',
+    onChange: (selectedDates) => {
+        startDate = selectedDates[0];
+        document.getElementById('time-range-toggle').textContent = `${startDate.toISOString().split('T')[0]} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
+        updateGraph();
+    }
+});
+
+flatpickr('#end-date', {
+    dateFormat: 'Y-m-d',
+    defaultDate: '2025-04-05',
+    onChange: (selectedDates) => {
+        endDate = selectedDates[0];
+        document.getElementById('time-range-toggle').textContent = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate.toISOString().split('T')[0]}`;
+        updateGraph();
+    }
+});
+
+window.addEventListener('resize', () => {
+    if (dataLoaded && graphInitialized) Plotly.relayout('graph', { 
+        width: calculateGraphWidth(), 
+        height: calculateGraphHeight(),
+        margin: { 
+            t: window.innerWidth <= 480 ? 50 : 60, 
+            b: window.innerWidth <= 480 ? 80 : 100, 
+            l: window.innerWidth <= 480 ? 80 : 100, 
+            r: window.innerWidth <= 480 ? 20 : 30 
+        },
+        font: { size: window.innerWidth <= 480 ? 10 : 12 },
+        title: { font: { size: window.innerWidth <= 480 ? 14 : 16 } },
+        legend: { font: { size: window.innerWidth <= 480 ? 10 : 12 } }
+    });
+    const sidebar = document.getElementById('sidebar');
+    const mobileButton = document.getElementById('mobile-sidebar-button');
+    mobileButton.style.display = sidebar.classList.contains('collapsed') && window.innerWidth <= 480 ? 'block' : 'none';
+});
+
+const script = document.createElement('script');
+script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.2.0/math.min.js';
+script.onload = () => {
+    if (typeof math === 'undefined') console.error('math.js failed to initialize');
+    loadData();
     loadMetagenomicData();
-
-    document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
-    document.getElementById('mobile-sidebar-button').addEventListener('click', toggleSidebar);
-    document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
-    document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
-    document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
-    document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
-    document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
-    document.getElementById('control-panel-button').addEventListener('click', toggleControlPanel);
-    document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu'));
-    document.getElementById('close-control-panel').addEventListener('click', toggleControlPanel);
-    document.getElementById('show-fit').addEventListener('change', updateGraph);
-    document.getElementById('show-on-chart').addEventListener('change', updateGraph);
-
-    document.querySelectorAll('#independent-menu input').forEach(input => {
-        input.addEventListener('change', () => {
-            enforceSingleSelection('independent-menu', input.id);
-            updateGraph();
-        });
-    });
-
-    document.querySelectorAll('#dependent-menu input').forEach(input => {
-        input.addEventListener('change', updateGraph);
-    });
-
-    document.querySelectorAll('#chart-type-menu input').forEach(input => {
-        input.addEventListener('change', () => {
-            document.getElementById('chart-type-toggle').textContent = document.querySelector(`label[for="${input.id}"]`).textContent;
-            updateStatsOptions();
-            updateGraph();
-        });
-    });
-
-    document.querySelectorAll('#fit-options input').forEach(input => {
-        input.addEventListener('change', updateGraph);
-    });
-
-    document.querySelectorAll('#plot-number-menu input').forEach(input => {
-        input.addEventListener('change', () => {
-            selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked'))
-                .map(input => Number(input.value));
-            updateGraph(); // No toggle text update
-        });
-    });
-
-    flatpickr('#start-date', {
-        dateFormat: 'Y-m-d',
-        defaultDate: '2015-08-01',
-        onChange: (selectedDates) => {
-            startDate = selectedDates[0];
-            document.getElementById('time-range-toggle').textContent = `${startDate.toISOString().split('T')[0]} - ${endDate ? endDate.toISOString().split('T')[0] : 'End'}`;
-            updateGraph();
-        }
-    });
-
-    flatpickr('#end-date', {
-        dateFormat: 'Y-m-d',
-        defaultDate: '2025-04-05',
-        onChange: (selectedDates) => {
-            endDate = selectedDates[0];
-            document.getElementById('time-range-toggle').textContent = `${startDate ? startDate.toISOString().split('T')[0] : 'Start'} - ${endDate.toISOString().split('T')[0]}`;
-            updateGraph();
-        }
-    });
-
-    window.addEventListener('resize', () => {
-        if (dataLoaded && graphInitialized) Plotly.relayout('graph', { 
-            width: calculateGraphWidth(), 
-            height: calculateGraphHeight(),
-            margin: { 
-                t: window.innerWidth <= 480 ? 50 : 60, 
-                b: window.innerWidth <= 480 ? 80 : 100, 
-                l: window.innerWidth <= 480 ? 80 : 100, 
-                r: window.innerWidth <= 480 ? 20 : 30 
-            },
-            font: { size: window.innerWidth <= 480 ? 10 : 12 },
-            title: { font: { size: window.innerWidth <= 480 ? 14 : 16 } },
-            legend: { font: { size: window.innerWidth <= 480 ? 10 : 12 } }
-        });
-        const sidebar = document.getElementById('sidebar');
-        const mobileButton = document.getElementById('mobile-sidebar-button');
-        mobileButton.style.display = sidebar.classList.contains('collapsed') && window.innerWidth <= 480 ? 'block' : 'none';
-    });
-
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.2.0/math.min.js';
-    script.onload = () => {
-        if (typeof math === 'undefined') console.error('math.js failed to initialize');
-        loadData();
-    };
-    script.onerror = () => console.error('Failed to load math.js');
-    document.head.appendChild(script);
-</script>
+};
+script.onerror = () => console.error('Failed to load math.js');
+document.head.appendChild(script);
+    </script>
 </body>
 </html>
