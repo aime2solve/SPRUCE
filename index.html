@@ -185,6 +185,7 @@
 
         }
     </style>
+</head>
 <body>
     <h1>Comparative Biospheromics Dashboard</h1>
     <div class="container">
@@ -199,197 +200,71 @@
                 <span class="button-label">X-Axis:</span>
                 <div class="dropdown-toggle" id="independent-toggle">Time</div>
                 <div class="dropdown-menu" id="independent-menu">
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="TIMESTAMP" value="TIMESTAMP">
-                        <label for="TIMESTAMP">Time</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="TS_200" value="TS_200">
-                        <label for="TS_200">Soil Temp 200cm</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="Soil_Depth" value="Soil_Depth">
-                        <label for="Soil_Depth">Soil Depth</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="TA_2_0" value="TA_2_0">
-                        <label for="TA_2_0">Ambient Temp 2m</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="CO2_measured" value="CO2_measured">
-                        <label for="CO2_measured">Measured CO₂</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="H2O_measured" value="H2O_measured">
-                        <label for="H2O_measured">Measured H₂O</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="RH_2_0" value="RH_2_0">
-                        <label for="RH_2_0">Relative Humidity 2m</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="WD_10" value="WD_10">
-                        <label for="WD_10">Wind Direction 10m</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="PREC_6" value="PREC_6">
-                        <label for="PREC_6">Precipitation</label>
-                    </div>
+                    <div class="dropdown-item"><input type="checkbox" id="TIMESTAMP" value="TIMESTAMP" checked><label for="TIMESTAMP">Time</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0" value="TA_2_0"><label for="TA_2_0">Ambient Temp 2m (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0" value="RH_2_0"><label for="RH_2_0">Relative Humidity 2m (%)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10" value="WD_10"><label for="WD_10">Wind Direction 10m (°)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6" value="PREC_6"><label for="PREC_6">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="CO2_measured" value="CO2_measured"><label for="CO2_measured">Measured CO₂ (ppm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="H2O_measured" value="H2O_measured"><label for="H2O_measured">Measured H₂O (mmol/mol)</label></div>
                 </div>
             </div>
             <div class="button-container">
-                <span class="button-label">Dependent:</span>
+                <span class="button-label">Y-Axis:</span>
                 <div class="dropdown-toggle" id="dependent-toggle">Select Dependent</div>
                 <div class="dropdown-menu" id="dependent-menu">
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="TS_0_dep" value="TS_0">
-                        <label for="TS_0_dep">Soil Temp 0cm</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="TS_5_dep" value="TS_5">
-                        <label for="TS_5_dep">Soil Temp 5cm</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="TS_10_dep" value="TS_10">
-                        <label for="TS_10_dep">Soil Temp 10cm</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="TS_20_dep" value="TS_20">
-                        <label for="TS_20_dep">Soil Temp 20cm</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="TS_30_dep" value="TS_30">
-                        <label for="TS_30_dep">Soil Temp 30cm</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="TS_40_dep" value="TS_40">
-                        <label for="TS_40_dep">Soil Temp 40cm</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="TS_50_dep" value="TS_50">
-                        <label for="TS_50_dep">Soil Temp 50cm</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="TS_100_dep" value="TS_100">
-                        <label for="TS_100_dep">Soil Temp 100cm</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="TS_200_dep" value="TS_200">
-                        <label for="TS_200_dep">Soil Temp 200cm</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="TA_2_0_dep" value="TA_2_0">
-                        <label for="TA_2_0_dep">Ambient Temp 2m</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="CO2_measured_dep" value="CO2_measured">
-                        <label for="CO2_measured_dep">Measured CO₂</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="H2O_measured_dep" value="H2O_measured">
-                        <label for="H2O_measured_dep">Measured H₂O</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="RH_2_0_dep" value="RH_2_0">
-                        <label for="RH_2_0_dep">Relative Humidity 2m</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="WD_10_dep" value="WD_10">
-                        <label for="WD_10_dep">Wind Direction 10m</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="PREC_6_dep" value="PREC_6">
-                        <label for="PREC_6_dep">Precipitation</label>
-                    </div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_0" value="TS_0"><label for="TS_0" style="color: #00FFFF;">Soil Temp 0 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_5" value="TS_5"><label for="TS_5" style="color: #FFFF00;">Soil Temp 5 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_10" value="TS_10"><label for="TS_10" style="color: #FF00FF;">Soil Temp 10 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_20" value="TS_20"><label for="TS_20" style="color: #00FF00;">Soil Temp 20 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_30" value="TS_30"><label for="TS_30" style="color: #FF0000;">Soil Temp 30 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_40" value="TS_40"><label for="TS_40" style="color: #0000FF;">Soil Temp 40 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_50" value="TS_50"><label for="TS_50" style="color: #FFA500;">Soil Temp 50 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_100" value="TS_100"><label for="TS_100" style="color: #800080;">Soil Temp 100 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TS_200" value="TS_200"><label for="TS_200" style="color: #008080;">Soil Temp 200 cm (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="TA_2_0_dep" value="TA_2_0"><label for="TA_2_0_dep" style="color: #FF6347;">Ambient Temp 2m (°C)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="RH_2_0_dep" value="RH_2_0"><label for="RH_2_0_dep" style="color: #4682B4;">Relative Humidity 2m (%)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="WD_10_dep" value="WD_10"><label for="WD_10_dep" style="color: #6A5ACD;">Wind Direction 10m (°)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="PREC_6_dep" value="PREC_6"><label for="PREC_6_dep" style="color: #DAA520;">Precipitation (mm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="CO2_measured_dep" value="CO2_measured"><label for="CO2_measured_dep" style="color: #FF69B4;">Measured CO₂ (ppm)</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="H2O_measured_dep" value="H2O_measured"><label for="H2O_measured_dep" style="color: #7FFF00;">Measured H₂O (mmol/mol)</label></div>
                 </div>
             </div>
             <div class="button-container">
                 <span class="button-label">Time Range:</span>
                 <div class="dropdown-toggle" id="time-range-toggle">2015-08-01 - 2025-04-05</div>
                 <div class="dropdown-menu" id="time-range-menu">
-                    <div class="dropdown-item">
-                        <label for="start-date">Start Date:</label>
-                        <input type="text" id="start-date" placeholder="YYYY-MM-DD">
-                    </div>
-                    <div class="dropdown-item">
-                        <label for="end-date">End Date:</label>
-                        <input type="text" id="end-date" placeholder="YYYY-MM-DD">
-                    </div>
-                </div>
-            </div>
-            <div class="button-container">
-                <span class="button-label">Stats:</span>
-                <div class="dropdown-toggle" id="stats-toggle">Statistics</div>
-                <div class="dropdown-menu" id="stats-menu">
-                    <div class="dropdown-item" id="stats-content">
-                        Select variables to view statistics
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="show-fit" checked>
-                        <label for="show-fit">Show Fit</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="checkbox" id="show-on-chart">
-                        <label for="show-on-chart">Show Stats on Chart</label>
-                    </div>
-                    <div class="dropdown-item" id="fit-options">
-                        <div>
-                            <input type="radio" id="fit-auto" name="fit-type" value="auto" checked>
-                            <label for="fit-auto">Auto</label>
-                        </div>
-                        <div>
-                            <input type="radio" id="fit-linear" name="fit-type" value="linear">
-                            <label for="fit-linear">Linear</label>
-                        </div>
-                        <div>
-                            <input type="radio" id="fit-log" name="fit-type" value="logarithmic">
-                            <label for="fit-log">Logarithmic</label>
-                        </div>
-                        <div>
-                            <input type="radio" id="fit-exp" name="fit-type" value="exponential">
-                            <label for="fit-exp">Exponential</label>
-                        </div>
-                        <div>
-                            <input type="radio" id="fit-poly" name="fit-type" value="polynomial">
-                            <label for="fit-poly">Polynomial</label>
-                        </div>
-                    </div>
+                    <div class="dropdown-item"><label for="start-date">Start Date:</label><input type="text" id="start-date" value="2015-08-01"></div>
+                    <div class="dropdown-item"><label for="end-date">End Date:</label><input type="text" id="end-date" value="2025-04-05"></div>
                 </div>
             </div>
             <div class="button-container">
                 <span class="button-label">Chart Type:</span>
                 <div class="dropdown-toggle" id="chart-type-toggle">Scatter</div>
                 <div class="dropdown-menu" id="chart-type-menu">
-                    <div class="dropdown-item">
-                        <input type="radio" id="chart-scatter" name="chart-type" value="scatter" checked>
-                        <label for="chart-scatter">Scatter</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="radio" id="chart-line" name="chart-type" value="line">
-                        <label for="chart-line">Line</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="radio" id="chart-area" name="chart-type" value="area">
-                        <label for="chart-area">Area</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="radio" id="chart-box" name="chart-type" value="box">
-                        <label for="chart-box">Box</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="radio" id="chart-bar" name="chart-type" value="bar">
-                        <label for="chart-bar">Bar</label>
-                    </div>
-                    <div class="dropdown-item">
-                        <input type="radio" id="chart-anova" name="chart-type" value="anova">
-                        <label for="chart-anova">ANOVA</label>
-                    </div>
+                    <div class="dropdown-item"><input type="radio" name="chart-type" id="scatter" value="scatter" checked><label for="scatter">Scatter</label></div>
+                    <div class="dropdown-item"><input type="radio" name="chart-type" id="line" value="line"><label for="line">Line</label></div>
+                    <div class="dropdown-item"><input type="radio" name="chart-type" id="bar" value="bar"><label for="bar">Bar</label></div>
+                    <div class="dropdown-item"><input type="radio" name="chart-type" id="area" value="area"><label for="area">Area</label></div>
+                    <div class="dropdown-item"><input type="radio" name="chart-type" id="box" value="box"><label for="box">Box</label></div>
+                    <div class="dropdown-item"><input type="radio" name="chart-type" id="anova" value="anova"><label for="anova">ANOVA</label></div>
                 </div>
             </div>
             <div class="button-container">
-                <span class="button-label">Plot #:</span>
-                <div class="dropdown-toggle" id="plot-number-toggle">Plot #</div>
-                <div class="dropdown-menu" id="plot-number-menu"></div>
+                <span class="button-label">Stats:</span>
+                <div class="dropdown-toggle" id="stats-toggle">Show Stats</div>
+                <div class="dropdown-menu" id="stats-menu">
+                    <div id="stats-content"></div>
+                    <div class="fit-options" id="fit-options">
+                        <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-auto" value="auto" checked><label for="fit-auto">Auto (Best Fit)</label></div>
+                        <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-linear" value="linear"><label for="fit-linear">Linear</label></div>
+                        <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-exponential" value="exponential"><label for="fit-exponential">Exponential</label></div>
+                        <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-polynomial" value="polynomial"><label for="fit-polynomial">Polynomial</label></div>
+                        <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-logarithmic" value="logarithmic"><label for="fit-logarithmic">Logarithmic</label></div>
+                    </div>
+                    <div class="dropdown-item"><input type="checkbox" id="show-fit" checked><label for="show-fit">Show Fit</label></div>
+                    <div class="dropdown-item"><input type="checkbox" id="show-on-chart"><label for="show-on-chart">Show on Chart</label></div>
+                </div>
             </div>
             <div class="button-container">
                 <span class="button-label">Metagenomics:</span>
@@ -434,21 +309,18 @@
         <div class="graph-container" id="graph-container">
             <div id="graph">
                 <div class="welcome-message" id="welcome-message">
-                    <a href="https://mnspruce.ornl.gov" target="_blank">
-                        <img src="./SPRUCE_logo.png" alt="SPRUCE Logo">
-                    </a>
-                    <hr>
-                    An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO₂ concentrations.
-                    <hr>
-                    Beginning August 2015
+                    <a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a>
+                    <hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO₂ concentrations.<hr>Beginning August 2015
                 </div>
             </div>
         </div>
     </div>
-    <div class="control-panel-popup" id="control-panel-popup">
+    <div class="controls-popup" id="control-panel-popup">
         <div class="controls-header">
-            <h3>Control Panel</h3>
+            <h3 style="flex-grow: 1; text-align: left;">Control Panel</h3>
             <div class="close-button" id="close-control-panel">X</div>
+            <div class="dropdown-toggle" id="plot-number-toggle" style="width: 80px;">Plot # (all)</div>
+            <div class="dropdown-menu" id="plot-number-menu"></div>
         </div>
         <div id="control-panel-content"></div>
     </div>
@@ -457,9 +329,44 @@
             <h3>Metagenomics Visualization</h3>
             <div class="close-button" id="close-metagenomics">X</div>
         </div>
-        <iframe id="metagenomics-iframe"></iframe>
+        <iframe id="metagenomics-iframe" style="width: 100%; height: 80vh; border: none;"></iframe>
     </div>
-    <button class="mobile-sidebar-button" id="mobile-sidebar-button">☰</button>
+    <div class="mobile-sidebar-button" id="mobile-sidebar-button">></div><div class="dropdown-item">
+    <a href="#" class="metagenomics-link kraken-stacked-bar" onclick="console.log('Direct click on Stacked Bar Chart')">Stacked Bar Chart (Top Taxa)</a>
+</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="graph-container" id="graph-container">
+            <div id="graph">
+                <div class="welcome-message" id="welcome-message">
+                    <a href="https://mnspruce.ornl.gov" target="_blank"><img src="./SPRUCE_logo.png" alt="SPRUCE Logo"></a>
+                    <hr>An experiment to assess the response of northern peatland ecosystems to increases in temperature and exposures to elevated atmospheric CO₂ concentrations.<hr>Beginning August 2015
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls-popup" id="control-panel-popup">
+        <div class="controls-header">
+            <h3 style="flex-grow: 1; text-align: left;">Control Panel</h3>
+            <div class="close-button" id="close-control-panel">X</div>
+            <div class="dropdown-toggle" id="plot-number-toggle" style="width: 80px;">Plot # (all)</div>
+            <div class="dropdown-menu" id="plot-number-menu"></div>
+        </div>
+        <div id="control-panel-content"></div>
+    </div>
+
+    <div class="metagenomics-popup" id="metagenomics-popup">
+        <div class="controls-header">
+            <h3>Metagenomics Visualization</h3>
+            <div class="close-button" id="close-metagenomics">X</div>
+        </div>
+        <iframe id="metagenomics-iframe" style="width: 100%; height: 80vh; border: none;"></iframe>
+    </div>
+
+    <div class="mobile-sidebar-button" id="mobile-sidebar-button">></div>
 
     <script>
 let allData = [];
@@ -516,7 +423,6 @@ const plotConditions = {
     21: { temp: 'Amb', co2: 'Amb', chamber: 'Open' }
 };
 
-// Existing functions (unchanged)
 async function loadData() {
     const graphDiv = document.getElementById('graph');
     graphDiv.innerHTML = '<div class="welcome-message" id="welcome-message">Loading data...</div>';
@@ -1254,7 +1160,7 @@ async function showStackedBarChart() {
     console.log('Starting showStackedBarChart');
     const popup = document.getElementById('metagenomics-popup');
     const iframe = document.getElementById('metagenomics-iframe');
-    const chartDiv = popup.querySelector('div:not(.controls-header):not(#metagenomics-iframe)');
+    let chartDiv = popup.querySelector('div:not(.controls-header):not(#metagenomics-iframe)');
     if (chartDiv) chartDiv.remove();
     iframe.src = '';
     iframe.style.display = 'none';
@@ -1345,7 +1251,7 @@ async function showStackedBarChart() {
         legend: { bgcolor: 'rgba(26, 26, 26, 0.7)', bordercolor: 'transparent' }
     };
 
-    const chartDiv = document.createElement('div');
+    chartDiv = document.createElement('div');
     chartDiv.style.width = '100%';
     chartDiv.style.height = 'calc(100% - 40px)';
     popup.appendChild(chartDiv);
@@ -1431,7 +1337,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Metagenomics menu not found');
     }
 
-    // Other event listeners (unchanged)
+    // Other event listeners
     document.getElementById('sidebar-tab').addEventListener('click', toggleSidebar);
     document.getElementById('mobile-sidebar-button').addEventListener('click', toggleSidebar);
     document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
@@ -1525,6 +1431,6 @@ script.onload = () => {
 };
 script.onerror = () => console.error('Failed to load math.js');
 document.head.appendChild(script);
-    </script>
+</script>
 </body>
 </html>
