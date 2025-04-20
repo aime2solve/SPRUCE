@@ -207,13 +207,6 @@
             font-size: 15px;
         }
 
-        #plot-number-menu {
-            width: 300px;
-            left: auto;
-            right: 0;
-            top: 100%;
-        }
-
         /* Graph container */
         .graph-container {
             position: absolute;
@@ -224,7 +217,7 @@
             transition: width 0.3s ease, left 0.3s ease;
             z-index: 1;
             overflow: hidden;
-            padding-left: 20px; /* Added to ensure space for y-axis label */
+            padding-left: 20px; /* Ensure space for y-axis label */
         }
 
         .graph-container.full-width {
@@ -370,24 +363,6 @@
             box-sizing: border-box;
         }
 
-        .close-button {
-            display: block;
-            cursor: pointer;
-            color: #FFFFFF;
-            background-color: #FF4500;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            line-height: 32px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            z-index: 10011;
-            pointer-events: auto;
-            user-select: none;
-            box-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
-        }
-
         #metagenomics-iframe,
         #metagenomics-popup > div:not(.controls-header) {
             margin-top: 40px;
@@ -489,6 +464,42 @@
             text-align: center;
             cursor: pointer;
             z-index: 12;
+        }
+
+        /* Plot number button and dropdown in control panel */
+        #plot-number-button {
+            background: rgba(26, 26, 26, 0.8);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            color: #00FFFF;
+            font-size: 11px;
+            padding: 4px 8px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 0 8px #00FFFF;
+            display: inline-block;
+            width: 120px;
+        }
+
+        #plot-number-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 300px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(26, 26, 26, 0.9);
+            border: 2px solid #00FFFF;
+            border-radius: 10px;
+            color: #00FFFF;
+            font-size: 11px;
+            padding: 8px;
+            z-index: 100;
+            display: none;
+        }
+
+        #plot-number-menu.open {
+            display: block;
         }
 
         /* Mobile optimizations */
@@ -624,6 +635,10 @@
             .metagenomics-popup h3 {
                 font-size: 16px;
             }
+
+            #plot-number-button {
+                width: 100px;
+            }
         }
     </style>
 </head>
@@ -758,7 +773,6 @@
     <div class="controls-popup" id="control-panel-popup">
         <div class="controls-header">
             <h3>Control Panel</h3>
-            <div class="close-button" id="close-control-panel">X</div>
         </div>
         <div id="control-panel-content"></div>
     </div>
