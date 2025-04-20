@@ -89,7 +89,7 @@
     display: none;
     width: 80vw;
     max-height: 90vh;
-    overflow: hidden;
+    overflow: auto;
 }
 .metagenomics-popup h3 {
     color: #DAA520;
@@ -331,6 +331,14 @@
         <div id="control-panel-content"></div>
     </div>
     <div class="mobile-sidebar-button" id="mobile-sidebar-button">></div>
+
+<div class="metagenomics-popup" id="metagenomics-popup">
+    <div class="controls-header">
+        <h3>Metagenomics Visualization</h3>
+        <div class="close-button" id="close-metagenomics">X</div>
+    </div>
+    <iframe id="metagenomics-iframe" style="width: 100%; height: 80vh; border: none;"></iframe>
+</div>
 
    <script>
 let allData = [];
@@ -1080,79 +1088,91 @@ function updateGraph() {
     });
 
     // Show stacked bar chart
-    async function showStackedBarChart() {
-        const popup = document.getElementById('metagenomics-popup');
-        const iframe = document.getElementById('metagenomics-iframe');
-        iframe.src = '';
-        popup.style.display = 'block';
+   async function showStackedBarChart() {
+    const popup = document.getElementById('metagenomics-popup');
+    const iframe = document.getElementById('metagenomics-iframe');
+    iframe.src = '';
+    // Clear previous content
+    const existingChart = popup.querySelector('div:not(.controls-header):not(#metagenomics-iframe)');
+    if (existingChart) existingChart.remove();
+    popup.style.display = 'block';
 
-        if (!krakenData || !metadata || Object.keys(krakenData).length === 0) {
-            const content = document.createElement('div');
-            content.style.color = '#FF4500';
-            content.style.padding = '10px';
-            content.innerHTML = '<p>No taxonomic data available for visualization.</p>';
-            iframe.insertAdjacentElement('afterend', content);
-            return;
-        }
-
-        // Filter runs by Control Panel and Plot Number
-        const workingData = filterByRanges(allData);
-        const selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked'))
-            .map(input => Number(input.value));
-        const filteredRuns = Object.keys(krakenData).filter(run => {
-            const runMetadata = metadata[run];
-            if (!runMetadata || !runMetadata.plot) return false;
-            const plot = runMetadata.plot;
-            if (!selectedPlots.includes(plot)) return false;
-            const envData = workingData.find(d => d.Plot === plot && d.TIMESTAMP);
-            if (!envData) return false;
-            return Object.keys(currentRanges).every(key => {
-                if (key === 'Soil_Depth') return true;
-                const value = parseFloat(envData[key]);
-                const range = currentRanges[key];
-                return isNaN(value) || (value >= range.defaultMin && value <= range.defaultMax);
-            });
-        });
-
-        if (!filteredRuns.length) {
-            const content = document.createElement('div');
-            content.style.color = '#FF4500';
-            content.style.padding = '10px';
-            content.innerHTML = '<p>No runs match the current filters.</p>';
-            iframe.insertAdjacentElement('afterend', content);
-            return;
-        }
-
-        // Create stacked bar chart
-        const taxa = Object.keys(krakenData[filteredRuns[0]]);
-        const traces = taxa.map(taxon => ({
-            x: filteredRuns,
-            y: filteredRuns.map(run => krakenData[run][taxon] || 0),
-            name: taxon,
-            type: 'bar',
-            marker: { color: getTaxonColor(taxon) }
-        }));
-
-        const layout = {
-            title: { text: 'Taxonomic Composition by Run', font: { size: 16, color: '#FFFFFF' } },
-            xaxis: { title: 'Run (Soil Depth)', ticktext: filteredRuns.map(run => `${run} (${metadata[run]?.depth || 'Unknown'})`), tickvals: filteredRuns },
-            yaxis: { title: 'Relative Abundance (%)', range: [0, 100] },
-            barmode: 'stack',
-            plot_bgcolor: '#1A1A1A',
-            paper_bgcolor: '#1A1A1A',
-            font: { color: '#FFFFFF', size: 12 },
-            margin: { t: 60, b: 100, l: 80, r: 30 },
-            showlegend: true,
-            legend: { bgcolor: 'rgba(26, 26, 26, 0.7)', bordercolor: 'transparent' }
-        };
-
-        const chartDiv = document.createElement('div');
-        chartDiv.style.width = '100%';
-        chartDiv.style.height = '70vh';
-        iframe.insertAdjacentElement('afterend', chartDiv);
-
-        Plotly.newPlot(chartDiv, traces, layout, { responsive: true });
+    if (!krakenData || !metadata || Object.keys(krakenData).length === 0) {
+        const content = document.createElement('div');
+        content.style.color = '#FF4500';
+        content.style.padding = '10px';
+        content.innerHTML = '<p>No taxonomic data available for visualization.</p>';
+        iframe.insertAdjacentElement('afterend', content);
+        return;
     }
+
+    // Filter runs
+    const workingData = filterByRanges(allData);
+    const selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked'))
+        .map(input => Number(input.value));
+    console.log('Selected plots:', selectedPlots, 'Working data sample:', workingData.slice(0, 5));
+    const filteredRuns = Object.keys(krakenData).filter(run => {
+        const runMetadata = metadata[run];
+        if (!runMetadata || !runMetadata.plot) return false;
+        const plot = runMetadata.plot;
+        if (!selectedPlots.includes(plot)) return false;
+        const envData = workingData.find(d => d.Plot === plot && d.TIMESTAMP);
+        if (!envData) return false;
+        return Object.keys(currentRanges).every(key => {
+            if (key === 'Soil_Depth') return true;
+            const value = parseFloat(envData[key]);
+            const range = currentRanges[key];
+            return isNaN(value) || (value >= range.defaultMin && value <= range.defaultMax);
+        });
+    });
+    console.log('Filtered runs:', filteredRuns);
+
+    if (!filteredRuns.length) {
+        const content = document.createElement('div');
+        content.style.color = '#FF4500';
+        content.style.padding = '10px';
+        content.innerHTML = '<p>No runs match the current filters.</p>';
+        iframe.insertAdjacentElement('afterend', content);
+        return;
+    }
+
+    // Create stacked bar chart
+    const taxa = Object.keys(krakenData[filteredRuns[0]]);
+    const traces = taxa.map(taxon => ({
+        x: filteredRuns,
+        y: filteredRuns.map(run => krakenData[run][taxon] || 0),
+        name: taxon,
+        type: 'bar',
+        marker: { color: getTaxonColor(taxon) }
+    }));
+
+    const layout = {
+        title: { text: 'Taxonomic Composition by Run', font: { size: 16, color: '#FFFFFF' } },
+        xaxis: { 
+            title: 'Run (Soil Depth)', 
+            ticktext: filteredRuns.map(run => `${run} (${metadata[run]?.depth || 'Unknown'})`), 
+            tickvals: filteredRuns 
+        },
+        yaxis: { title: 'Relative Abundance (%)', range: [0, 100] },
+        barmode: 'stack',
+        plot_bgcolor: '#1A1A1A',
+        paper_bgcolor: '#1A1A1A',
+        font: { color: '#FFFFFF', size: 12 },
+        margin: { t: 60, b: 100, l: 80, r: 30 },
+        showlegend: true,
+        legend: { bgcolor: 'rgba(26, 26, 26, 0.7)', bordercolor: 'transparent' }
+    };
+
+    const chartDiv = document.createElement('div');
+    chartDiv.style.width = '100%';
+    chartDiv.style.height = '70vh';
+    iframe.insertAdjacentElement('afterend', chartDiv);
+
+    Plotly.newPlot(chartDiv, traces, layout, { responsive: true }).catch(err => {
+        console.error('Plotly error in stacked bar chart:', err);
+        chartDiv.innerHTML = '<div style="color: #FF4500; padding: 10px;">Failed to render chart.</div>';
+    });
+}
 
     // Taxon color mapping
     function getTaxonColor(taxon) {
@@ -1162,19 +1182,22 @@ function updateGraph() {
 
     // Handle metagenomics links
     document.querySelectorAll('.metagenomics-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.querySelectorAll('.metagenomics-link').forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            const url = link.getAttribute('href');
-            if (link.classList.contains('kraken-stacked-bar')) {
-                showStackedBarChart();
-            } else {
-                showMetagenomics(url);
-                document.getElementById('metagenomics-menu').style.display = 'none';
-            }
-        });
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('Clicked metagenomics link:', link.textContent);
+        document.querySelectorAll('.metagenomics-link').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        const url = link.getAttribute('href');
+        if (link.classList.contains('kraken-stacked-bar')) {
+            console.log('Triggering stacked bar chart');
+            showStackedBarChart();
+        } else {
+            console.log('Showing metagenomics URL:', url);
+            showMetagenomics(url);
+            document.getElementById('metagenomics-menu').style.display = 'none';
+        }
     });
+});
 
     // Update existing updateGraph function
     const originalUpdateGraph = updateGraph;
@@ -1313,12 +1336,5 @@ function updateGraph() {
     script.onerror = () => console.error('Failed to load math.js');
     document.head.appendChild(script);
 </script>
-<div class="metagenomics-popup" id="metagenomics-popup">
-    <div class="controls-header">
-        <h3>Metagenomics Visualization</h3>
-        <div class="close-button" id="close-metagenomics">X</div>
-    </div>
-    <iframe id="metagenomics-iframe" style="width: 100%; height: 80vh; border: none;"></iframe>
-</div>
 </body>
 </html>
