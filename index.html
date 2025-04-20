@@ -1,113 +1,3 @@
-
-<<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comparative Biospheromics Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Exo+2:wght@700&family=VT323&family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js"></script>
-    <style>
-        @font-face {
-            font-family: 'Nasalization';
-            src: url('https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Nasalization.otf') format('opentype');
-            font-weight: normal;
-            font-style: normal;
-        }
-
-        /* Base styles */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            width: 100vw;
-            background-color: #000000;
-            font-family: 'Lato', sans-serif;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        h1 {
-            color: #00FFFF;
-            text-align: center;
-            padding: 2vh;
-            font-family: 'Nasalization', sans-serif;
-            font-size: calc(16px + 1.5vw);
-            margin: 0;
-            text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF;
-            animation: glowBreathe 8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-            flex-shrink: 0;
-            z-index: 11;
-            line-height: 1.5;
-            text-transform: uppercase;
-        }
-
-        @keyframes glowBreathe {
-            0%, 100% { text-shadow: 2px 2px 4px #00CC66, -2px -2px 4px #00CC66, 0 0 10px #00FFFF; }
-            25%, 75% { text-shadow: 2px 2px 5px #00CC66, -2px -2px 5px #00CC66, 0 0 12px #00FFFF; }
-            50% { text-shadow: 2px 2px 4.5px #00CC66, -2px -2px 4.5px #00CC66, 0 0 11px #00FFFF; }
-        }
-
-        .container {
-            display: flex;
-            flex-grow: 1;
-            overflow: hidden;
-            height: calc(100vh - 4vh);
-            position: relative;
-        }
-
-        /* Sidebar styles */
-        .sidebar {
-            width: 250px;
-            background: rgba(26, 26, 26, 0.8);
-            border-right: 2px solid #00FFFF;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            transition: transform 0.3s ease;
-            z-index: 10;
-        }
-
-        .sidebar.collapsed {
-            transform: translateX(-250px);
-        }
-
-        .sidebar-tab {
-            position: absolute;
-            top: 0;
-            right: -40px;
-            width: 40px;
-            height: 40px;
-            background: rgba(26, 26, 26, 0.8);
-            border: 2px solid #00FFFF;
-            border-left: none;
-            border-radius: 0 10px 10px 0;
-        ;
-            color: #00FFFF;
-            font-size: 19px;
-            line-height: 36px;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 0 8px #00FFFF;
-            z-index: 11;
-        }
-
-        .sidebar-title {
-            font-family: 'Exo 2', sans-serif;
-            font-size: 26px;
-Starting new file: index.html
-Truncated at the end.
-
-filepath: index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -320,8 +210,8 @@ filepath: index.html
         #plot-number-menu {
             width: 300px;
             left: auto;
-            right: -10px;
-            top: 40px;
+            right: 0;
+            top: 100%;
         }
 
         /* Graph container */
@@ -808,7 +698,6 @@ filepath: index.html
                         <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-auto" value="auto" checked><label for="fit-auto">Auto (Best Fit)</label></div>
                         <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-linear" value="linear"><label for="fit-linear">Linear</label></div>
                         <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-exponential" value="exponential"><label for="fit-exponential">Exponential</label></div>
-                        <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-polynomial" value="polynomial"><label for="fit-polynomial">Polynomial</label></div>
                         <div class="dropdown-item"><input type="radio" name="fit-type" id="fit-logarithmic" value="logarithmic"><label for="fit-logarithmic">Logarithmic</label></div>
                     </div>
                     <div class="dropdown-item"><input type="checkbox" id="show-fit" checked><label for="show-fit">Show Fit</label></div>
@@ -850,9 +739,14 @@ filepath: index.html
                         <span class="metagenomics-subheader">Kraken2 Visualizations</span>
                     </div>
                     <div class="dropdown-item">
-                        <a href="#" class="metagenomics-link kraken-stacked-bar" onclick="console.log('Direct click on Stacked Bar Chart')">Stacked Bar Chart (Top Taxa)</a>
+                        <a href="#" class="metagenomics-link kraken-stacked-bar">Stacked Bar Chart (Top Taxa)</a>
                     </div>
                 </div>
+            </div>
+            <div class="button-container">
+                <span class="button-label">Plot Number:</span>
+                <div class="dropdown-toggle" id="plot-number-toggle">Plot # (all)</div>
+                <div class="dropdown-menu" id="plot-number-menu"></div>
             </div>
         </div>
         <div class="graph-container" id="graph-container">
@@ -868,8 +762,6 @@ filepath: index.html
         <div class="controls-header">
             <h3>Control Panel</h3>
             <div class="close-button" id="close-control-panel">X</div>
-            <div class="dropdown-toggle" id="plot-number-toggle" style="width: 80px;">Plot # (all)</div>
-            <div class="dropdown-menu" id="plot-number-menu"></div>
         </div>
         <div id="control-panel-content"></div>
     </div>
@@ -939,6 +831,10 @@ filepath: index.html
 
     async function loadData() {
         const graphDiv = document.getElementById('graph');
+        if (!graphDiv) {
+            console.error('Graph div not found');
+            return;
+        }
         graphDiv.innerHTML = '<div class="welcome-message" id="welcome-message">Loading data...</div>';
         try {
             const response = await fetch(dataUrl);
@@ -958,12 +854,18 @@ filepath: index.html
             }).filter(row => !isNaN(row.TIMESTAMP) && row.TIMESTAMP instanceof Date && !isNaN(row.Plot));
 
             const plotMenu = document.getElementById('plot-number-menu');
+            if (!plotMenu) {
+                console.error('Plot number menu not found');
+                graphDiv.innerHTML = '<div class="warning-message">Plot selection menu not found.</div>';
+                return;
+            }
             plotMenu.innerHTML = Object.entries(plotConditions).map(([plot, cond]) =>
                 `<div class="dropdown-item"><input type="checkbox" id="plot-${plot}" value="${plot}" checked><label for="plot-${plot}">Plot ${plot} (${cond.temp}, ${cond.co2}, ${cond.chamber})</label></div>`
             ).join('');
 
             selectedPlots = Object.keys(plotConditions).map(Number);
-            document.getElementById('plot-number-toggle').textContent = 'Plot #';
+            const plotToggle = document.getElementById('plot-number-toggle');
+            if (plotToggle) plotToggle.textContent = 'Plot # (all)';
 
             dataLoaded = true;
             cachedData = aggregateVariables(allData);
@@ -976,6 +878,7 @@ filepath: index.html
 
     function resetGraph() {
         const graphDiv = document.getElementById('graph');
+        if (!graphDiv) return;
         if (graphInitialized) {
             Plotly.purge(graphDiv);
             graphInitialized = false;
@@ -991,7 +894,7 @@ filepath: index.html
         const menu = document.getElementById(id);
         if (menu) {
             menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-            console.log(`Toggled dropdown: ${id}, now ${menu.style.display === 'block' ? 'open' : 'closed'}`);
+            console.log(`Toggled dropdown: ${id}, now ${menu.style.display}`);
             if (id === 'stats-menu' && menu.style.display === 'block') {
                 statsOpened = true;
                 updateStatsOptions();
@@ -1005,11 +908,15 @@ filepath: index.html
         const graphContainer = document.getElementById('graph-container');
         const tab = document.getElementById('sidebar-tab');
         const mobileButton = document.getElementById('mobile-sidebar-button');
-        sidebar.classList.toggle('collapsed');
-        graphContainer.classList.toggle('full-width');
-        tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
-        mobileButton.style.display = sidebar.classList.contains('collapsed') && window.innerWidth <= 480 ? 'block' : 'none';
-        if (dataLoaded && graphInitialized) Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
+        if (sidebar && graphContainer && tab && mobileButton) {
+            sidebar.classList.toggle('collapsed');
+            graphContainer.classList.toggle('full-width');
+            tab.textContent = sidebar.classList.contains('collapsed') ? '>' : '<';
+            mobileButton.style.display = sidebar.classList.contains('collapsed') && window.innerWidth <= 480 ? 'block' : 'none';
+            if (dataLoaded && graphInitialized) {
+                Plotly.relayout('graph', { width: calculateGraphWidth(), height: calculateGraphHeight() });
+            }
+        }
     }
 
     function enforceSingleSelection(groupId, changedId) {
@@ -1045,6 +952,7 @@ filepath: index.html
         const popup = document.getElementById('control-panel-popup');
         const content = document.getElementById('control-panel-content');
         const button = document.getElementById('control-panel-button');
+        if (!popup || !content || !button) return;
         const isVisible = popup.style.display === 'block';
         popup.style.display = isVisible ? 'none' : 'block';
         button.textContent = isVisible ? 'Show Control Panel' : 'Hide Control Panel';
@@ -1071,6 +979,8 @@ filepath: index.html
                 const track = document.getElementById(`${key}-track`);
                 const minValue = document.getElementById(`${key}-min-value`);
                 const maxValue = document.getElementById(`${key}-max-value`);
+
+                if (!minSlider || !maxSlider || !track || !minValue || !maxValue) return;
 
                 function updateTrack() {
                     const min = parseFloat(minSlider.value);
@@ -1129,7 +1039,6 @@ filepath: index.html
         const n = pairedData.length;
 
         console.log('Fit inputs:', { xNum: xNum.slice(0, 5), yNum: yNum.slice(0, 5), total: n, fitType });
-        console.log('xNum variation:', { min: Math.min(...xNum), max: Math.max(...xNum) });
 
         const fits = {};
         const defaultResult = { type: 'none', params: {}, rSquared: NaN, pValue: NaN, fValue: NaN, yPred: [] };
@@ -1212,7 +1121,7 @@ filepath: index.html
         const ssTot = yNum.reduce((sum, d) => sum + Math.pow(d - meanY, 2), 0);
         const ssRes = xNum.reduce((sum, _, i) => sum + Math.pow(yNum[i] - yPred[i], 2), 0);
         const rSquared = ssTot === 0 ? NaN : 1 - (ssRes / ssTot);
-        const dfReg = (type === 'polynomial' ? 2 : 1);
+        const dfReg = 1; // Only linear, logarithmic, exponential fits
         const dfRes = n - (dfReg + 1);
         const msReg = (ssTot - ssRes) / dfReg;
         const msRes = ssRes / dfRes;
@@ -1337,9 +1246,11 @@ filepath: index.html
     }
 
     function updateStatsOptions() {
-        const chartType = document.querySelector('#chart-type-menu input:checked').value;
+        const chartType = document.querySelector('#chart-type-menu input:checked')?.value;
         const fitOptions = document.getElementById('fit-options');
-        fitOptions.style.display = ['scatter', 'line', 'area'].includes(chartType) ? 'block' : 'none';
+        if (fitOptions) {
+            fitOptions.style.display = ['scatter', 'line', 'area'].includes(chartType) ? 'block' : 'none';
+        }
     }
 
     async function loadMetagenomicData() {
@@ -1359,8 +1270,9 @@ filepath: index.html
         const popup = document.getElementById('metagenomics-popup');
         const iframe = document.getElementById('metagenomics-iframe');
         const graphDiv = document.getElementById('graph');
-        const data = await loadMetagenomicData();
+        if (!popup || !iframe || !graphDiv) return;
 
+        const data = await loadMetagenomicData();
         if (!data) {
             graphDiv.innerHTML = '<div class="warning-message">Failed to load metagenomic data.</div>';
             return;
@@ -1403,250 +1315,264 @@ filepath: index.html
 
     function updateGraph() {
         const graphDiv = document.getElementById('graph');
+        if (!graphDiv) {
+            console.error('Graph div not found');
+            return;
+        }
         if (!dataLoaded || typeof Plotly === 'undefined') {
             console.warn('Data not loaded or Plotly undefined');
             resetGraph();
             return;
         }
 
-        const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || null;
-        const allDependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
-        const chartType = document.querySelector('#chart-type-menu input:checked').value;
-        const fitType = document.querySelector('#fit-options input:checked')?.value || 'auto';
-        const showFit = document.getElementById('show-fit').checked;
-        const showOnChart = document.getElementById('show-on-chart').checked;
+        try {
+            const independent = Array.from(document.querySelectorAll('#independent-menu input:checked'))[0]?.value || null;
+            const allDependents = Array.from(document.querySelectorAll('#dependent-menu input:checked')).map(input => input.value);
+            const chartType = document.querySelector('#chart-type-menu input:checked')?.value || 'scatter';
+            const fitType = document.querySelector('#fit-options input:checked')?.value || 'auto';
+            const showFit = document.getElementById('show-fit')?.checked || false;
+            const showOnChart = document.getElementById('show-on-chart')?.checked || false;
 
-        console.log('Selections:', { independent, allDependents });
+            console.log('Selections:', { independent, allDependents, chartType, fitType });
 
-        document.getElementById('independent-toggle').textContent = independent ? document.querySelector(`label[for="${independent}"]`)?.textContent || 'Select Independent' : 'Select Independent';
-        document.getElementById('dependent-toggle').innerHTML = allDependents.length ? allDependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent}</span>`).join('<br>') : 'Select Dependent';
+            const independentToggle = document.getElementById('independent-toggle');
+            const dependentToggle = document.getElementById('dependent-toggle');
+            if (independentToggle) {
+                independentToggle.textContent = independent ? document.querySelector(`label[for="${independent}"]`)?.textContent || 'Select Independent' : 'Select Independent';
+            }
+            if (dependentToggle) {
+                dependentToggle.innerHTML = allDependents.length ? allDependents.map(dep => `<span style="color: ${dependentColors[dep]}">${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent}</span>`).join('<br>') : 'Select Dependent';
+            }
 
-        if (!allDependents.length || !independent) {
-            console.warn('No dependents or independent selected');
-            resetGraph();
-            graphDiv.innerHTML = '<div class="warning-message">Please select an independent (X-Axis) and at least one dependent (Y-Axis) variable.</div>';
-            return;
-        }
+            if (!allDependents.length || !independent) {
+                console.warn('No dependents or independent selected');
+                resetGraph();
+                graphDiv.innerHTML = '<div class="warning-message">Please select an independent (X-Axis) and at least one dependent (Y-Axis) variable.</div>';
+                return;
+            }
 
-        let workingData = filterByRanges(cachedData);
-        workingData = filterByDepthRange(workingData);
-        workingData = workingData.filter(row => {
-            const rowDate = row.TIMESTAMP;
-            return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1)) &&
-                   (selectedPlots.length === 0 || selectedPlots.includes(row.Plot));
-        });
-        console.log(`Filtered data length: ${workingData.length}, Selected Plots: ${selectedPlots.length ? selectedPlots.join(', ') : 'None'}`);
+            let workingData = filterByRanges(cachedData);
+            workingData = filterByDepthRange(workingData);
+            workingData = workingData.filter(row => {
+                const rowDate = row.TIMESTAMP;
+                return (!startDate || rowDate >= startDate) && (!endDate || rowDate <= new Date(endDate.getTime() + 24 * 60 * 60 * 1000 - 1)) &&
+                       (selectedPlots.length === 0 || selectedPlots.includes(row.Plot));
+            });
+            console.log(`Filtered data length: ${workingData.length}, Selected Plots: ${selectedPlots.length ? selectedPlots.join(', ') : 'None'}`);
 
-        if (independent === 'TIMESTAMP' && ['scatter', 'line', 'area'].includes(chartType)) {
-            workingData = getWeeklyTimestamps(workingData, startDate, endDate);
-        }
+            if (independent === 'TIMESTAMP' && ['scatter', 'line', 'area'].includes(chartType)) {
+                workingData = getWeeklyTimestamps(workingData, startDate, endDate);
+            }
 
-        const units = allDependents.map(dep => unitMap[dep]);
-        const commonUnit = units.every(u => u === units[0]) ? units[0] : null;
-        const dependents = commonUnit ? allDependents.filter(dep => unitMap[dep] === commonUnit) : allDependents;
-        if (!dependents.length || !workingData.length) {
-            console.warn('No valid dependents or data after filtering');
-            resetGraph();
-            return;
-        }
+            const units = allDependents.map(dep => unitMap[dep]);
+            const commonUnit = units.every(u => u === units[0]) ? units[0] : null;
+            const dependents = commonUnit ? allDependents.filter(dep => unitMap[dep] === commonUnit) : allDependents;
+            if (!dependents.length || !workingData.length) {
+                console.warn('No valid dependents or data after filtering');
+                resetGraph();
+                return;
+            }
 
-        const traces = [];
-        const fitTraces = [];
-        let invalidTraces = [];
-        const statsText = [];
+            const traces = [];
+            const fitTraces = [];
+            let invalidTraces = [];
+            const statsText = [];
 
-        if (chartType === 'anova' && dependents.length === 1) {
-            const anovaResults = calculateANOVA(workingData, independent, dependents[0]);
-            if (isNaN(anovaResults.fScore)) {
-                console.warn('Insufficient data for ANOVA');
-                graphDiv.innerHTML = '<div class="warning-message">Insufficient data for ANOVA</div>';
+            if (chartType === 'anova' && dependents.length === 1) {
+                const anovaResults = calculateANOVA(workingData, independent, dependents[0]);
+                if (isNaN(anovaResults.fScore)) {
+                    console.warn('Insufficient data for ANOVA');
+                    graphDiv.innerHTML = '<div class="warning-message">Insufficient data for ANOVA</div>';
+                    graphInitialized = false;
+                    return;
+                }
+                traces.push({
+                    x: anovaResults.groupNames,
+                    y: anovaResults.means,
+                    type: 'bar',
+                    name: `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means`,
+                    marker: { color: dependentColors[dependents[0]] || '#00FFFF' }
+                });
+                statsText.push(`${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]}: F-Score=${anovaResults.fScore.toFixed(2)}, p-value=${anovaResults.pValue.toFixed(4)}`);
+            } else {
+                dependents.forEach(dep => {
+                    const pairedData = workingData
+                        .map(row => ({
+                            x: independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent]),
+                            y: parseFloat(row[dep])
+                        }))
+                        .filter(d => d.x !== null && !isNaN(d.x) && d.y !== null && !isNaN(d.y));
+
+                    console.log(`Paired data for ${dep}:`, {
+                        length: pairedData.length,
+                        sample: pairedData.slice(0, 5)
+                    });
+
+                    if (pairedData.length < 2) {
+                        console.warn(`No valid data for ${dep} vs ${independent}`);
+                        invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has no valid data`);
+                        return;
+                    }
+
+                    let xValues = pairedData.map(d => d.x);
+                    let yValues = pairedData.map(d => d.y);
+
+                    const filtered = filterOutliers(xValues, yValues);
+                    xValues = filtered.x;
+                    yValues = filtered.y;
+
+                    if (xValues.length < 2 || yValues.length < 2) {
+                        console.warn(`Insufficient data after outlier filtering for ${dep}`);
+                        invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has insufficient data after filtering`);
+                        return;
+                    }
+
+                    const color = dependentColors[dep] || '#FFFFFF';
+                    traces.push({
+                        x: xValues,
+                        y: yValues,
+                        mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
+                        type: chartType === 'scatter' ? 'scatter' : chartType === 'area' ? 'scatter' : chartType,
+                        name: document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep,
+                        marker: { color: color, size: 8 },
+                        line: (chartType === 'line' || chartType === 'area') ? { color: color, width: 2 } : undefined,
+                        fill: chartType === 'area' ? 'tozeroy' : undefined
+                    });
+
+                    if (chartType === 'box') {
+                        const boxStats = calculateBoxStats(yValues);
+                        statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Median=${boxStats.median.toFixed(2)}, Q1=${boxStats.q1.toFixed(2)}, Q3=${boxStats.q3.toFixed(2)}, IQR=${boxStats.iqr.toFixed(2)}, Min=${boxStats.min.toFixed(2)}, Max=${boxStats.max.toFixed(2)}`);
+                    } else if (chartType === 'bar') {
+                        const mean = jStat.mean(yValues);
+                        const stdDev = jStat.stdev(yValues);
+                        statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Mean=${mean.toFixed(2)}, StdDev=${stdDev.toFixed(2)}`);
+                    } else if (['scatter', 'line', 'area'].includes(chartType) && xValues.length > 1 && showFit) {
+                        let xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
+                        let originalXMin = 0;
+                        if (independent === 'TIMESTAMP') {
+                            originalXMin = Math.min(...xNum);
+                            xNum = xNum.map(x => (x - originalXMin) / (1000 * 60 * 60 * 24));
+                        }
+                        const fit = calculateFit(xNum, yValues, fitType);
+                        console.log(`Fit for ${dep}:`, fit);
+                        if (fit.type !== 'none' && fit.yPred.length > 0) {
+                            let xFit, yFit;
+                            if (independent === 'TIMESTAMP') {
+                                xFit = xNum.map(x => new Date(originalXMin + x * 1000 * 60 * 60 * 24));
+                                yFit = fit.yPred;
+                            } else {
+                                const xMin = Math.min(...xNum);
+                                const xMax = Math.max(...xNum);
+                                xFit = Array.from({ length: 100 }, (_, i) => xMin + (xMax - xMin) * i / 99);
+                                yFit = xFit.map(x => {
+                                    if (fit.type === 'linear') return fit.params.slope * x + fit.params.intercept;
+                                    if (fit.type === 'logarithmic') return fit.params.slope * Math.log(x) + fit.params.intercept;
+                                    if (fit.type === 'exponential') return fit.params.a * Math.exp(fit.params.b * x);
+                                    return NaN;
+                                });
+                            }
+                            if (yFit.every(y => isFinite(y))) {
+                                fitTraces.push({
+                                    x: xFit,
+                                    y: yFit,
+                                    mode: 'lines',
+                                    type: 'scatter',
+                                    name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (${fit.type} fit)`,
+                                    line: { color: color, width: 2, dash: 'dash' }
+                                });
+                            }
+                        }
+                        let eq = 'Fit not available';
+                        if (fit.type === 'linear') eq = `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}x`;
+                        else if (fit.type === 'logarithmic') eq = `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}ln(x)`;
+                        else if (fit.type === 'exponential') eq = `y = ${fit.params.a.toFixed(2)}e^(${fit.params.b.toFixed(2)}x)`;
+                        statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: ${eq}, R²=${(fit.rSquared || NaN).toFixed(2)}, F=${(fit.fValue || NaN).toFixed(2)}, p=${(fit.pValue || NaN).toFixed(4)}`);
+                    }
+                });
+            }
+
+            if (!traces.length) {
+                console.warn('No valid traces to plot:', invalidTraces);
+                resetGraph();
+                if (invalidTraces.length) {
+                    graphDiv.innerHTML = `<div class="warning-message">${invalidTraces.join('<br>')}</div>`;
+                } else {
+                    graphDiv.innerHTML = '<div class="warning-message">No valid data to plot after filtering.</div>';
+                }
                 graphInitialized = false;
                 return;
             }
-            traces.push({
-                x: anovaResults.groupNames,
-                y: anovaResults.means,
-                type: 'bar',
-                name: `${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]} Means`,
-                marker: { color: dependentColors[dependents[0]] || '#00FFFF' }
-            });
-            statsText.push(`${document.querySelector(`label[for="${dependents[0]}"], label[for="${dependents[0]}_dep"]`)?.textContent || dependents[0]}: F-Score=${anovaResults.fScore.toFixed(2)}, p-value=${anovaResults.pValue.toFixed(4)}`);
-        } else {
-            dependents.forEach(dep => {
-                const pairedData = workingData
-                    .map(row => ({
-                        x: independent === 'TIMESTAMP' ? row.TIMESTAMP : parseFloat(row[independent]),
-                        y: parseFloat(row[dep])
-                    }))
-                    .filter(d => d.x !== null && !isNaN(d.x) && d.y !== null && !isNaN(d.y));
 
-                console.log(`Paired data for ${dep}:`, {
-                    length: pairedData.length,
-                    sample: pairedData.slice(0, 5),
-                    xSample: pairedData.slice(0, 5).map(d => d.x),
-                    ySample: pairedData.slice(0, 5).map(d => d.y)
-                });
+            const allTraces = showFit ? [...traces, ...fitTraces] : traces;
+            console.log('Plotting traces:', allTraces.length, 'Invalid traces:', invalidTraces);
 
-                if (pairedData.length < 2) {
-                    console.warn(`No valid data for ${dep} vs ${independent}: pairedData length=${pairedData.length}`);
-                    invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has no valid data`);
-                    return;
-                }
-
-                let xValues = pairedData.map(d => d.x);
-                let yValues = pairedData.map(d => d.y);
-
-                const filtered = filterOutliers(xValues, yValues);
-                xValues = filtered.x;
-                yValues = filtered.y;
-
-                console.log(`Filtered values for ${dep}:`, {
-                    xLength: xValues.length,
-                    yLength: yValues.length,
-                    xSample: xValues.slice(0, 5),
-                    ySample: yValues.slice(0, 5),
-                    xValid: xValues.every(v => v !== null && !isNaN(v)),
-                    yValid: yValues.every(v => v !== null && !isNaN(v))
-                });
-
-                if (xValues.length < 2 || yValues.length < 2) {
-                    console.warn(`Insufficient data after outlier filtering for ${dep}: xLength=${xValues.length}, yLength=${yValues.length}`);
-                    invalidTraces.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} has insufficient data after filtering`);
-                    return;
-                }
-
-                const color = dependentColors[dep] || '#FFFFFF';
-                traces.push({
-                    x: xValues,
-                    y: yValues,
-                    mode: chartType === 'scatter' ? 'markers' : chartType === 'line' ? 'lines' : chartType === 'area' ? 'lines' : chartType === 'box' ? 'box' : 'bar',
-                    type: chartType === 'scatter' ? 'scatter' : chartType === 'area' ? 'scatter' : chartType,
-                    name: document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep,
-                    marker: { color: color, size: 8 },
-                    line: (chartType === 'line' || chartType === 'area') ? { color: color, width: 2 } : undefined,
-                    fill: chartType === 'area' ? 'tozeroy' : undefined
-                });
-
-                if (chartType === 'box') {
-                    const boxStats = calculateBoxStats(yValues);
-                    statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Median=${boxStats.median.toFixed(2)}, Q1=${boxStats.q1.toFixed(2)}, Q3=${boxStats.q3.toFixed(2)}, IQR=${boxStats.iqr.toFixed(2)}, Min=${boxStats.min.toFixed(2)}, Max=${boxStats.max.toFixed(2)}`);
-                } else if (chartType === 'bar') {
-                    const mean = jStat.mean(yValues);
-                    const stdDev = jStat.stdev(yValues);
-                    statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: Mean=${mean.toFixed(2)}, StdDev=${stdDev.toFixed(2)}`);
-                } else if (['scatter', 'line', 'area'].includes(chartType) && xValues.length > 1 && showFit) {
-                    let xNum = xValues.map(x => independent === 'TIMESTAMP' ? x.getTime() : x);
-                    let originalXMin = 0;
-                    if (independent === 'TIMESTAMP') {
-                        originalXMin = Math.min(...xNum);
-                        xNum = xNum.map(x => (x - originalXMin) / (1000 * 60 * 60 * 24));
-                    }
-                    const fit = calculateFit(xNum, yValues, fitType);
-                    console.log(`Fit for ${dep}:`, fit);
-                    if (fit.type !== 'none' && fit.yPred.length > 0) {
-                        let xFit, yFit;
-                        if (independent === 'TIMESTAMP') {
-                            xFit = xNum.map(x => new Date(originalXMin + x * 1000 * 60 * 60 * 24));
-                            yFit = fit.yPred;
-                        } else {
-                            const xMin = Math.min(...xNum);
-                            const xMax = Math.max(...xNum);
-                            xFit = Array.from({ length: 100 }, (_, i) => xMin + (xMax - xMin) * i / 99);
-                            yFit = xFit.map(x => {
-                                if (fit.type === 'linear') return fit.params.slope * x + fit.params.intercept;
-                                if (fit.type === 'logarithmic') return fit.params.slope * Math.log(x) + fit.params.intercept;
-                                if (fit.type === 'exponential') return fit.params.a * Math.exp(fit.params.b * x);
-                                return NaN;
-                            });
-                        }
-                        if (yFit.every(y => isFinite(y))) {
-                            fitTraces.push({
-                                x: xFit,
-                                y: yFit,
-                                mode: 'lines',
-                                type: 'scatter',
-                                name: `${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep} (${fit.type} fit)`,
-                                line: { color: color, width: 2, dash: 'dash' }
-                            });
-                        }
-                    }
-                    let eq = 'Fit not available';
-                    if (fit.type === 'linear') eq = `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}x`;
-                    else if (fit.type === 'logarithmic') eq = `y = ${fit.params.intercept.toFixed(2)} + ${fit.params.slope.toFixed(2)}ln(x)`;
-                    else if (fit.type === 'exponential') eq = `y = ${fit.params.a.toFixed(2)}e^(${fit.params.b.toFixed(2)}x)`;
-                    statsText.push(`${document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep}: ${eq}, R²=${(fit.rSquared || NaN).toFixed(2)}, F=${(fit.fValue || NaN).toFixed(2)}, p=${(fit.pValue || NaN).toFixed(4)}`);
-                }
-            });
-        }
-
-        if (!traces.length) {
-            console.warn('No valid traces to plot:', invalidTraces);
-            resetGraph();
-            if (invalidTraces.length) {
-                graphDiv.innerHTML = `<div class="warning-message">${invalidTraces.join('<br>')}</div>`;
-            } else {
-                graphDiv.innerHTML = '<div class="warning-message">No valid data to plot after filtering.</div>';
+            const statsContent = document.getElementById('stats-content');
+            if (statsContent) {
+                statsContent.innerHTML = statsText.length ? statsText.join('<br>') : 'No statistics available';
             }
-            graphInitialized = false;
-            return;
-        }
 
-        const allTraces = showFit ? [...traces, ...fitTraces] : traces;
-        console.log('Plotting traces:', allTraces.length, 'Invalid traces:', invalidTraces);
+            const layout = {
+                title: {
+                    text: `SPRUCE Experiment: ${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep).join(', ')} vs ${independent === 'TIMESTAMP' ? 'Time' : document.querySelector(`label[for="${independent}"]`)?.textContent || independent}`,
+                    font: { color: '#00FFFF', family: 'Exo 2', size: 16 }
+                },
+                xaxis: {
+                    title: independent === 'TIMESTAMP' ? 'Date' : `${document.querySelector(`label[for="${independent}"]`)?.textContent || independent} (${unitMap[independent] || ''})`,
+                    color: '#00FFFF',
+                    gridcolor: '#444'
+                },
+                yaxis: {
+                    title: commonUnit ? `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep).join(', ')} (${commonUnit})` : 'Multiple Units',
+                    color: '#00FFFF',
+                    gridcolor: '#444'
+                },
+                paper_bgcolor: '#1A1A1A',
+                plot_bgcolor: '#1A1A1A',
+                font: { color: '#00FFFF' },
+                showlegend: legendVisible,
+                width: calculateGraphWidth(),
+                height: calculateGraphHeight(),
+                margin: { t: 50, b: 50, l: 50, r: 50 },
+                annotations: showOnChart && statsText.length ? [{
+                    xref: 'paper',
+                    yref: 'paper',
+                    x: 0,
+                    y: 1,
+                    xanchor: 'left',
+                    yanchor: 'top',
+                    text: statsText.join('<br>'),
+                    showarrow: false,
+                    font: { color: '#00FF00', size: 10 },
+                    bgcolor: 'rgba(26, 26, 26, 0.8)',
+                    bordercolor: '#00FFFF',
+                    borderwidth: 1
+                }] : []
+            };
 
-        const statsContent = document.getElementById('stats-content');
-        statsContent.innerHTML = statsText.length ? statsText.join('<br>') : 'No statistics available';
-
-        const layout = {
-            title: {
-                text: `SPRUCE Experiment: ${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep).join(', ')} vs ${independent === 'TIMESTAMP' ? 'Time' : document.querySelector(`label[for="${independent}"]`)?.textContent || independent}`,
-                font: { color: '#00FFFF', family: 'Exo 2', size: 16 }
-            },
-            xaxis: {
-                title: independent === 'TIMESTAMP' ? 'Date' : `${document.querySelector(`label[for="${independent}"]`)?.textContent || independent} (${unitMap[independent] || ''})`,
-                color: '#00FFFF',
-                gridcolor: '#444'
-            },
-            yaxis: {
-                title: commonUnit ? `${dependents.map(dep => document.querySelector(`label[for="${dep}"], label[for="${dep}_dep"]`)?.textContent || dep).join(', ')} (${commonUnit})` : 'Multiple Units',
-                color: '#00FFFF',
-                gridcolor: '#444'
-            },
-            paper_bgcolor: '#1A1A1A',
-            plot_bgcolor: '#1A1A1A',
-            font: { color: '#00FFFF' },
-            showlegend: legendVisible,
-            width: calculateGraphWidth(),
-            height: calculateGraphHeight(),
-            margin: { t: 50, b: 50, l: 50, r: 50 },
-            annotations: showOnChart && statsText.length ? [{
-                xref: 'paper',
-                yref: 'paper',
-                x: 0,
-                y: 1,
-                xanchor: 'left',
-                yanchor: 'top',
-                text: statsText.join('<br>'),
-                showarrow: false,
-                font: { color: '#00FF00', size: 10 },
-                bgcolor: 'rgba(26, 26, 26, 0.8)',
-                bordercolor: '#00FFFF',
-                borderwidth: 1
-            }] : []
-        };
-
-        Plotly.newPlot(graphDiv, allTraces, layout, { responsive: true }).then(() => {
-            console.log('Graph plotted successfully');
-            graphInitialized = true;
-        }).catch(err => {
-            console.error('Error plotting graph:', err);
+            Plotly.newPlot(graphDiv, allTraces, layout, { responsive: true }).then(() => {
+                console.log('Graph plotted successfully');
+                graphInitialized = true;
+            }).catch(err => {
+                console.error('Error plotting graph:', err);
+                resetGraph();
+                graphDiv.innerHTML = '<div class="warning-message">Error plotting graph. Check console for details.</div>';
+            });
+        } catch (error) {
+            console.error('Error in updateGraph:', error);
             resetGraph();
-            graphDiv.innerHTML = '<div class="warning-message">Error plotting graph. Check console for details.</div>';
-        });
+            graphDiv.innerHTML = '<div class="warning-message">Error rendering graph. Check console for details.</div>';
+        }
     }
 
     // Event listeners
     document.addEventListener('DOMContentLoaded', () => {
+        // Ensure Plotly and jStat are loaded before initializing
+        if (typeof Plotly === 'undefined' || typeof jStat === 'undefined') {
+            console.error('Plotly or jStat not loaded');
+            document.getElementById('graph').innerHTML = '<div class="warning-message">Required libraries not loaded.</div>';
+            return;
+        }
+
         loadData();
 
         const sidebarTab = document.getElementById('sidebar-tab');
@@ -1686,6 +1612,7 @@ filepath: index.html
                 e.preventDefault();
                 const popup = document.getElementById('metagenomics-popup');
                 const iframe = document.getElementById('metagenomics-iframe');
+                if (!popup || !iframe) return;
                 if (link.classList.contains('kraken-stacked-bar')) {
                     showStackedBarChart();
                 } else {
@@ -1701,9 +1628,11 @@ filepath: index.html
             closeMetagenomics.addEventListener('click', () => {
                 const popup = document.getElementById('metagenomics-popup');
                 const iframe = document.getElementById('metagenomics-iframe');
-                popup.style.display = 'none';
-                iframe.src = '';
-                console.log('Metagenomics popup closed');
+                if (popup && iframe) {
+                    popup.style.display = 'none';
+                    iframe.src = '';
+                    console.log('Metagenomics popup closed');
+                }
             });
         } else {
             console.warn('Close button for metagenomics popup not found');
@@ -1713,9 +1642,12 @@ filepath: index.html
         if (closeControlPanel) {
             closeControlPanel.addEventListener('click', () => {
                 const popup = document.getElementById('control-panel-popup');
-                popup.style.display = 'none';
-                document.getElementById('control-panel-button').textContent = 'Show Control Panel';
-                console.log('Control panel popup closed');
+                const button = document.getElementById('control-panel-button');
+                if (popup && button) {
+                    popup.style.display = 'none';
+                    button.textContent = 'Show Control Panel';
+                    console.log('Control panel popup closed');
+                }
             });
         } else {
             console.warn('Close button for control panel popup not found');
@@ -1725,7 +1657,10 @@ filepath: index.html
             dateFormat: 'Y-m-d',
             onChange: (selectedDates) => {
                 startDate = selectedDates[0];
-                document.getElementById('time-range-toggle').textContent = `${startDate.toISOString().split('T')[0]} - ${endDate.toISOString().split('T')[0]}`;
+                const timeRangeToggle = document.getElementById('time-range-toggle');
+                if (timeRangeToggle) {
+                    timeRangeToggle.textContent = `${startDate.toISOString().split('T')[0]} - ${endDate.toISOString().split('T')[0]}`;
+                }
                 updateGraph();
             }
         });
@@ -1734,27 +1669,33 @@ filepath: index.html
             dateFormat: 'Y-m-d',
             onChange: (selectedDates) => {
                 endDate = selectedDates[0];
-                document.getElementById('time-range-toggle').textContent = `${startDate.toISOString().split('T')[0]} - ${endDate.toISOString().split('T')[0]}`;
+                const timeRangeToggle = document.getElementById('time-range-toggle');
+                if (timeRangeToggle) {
+                    timeRangeToggle.textContent = `${startDate.toISOString().split('T')[0]} - ${endDate.toISOString().split('T')[0]}`;
+                }
                 updateGraph();
             }
         });
 
         const plotNumberMenu = document.getElementById('plot-number-menu');
         if (plotNumberMenu) {
-            plotNumberMenu.addEventListener('change', (e) => {
+            plotNumberMenu.addEventListener('change', () => {
                 selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked')).map(input => Number(input.value));
-                document.getElementById('plot-number-toggle').textContent = selectedPlots.length ? `Plot # (${selectedPlots.join(', ')})` : 'Plot #';
+                const plotToggle = document.getElementById('plot-number-toggle');
+                if (plotToggle) {
+                    plotToggle.textContent = selectedPlots.length ? `Plot # (${selectedPlots.join(', ')})` : 'Plot # (all)';
+                }
                 updateGraph();
             });
         }
 
-        document.getElementById('independent-toggle').addEventListener('click', () => toggleDropdown('independent-menu'));
-        document.getElementById('dependent-toggle').addEventListener('click', () => toggleDropdown('dependent-menu'));
-        document.getElementById('time-range-toggle').addEventListener('click', () => toggleDropdown('time-range-menu'));
-        document.getElementById('chart-type-toggle').addEventListener('click', () => toggleDropdown('chart-type-menu'));
-        document.getElementById('stats-toggle').addEventListener('click', () => toggleDropdown('stats-menu'));
-        document.getElementById('metagenomics-toggle').addEventListener('click', () => toggleDropdown('metagenomics-menu'));
-        document.getElementById('plot-number-toggle').addEventListener('click', () => toggleDropdown('plot-number-menu'));
+        document.getElementById('independent-toggle')?.addEventListener('click', () => toggleDropdown('independent-menu'));
+        document.getElementById('dependent-toggle')?.addEventListener('click', () => toggleDropdown('dependent-menu'));
+        document.getElementById('time-range-toggle')?.addEventListener('click', () => toggleDropdown('time-range-menu'));
+        document.getElementById('chart-type-toggle')?.addEventListener('click', () => toggleDropdown('chart-type-menu'));
+        document.getElementById('stats-toggle')?.addEventListener('click', () => toggleDropdown('stats-menu'));
+        document.getElementById('metagenomics-toggle')?.addEventListener('click', () => toggleDropdown('metagenomics-menu'));
+        document.getElementById('plot-number-toggle')?.addEventListener('click', () => toggleDropdown('plot-number-menu'));
     });
 </script>
 </body>
