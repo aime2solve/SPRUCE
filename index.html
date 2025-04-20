@@ -865,22 +865,7 @@
                 return row;
             }).filter(row => !isNaN(row.TIMESTAMP.getTime()) && row.TIMESTAMP instanceof Date && !isNaN(row.Plot));
 
-            const plotMenu = document.getElementById('plot-number-menu');
-            if (!plotMenu) {
-                console.error('Plot number menu not found');
-                graphDiv.innerHTML = '<div class="warning-message">Plot selection menu not found.</div>';
-                return;
-            }
-            plotMenu.innerHTML = Object.entries(plotConditions).map(([plot, cond]) => {
-                return `<div class="dropdown-item"><input type="checkbox" id="plot-${plot}" value="${plot}" checked><label for="plot-${plot}">Plot ${plot} (${cond.temp}, ${cond.co2}, ${cond.chamber})</label></div>`;
-            }).join('');
-
             selectedPlots = Object.keys(plotConditions).map(Number);
-            const plotToggle = document.getElementById('plot-number-toggle');
-            if (plotToggle) {
-                plotToggle.textContent = 'Plot # (all)';
-            }
-
             dataLoaded = true;
             cachedData = aggregateVariables(allData);
             updateGraph();
@@ -994,7 +979,8 @@
         button.textContent = isVisible ? 'Show Control Panel' : 'Hide Control Panel';
 
         if (!isVisible) {
-            content.innerHTML = Object.keys(controlRanges).map(key => {
+            // Render sliders
+            let slidersHtml = Object.keys(controlRanges).map(key => {
                 return `
                     <div class="slider-container">
                         <label>${controlRanges[key].label}</label>
@@ -1011,6 +997,22 @@
                 `;
             }).join('');
 
+            // Add plot selection dropdown
+            slidersHtml += `
+                <div class="dropdown-container">
+                    <label>Plot Selection</label>
+                    <div id="plot-number-toggle" class="dropdown-toggle">Plot # (${selectedPlots.length ? selectedPlots.join(', ') : 'all'})</div>
+                    <div id="plot-number-menu" class="dropdown-menu">
+                        ${Object.entries(plotConditions).map(([plot, cond]) => {
+                            return `<div class="dropdown-item"><input type="checkbox" id="plot-${plot}" value="${plot}" ${selectedPlots.includes(Number(plot)) ? 'checked' : ''}><label for="plot-${plot}">Plot ${plot} (${cond.temp}, ${cond.co2}, ${cond.chamber})</label></div>`;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+
+            content.innerHTML = slidersHtml;
+
+            // Set up slider event listeners
             Object.keys(controlRanges).forEach(key => {
                 const minSlider = document.getElementById(`${key}-min`);
                 const maxSlider = document.getElementById(`${key}-max`);
@@ -1073,6 +1075,25 @@
 
                 updateTrack();
             });
+
+            // Set up plot selection event listener
+            const plotNumberMenu = document.getElementById('plot-number-menu');
+            if (plotNumberMenu) {
+                plotNumberMenu.addEventListener('change', () => {
+                    selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked')).map(input => Number(input.value));
+                    const plotToggle = document.getElementById('plot-number-toggle');
+                    if (plotToggle) {
+                        plotToggle.textContent = selectedPlots.length ? `Plot # (${selectedPlots.join(', ')})` : 'Plot # (all)';
+                    }
+                    updateGraph();
+                });
+            }
+
+            // Set up plot dropdown toggle
+            const plotToggle = document.getElementById('plot-number-toggle');
+            if (plotToggle) {
+                plotToggle.addEventListener('click', () => toggleDropdown('plot-number-menu'));
+            }
         }
     }
 
@@ -1350,8 +1371,10 @@
 
     // Load metagenomic data
     async function loadMetagenomicData() {
+        // Replace with correct URL or local path
+        const metagenomicUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Metagenomics/kraken2_summary.json'; // Update this
         try {
-            const response = await fetch('https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Metagenomics/kraken2_summary.json');
+            const response = await fetch(metagenomicUrl);
             if (!response.ok) {
                 throw new Error(`HTTP error: ${response.status}`);
             }
@@ -1377,13 +1400,13 @@
 
         const data = await loadMetagenomicData();
         if (!data) {
-            graphDiv.innerHTML = '<div class="warning-message">Failed to load metagenomic data.</div>';
+            graphDiv.innerHTML = '<div class="warning-message">Failed to load metagenomic data. Please check the data source URL or try again later.</div>';
             console.error('Metagenomic data load failed');
             return;
         }
 
         popup.style.display = 'block';
-        iframe.src = ''; // Clear previous content
+        iframe.src = '';
 
         const samples = Object.keys(data);
         const taxa = [...new Set(samples.flatMap(sample => Object.keys(data[sample])))].slice(0, 10);
@@ -1411,7 +1434,6 @@
         iframe.onload = () => {
             console.log('Iframe onload triggered');
             const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-            // Ensure Plotly is available
             if (!iframeDoc.defaultView.Plotly) {
                 console.error('Plotly not loaded in iframe');
                 const script = iframeDoc.createElement('script');
@@ -1437,7 +1459,6 @@
             }
         };
 
-        // Set iframe content without inline script to avoid parsing issues
         iframe.srcdoc = `
             <html>
                 <head></head>
@@ -1822,34 +1843,6 @@
                     timeRangeToggle.textContent = `${startDate.toISOString().split('T')[0]} - ${endDate.toISOString().split('T')[0]}`;
                 }
                 updateGraph();
-            }
-        });
-
-        const plotNumberMenu = document.getElementById('plot-number-menu');
-        if (plotNumberMenu) {
-            plotNumberMenu.addEventListener('change', () => {
-                selectedPlots = Array.from(document.querySelectorAll('#plot-number-menu input:checked')).map(input => Number(input.value));
-                const plotToggle = document.getElementById('plot-number-toggle');
-                if (plotToggle) {
-                    plotToggle.textContent = selectedPlots.length ? `Plot # (${selectedPlots.join(', ')})` : 'Plot # (all)';
-                }
-                updateGraph();
-            });
-        }
-
-        const toggles = [
-            { id: 'independent-toggle', menu: 'independent-menu' },
-            { id: 'dependent-toggle', menu: 'dependent-menu' },
-            { id: 'time-range-toggle', menu: 'time-range-menu' },
-            { id: 'chart-type-toggle', menu: 'chart-type-menu' },
-            { id: 'stats-toggle', menu: 'stats-menu' },
-            { id: 'metagenomics-toggle', menu: 'metagenomics-menu' },
-            { id: 'plot-number-toggle', menu: 'plot-number-menu' }
-        ];
-        toggles.forEach(toggle => {
-            const element = document.getElementById(toggle.id);
-            if (element) {
-                element.addEventListener('click', () => toggleDropdown(toggle.menu));
             }
         });
 
