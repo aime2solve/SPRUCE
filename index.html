@@ -1663,7 +1663,6 @@
                 }] : []
             };
 
-            // Simplified Plotly call with explicit error handling
             Plotly.newPlot(graphDiv, allTraces, layout, { responsive: true });
             console.log('Graph plotted successfully');
             graphInitialized = true;
@@ -1818,7 +1817,7 @@
         toggles.forEach(toggle => {
             const element = document.getElementById(toggle.id);
             if (element) {
-                element.addEventListener('click', () => toggleEditingAssistant: toggleDropdown(toggle.menu));
+                element.addEventListener('click', () => toggleDropdown(toggle.menu));
             }
         });
 
