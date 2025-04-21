@@ -868,11 +868,10 @@
 
 
 <script>
- 
 // Global variables
 let allData = [];
 const dataUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/spruce_daily_with_co2_h2o.json';
-const metagenomicUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Metagenomics/kraken_taxa.json';
+const metagenomicUrl = 'https://raw.githubusercontent.com/aime2solve/SPRUCE/main/Metagenomics/metadata.json'; // Changed to metadata.json
 let startDate = new Date('2015-08-01');
 let endDate = new Date('2025-04-05');
 let dataLoaded = false;
@@ -1495,6 +1494,16 @@ async function showStackedBarChart(e) {
     console.log('Selected plots:', selectedPlots);
     console.log('Available samples:', Object.keys(data));
     console.log('Sample to plot mapping:', sampleToPlotMap);
+
+    // Check if sample IDs match expected format
+    const expectedSamples = Object.keys(sampleToPlotMap);
+    const actualSamples = Object.keys(data);
+    const missingSamples = expectedSamples.filter(s => !actualSamples.includes(s));
+    if (missingSamples.length > 0) {
+        console.warn('Sample IDs in JSON do not match sampleToPlotMap:', { missingSamples, actualSamples });
+        graphDiv.innerHTML = '<div class="warning-message">Invalid sample IDs in metagenomic data. Expected IDs like SRR1157607, got ' + actualSamples.join(', ') + '. Check metadata.json or update sampleToPlotMap.</div>';
+        return;
+    }
 
     const filteredSamples = Object.keys(data).filter(sample => {
         const plot = sampleToPlotMap[sample]?.plot;
